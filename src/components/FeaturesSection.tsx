@@ -12,8 +12,11 @@ import {
   ShieldCheck, 
   Zap 
 } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
 
 export const FeaturesSection: React.FC = () => {
+  const { content } = useSiteContent();
+  const featuresConfig = content.features;
   const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
@@ -58,65 +61,65 @@ export const FeaturesSection: React.FC = () => {
         'Print-friendly formatting for easy paper highlighting',
         'Includes 10-minute quick revision mindmaps for each topic'
       ],
-      previewBadge: 'Bilingual (Hindi + Eng) • Printable PDFs',
-      stat: '500+ Pages of High-Yield Material',
+      previewBadge: 'Hindi + English • Printable PDFs',
+      stat: '500+ Pages High-Yield Notes',
       accentColor: 'from-emerald-600 to-teal-600'
     },
     {
-      id: 'mock-tests',
-      icon: Layers,
-      title: 'Weekly NTA CBT Mock Tests',
-      tagline: 'Real Exam Environment Simulation',
-      description: 'Practice on our CBT mock test portal that exactly mirrors the official NTA UGC NET interface. Master time management, avoid negative traps, and build exam stamina.',
+      id: 'pyq-analysis',
+      icon: TrendingUp,
+      title: 'NTA CBT Mock Tests & PYQs',
+      tagline: '2018-2024 Solved Papers with Analytics',
+      description: 'Practice inside a replica of the real NTA Computer Based Test environment. Review step-by-step video solutions and identify specific conceptual weak areas.',
       perks: [
-        '30+ Full Length Tests + 50+ Unit-wise Chapter Tests',
-        'Instant scorecards with All India Rank & percentile comparison',
-        'In-depth step-by-step solutions with concept reference links'
+        '30+ Full Length Mocks & 50+ Unit-wise Topic Tests',
+        'Detailed percentile, speed, and accuracy breakdown per unit',
+        'All latest June 2024 & Dec 2024 trend-based questions included'
       ],
-      previewBadge: 'NTA Exam Simulation • AI Analytics',
-      stat: '4,000+ Practice MCQs Included',
+      previewBadge: 'Real CBT Software • All-India Rank',
+      stat: '4,000+ Practice MCQs',
       accentColor: 'from-amber-600 to-orange-600'
     },
     {
-      id: 'doubt-solving',
+      id: 'doubt-mentorship',
       icon: MessageSquare,
-      title: 'Dedicated Doubt Solving Sessions',
-      tagline: '2-Hour Resolution Turnaround',
-      description: 'Got stuck on a tricky Indian Logic fallacy or Research variance calculation? Post your query directly in our private VIP Telegram community and get detailed audio/text explanations from faculty.',
+      title: 'Direct WhatsApp Doubt Desk',
+      tagline: 'Solve Academic Doubts within 4 Hours',
+      description: 'Never stay stuck on difficult concepts or mathematical problems. Send audio notes or photo snapshots directly into the dedicated student doubt desk for faculty explanation.',
       perks: [
-        'Batch-specific VIP community moderated by Dr. Ankita Bisht',
-        'Weekly live Google Meet doubt rooms for open discussions',
-        'One-on-one audio notes for complex conceptual questions'
+        'Direct guidance from Dr. Ankita Bisht and senior academic team',
+        'Weekly dedicated live doubt-clearing sessions on Zoom/Meet',
+        'Peer discussion group moderated strictly for academic focus'
       ],
-      previewBadge: 'VIP Telegram Group • Daily Doubt Rooms',
-      stat: '< 2 Hour Average Doubt Response',
-      accentColor: 'from-cyan-600 to-blue-600'
-    },
-    {
-      id: 'performance-tracking',
-      icon: TrendingUp,
-      title: 'Performance Tracking & Weak-Area Diagnosis',
-      tagline: 'AI-Powered Topic Diagnostics',
-      description: 'Our system tracks your test accuracy across all 10 units, pinpointing your exact weak spots (e.g. Data Interpretation or Syllogism) so you know precisely where to focus revision.',
-      perks: [
-        'Visual progress graph tracking score improvement month-over-month',
-        'Personalized recommended reading list based on test mistakes',
-        'Time-spent-per-question analysis to eliminate exam panic'
-      ],
-      previewBadge: 'Diagnostic Graph • Accuracy Heatmap',
-      stat: '35% Average Score Boost',
+      previewBadge: 'Instant WhatsApp Desk • Voice Notes',
+      stat: '< 4h Average Resolution Time',
       accentColor: 'from-rose-600 to-pink-600'
     },
     {
-      id: 'personalized-mentorship',
-      icon: UserCheck,
-      title: 'Personalized 1-on-1 Mentorship',
-      tagline: 'Direct Strategy Calls with Master Faculty',
-      description: 'Receive personalized preparation guidance, timetable planning, and exam-day psychological coaching directly from Dr. Ankita Bisht to stay motivated and on track.',
+      id: 'structured-study-plan',
+      icon: Layers,
+      title: 'Targeted Weekly Study Plan',
+      tagline: 'Day-Wise Roadmap for JRF Success',
+      description: 'A structured 120-day revision and study planner designed to keep working aspirants and full-time scholars on track without burnout.',
       perks: [
-        '1-on-1 scheduled telephone/video strategy calls before exam cycles',
-        'Customized daily study routine tailored for working scholars or mothers',
-        'Ph.D. interview synopsis review and counseling'
+        'Day-wise topic schedule from Day 1 to Exam Day',
+        'Dedicated buffer days for backlogs and high-weightage revisions',
+        'Monthly milestone assessments to track preparation trajectory'
+      ],
+      previewBadge: '120-Day Roadmap • Habit Tracker',
+      stat: '100% Syllabus Completed on Time',
+      accentColor: 'from-teal-600 to-cyan-600'
+    },
+    {
+      id: '1on1-counseling',
+      icon: UserCheck,
+      title: '1-on-1 Strategy Counseling',
+      tagline: 'Personalized Academic & Ph.D. Roadmap',
+      description: 'Personalized strategy calls with Dr. Ankita Bisht to discuss test performance, Paper 2 synchronization, time management hacks, and Ph.D. PET admission guidance.',
+      perks: [
+        'Diagnostic analysis of your mock test score stagnation',
+        'Strategy synchronization between Paper 1 (General) and Paper 2',
+        'Ph.D. synopsis & research proposal mentorship for qualified scholars'
       ],
       previewBadge: '1-on-1 Call • Custom Study Plan',
       stat: '94.8% Qualifier Satisfaction',
@@ -132,13 +135,13 @@ export const FeaturesSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 text-brand-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-3">
             <Zap className="w-4 h-4 text-brand-600" />
-            <span>Comprehensive Learning Ecosystem</span>
+            <span>{featuresConfig?.sectionBadge || 'Comprehensive Learning Ecosystem'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-            Everything You Need to <span className="gradient-text">Crack Your Exam on 1st Attempt</span>
+            {featuresConfig?.sectionTitle || 'Everything You Need to Crack Your Exam on 1st Attempt'}
           </h2>
           <p className="mt-3 text-slate-600 text-base sm:text-lg">
-            7 robust learning pillars engineered to bridge every gap between theory, practice, and exam-day execution.
+            {featuresConfig?.sectionSubtitle || '7 robust learning pillars engineered to bridge every gap between theory, practice, and exam-day execution.'}
           </p>
         </div>
 

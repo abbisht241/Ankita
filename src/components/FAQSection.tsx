@@ -6,9 +6,14 @@ import {
   MessageCircle, 
   PhoneCall 
 } from 'lucide-react';
-import { faqData } from '../data/faqData';
+import { faqData as defaultFaqData } from '../data/faqData';
+import { useSiteContent } from '../context/SiteContentContext';
 
 export const FAQSection: React.FC = () => {
+  const { content } = useSiteContent();
+  const faqConfig = content.faq;
+  const activeFaqs = (faqConfig?.faqs && faqConfig.faqs.length > 0) ? faqConfig.faqs : defaultFaqData;
+
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [expandedId, setExpandedId] = useState<string | null>('faq-1');
@@ -21,7 +26,7 @@ export const FAQSection: React.FC = () => {
     'Mentorship & Mock Tests'
   ];
 
-  const filteredFaqs = faqData.filter(item => {
+  const filteredFaqs = activeFaqs.filter(item => {
     const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
     const matchesSearch = item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           item.answer.toLowerCase().includes(searchQuery.toLowerCase());
@@ -40,15 +45,16 @@ export const FAQSection: React.FC = () => {
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 text-brand-800 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-3">
             <HelpCircle className="w-4 h-4 text-brand-600" />
-            <span>Frequently Asked Questions</span>
+            <span>{faqConfig?.sectionBadge || 'Frequently Asked Questions'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-            Got Questions? <span className="gradient-text">We Have Clear Answers.</span>
+            {faqConfig?.sectionTitle || 'Got Questions? We Have Clear Answers.'}
           </h2>
           <p className="mt-3 text-slate-600 text-base sm:text-lg">
-            Find everything you need to know about batch timings, recordings, fees, and study material.
+            {faqConfig?.sectionSubtitle || 'Find everything you need to know about batch timings, recordings, fees, and study material.'}
           </p>
         </div>
+
 
         {/* Search Bar */}
         <div className="relative max-w-xl mx-auto mb-8">

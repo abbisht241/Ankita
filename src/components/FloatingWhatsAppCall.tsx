@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { MessageSquare, PhoneCall, X, Sparkles } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface FloatingWhatsAppCallProps {
   onOpenDemoModal?: () => void;
 }
 
 export const FloatingWhatsAppCall: React.FC<FloatingWhatsAppCallProps> = () => {
+  const { content } = useSiteContent();
+  const contact = content.contact;
   const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
@@ -16,11 +19,15 @@ export const FloatingWhatsAppCall: React.FC<FloatingWhatsAppCallProps> = () => {
   }, []);
 
   const handleWhatsAppClick = () => {
+    const rawNum = contact?.whatsappNumber || '917417268651';
+    const cleanNum = rawNum.replace(/\D/g, '');
     const text = encodeURIComponent(
       "Hello Dr. Ankita Bisht & Team! I want to inquire about UGC NET Paper 1 & CDP online batch admission."
     );
-    window.open(`https://wa.me/917417268651?text=${text}`, '_blank');
+    window.open(`https://wa.me/${cleanNum}?text=${text}`, '_blank');
   };
+
+  const phoneHref = `tel:${contact?.phonePrimary || '+917417268651'}`;
 
   return (
     <div className="fixed bottom-6 right-5 z-40 flex flex-col items-end gap-3 pointer-events-auto">
@@ -44,7 +51,7 @@ export const FloatingWhatsAppCall: React.FC<FloatingWhatsAppCallProps> = () => {
       <div className="flex items-center gap-3">
         {/* Direct Call Button */}
         <a
-          href="tel:+917417268651"
+          href={phoneHref}
           className="w-12 h-12 rounded-full bg-brand-700 hover:bg-brand-800 text-white shadow-lg hover:shadow-brand-700/40 flex items-center justify-center transition-all duration-300 hover:scale-108 group focus:outline-none"
           title="Call Admission Helpline"
         >

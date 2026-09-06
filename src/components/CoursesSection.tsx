@@ -10,8 +10,9 @@ import {
   FileText, 
   Users
 } from 'lucide-react';
-import { coursesData } from '../data/coursesData';
+import { coursesData as defaultCoursesData } from '../data/coursesData';
 import type { Course } from '../types';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface CoursesSectionProps {
   onSelectSyllabus: (course: Course) => void;
@@ -24,6 +25,10 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
   onEnrollCourse,
   onOpenDemoModal
 }) => {
+  const { content } = useSiteContent();
+  const coursesConfig = content.courses;
+  const activeCourses = (coursesConfig?.courses && coursesConfig.courses.length > 0) ? coursesConfig.courses : defaultCoursesData;
+
   const [activeCategory, setActiveCategory] = useState<string>('All');
 
   const categories = [
@@ -37,8 +42,8 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
   ];
 
   const filteredCourses = activeCategory === 'All' 
-    ? coursesData 
-    : coursesData.filter(c => c.category === activeCategory);
+    ? activeCourses 
+    : activeCourses.filter(c => c.category === activeCategory);
 
   return (
     <section id="courses" className="py-16 sm:py-24 bg-slate-50 relative overflow-hidden">
@@ -48,15 +53,16 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 bg-brand-100/80 border border-brand-200 text-brand-800 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-3">
             <BookOpen className="w-4 h-4 text-brand-600" />
-            <span>Structured Academic Programs</span>
+            <span>{coursesConfig?.sectionBadge || 'Structured Academic Programs'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-            Targeted Online Batches Designed for <span className="gradient-text">Top Scores &amp; JRF Ranks</span>
+            {coursesConfig?.sectionTitle || 'Targeted Online Batches Designed for Top Scores & JRF Ranks'}
           </h2>
           <p className="mt-3 text-slate-600 text-base sm:text-lg">
-            Choose your dedicated batch with live classes, full recording access, bilingual study notes, and NTA CBT mock test series.
+            {coursesConfig?.sectionSubtitle || 'Choose your dedicated batch with live classes, full recording access, bilingual study notes, and NTA CBT mock test series.'}
           </p>
         </div>
+
 
         {/* Category Filter Tabs */}
         <div className="flex flex-wrap items-center justify-center gap-2 mb-12">

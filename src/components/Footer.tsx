@@ -8,6 +8,7 @@ import {
   ArrowRight,
   BookOpen
 } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface FooterProps {
   onOpenLegalModal: (type: 'privacy' | 'terms') => void;
@@ -15,6 +16,8 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModal }) => {
+  const { content } = useSiteContent();
+  const contact = content.contact;
   const currentYear = new Date().getFullYear();
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -60,7 +63,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 <BookOpen className="w-4 h-4" />
               </a>
               <a 
-                href="https://t.me" 
+                href={contact?.telegramUrl || 'https://t.me/DrAnkitaBishtUGC'} 
                 target="_blank" 
                 rel="noreferrer"
                 className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-sky-500 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
@@ -69,7 +72,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 <Send className="w-4 h-4" />
               </a>
               <a 
-                href="https://instagram.com" 
+                href={contact?.instagramUrl || 'https://instagram.com/learnwithdrankita'} 
                 target="_blank" 
                 rel="noreferrer"
                 className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-pink-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
@@ -80,11 +83,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 </svg>
               </a>
               <a 
-                href="https://youtube.com" 
+                href={contact?.youtubeUrl || 'https://youtube.com/@learnwithdrankita'} 
                 target="_blank" 
                 rel="noreferrer"
                 className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-rose-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
-                title="YouTube Channel"
+                title="YouTube Free Lectures"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -98,21 +101,21 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
               Quick Navigation
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="hover:text-brand-400 transition-colors">Home</a>
+                <a href="#hero" onClick={(e) => handleNavClick(e, '#hero')} className="hover:text-brand-400 transition-colors">Home &amp; Highlights</a>
               </li>
               <li>
-                <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-brand-400 transition-colors">About Dr. Ankita</a>
+                <a href="#about" onClick={(e) => handleNavClick(e, '#about')} className="hover:text-brand-400 transition-colors">About Faculty</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Courses &amp; Batches</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Target Batches</a>
               </li>
               <li>
                 <a href="#features" onClick={(e) => handleNavClick(e, '#features')} className="hover:text-brand-400 transition-colors">Learning System</a>
               </li>
               <li>
-                <a href="#free-resources" onClick={(e) => handleNavClick(e, '#free-resources')} className="hover:text-brand-400 transition-colors">Free Notes &amp; PYQs</a>
+                <a href="#free-resources" onClick={(e) => handleNavClick(e, '#free-resources')} className="hover:text-brand-400 transition-colors">Free Resources</a>
               </li>
               <li>
                 <a href="#faqs" onClick={(e) => handleNavClick(e, '#faqs')} className="hover:text-brand-400 transition-colors">FAQs</a>
@@ -123,9 +126,9 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
           {/* Popular Courses Column */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              Specialized Batches
+              Popular Programs
             </h4>
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-2 text-xs text-slate-400">
               <li>
                 <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1 Complete</a>
               </li>
@@ -155,15 +158,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             <div className="space-y-2.5 text-xs text-slate-400">
               <div className="flex items-start gap-2">
                 <PhoneCall className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>+91 7417268651 (Mon-Sat, 9am-8:30pm)</span>
+                <span>{contact?.phonePrimary || '+91 7417268651'} (Mon-Sat, 9am-8:30pm)</span>
               </div>
               <div className="flex items-start gap-2">
                 <Mail className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>abbisht241@gmail.com</span>
+                <span>{contact?.email || 'abbisht241@gmail.com'}</span>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>Srinagar Garhwal, Uttarakhand, India</span>
+                <span>{contact?.address || 'Srinagar Garhwal, Uttarakhand, India'}</span>
               </div>
             </div>
 
@@ -189,7 +192,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
         {/* Bottom Bar: Copyright and Legal links */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © {currentYear} Dr. Ankita Bisht Academic Academy. All rights reserved.
+            {contact?.footerCopyright || `© ${currentYear} Dr. Ankita Bisht Academic Academy. All rights reserved.`}
           </div>
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
             <a

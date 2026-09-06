@@ -11,13 +11,17 @@ import {
   BookMarked,
   ExternalLink
 } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface AboutSectionProps {
   onOpenDemoModal: () => void;
 }
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) => {
-  const credentials = [
+  const { content } = useSiteContent();
+  const about = content.about;
+
+  const defaultCredentials = [
     { label: 'Current Faculty Role', value: 'Assistant Professor (Guest Faculty), HNB Garhwal Central University (2023-2026)' },
     { label: 'Doctoral Qualification', value: 'Ph.D. in Home Science (2024), H.N.B. Garhwal University' },
     { label: 'Education Degrees', value: 'M.A. Education (2026) & B.Ed. (2015)' },
@@ -25,6 +29,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
     { label: 'National Milestone', value: 'UGC-NET Qualified (NTA) in Home Science (2020)' },
     { label: 'Published Author', value: 'Book: "समृद्ध स्त्रियां, समृद्ध समाज" & 8+ UGC-CARE Papers' },
   ];
+
+  const credentials = (about?.qualifications && about.qualifications.length > 0)
+    ? about.qualifications.map((q, idx) => ({
+        label: `Distinction 0${idx + 1}`,
+        value: q
+      }))
+    : defaultCredentials;
 
   const researchSpecializations = [
     {
@@ -53,13 +64,13 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-200 text-brand-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-3">
             <GraduationCap className="w-4 h-4 text-brand-600" />
-            <span>Meet Your Master Faculty</span>
+            <span>{about?.sectionBadge || 'Meet Your Master Faculty'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
             Learn from a Central University <span className="gradient-text">Gold Medalist &amp; Assistant Professor</span>
           </h2>
           <p className="mt-4 text-slate-600 text-base sm:text-lg">
-            Empowering UGC NET, JRF, and Pedagogy aspirants with simplified frameworks, empirical research methodology, and personalized academic guidance.
+            {about?.headline || 'Empowering UGC NET, JRF, and Pedagogy aspirants with simplified frameworks, empirical research methodology, and personalized academic guidance.'}
           </p>
         </div>
 
@@ -71,15 +82,25 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
             
             {/* Bio Paragraphs */}
             <div className="prose prose-slate max-w-none text-slate-600 leading-relaxed space-y-4">
-              <p className="text-base sm:text-lg">
-                Hello and welcome! I am <strong className="text-slate-900 font-bold">Dr. Ankita Bisht</strong>. I serve as an <span className="text-brand-700 font-semibold">Assistant Professor (Guest Faculty) at H.N.B. Garhwal University (A Central University)</span>, Srinagar Garhwal, Uttarakhand.
-              </p>
-              <p className="text-base">
-                Having earned my <strong className="text-slate-900 font-semibold">Ph.D. in Home Science (2024)</strong>, <strong className="text-slate-900 font-semibold">M.A. in Education (2026)</strong>, and <strong className="text-slate-900 font-semibold">B.Ed. (2015)</strong>, along with achieving <strong className="text-slate-900 font-semibold">Rank 1 Gold Medalist</strong> honours in M.A. Home Science and <strong className="text-slate-900 font-semibold">UGC-NET qualification</strong>, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams.
-              </p>
-              <p className="text-base">
-                I am also the author of the published academic book <em className="text-brand-800 font-medium">“समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका”</em> and have published 8+ research papers in the <strong>UGC CARE List</strong> and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.
-              </p>
+              {about?.bioParagraphs && about.bioParagraphs.length > 0 ? (
+                about.bioParagraphs.map((para, i) => (
+                  <p key={i} className="text-base sm:text-lg">
+                    {para}
+                  </p>
+                ))
+              ) : (
+                <>
+                  <p className="text-base sm:text-lg">
+                    Hello and welcome! I am <strong className="text-slate-900 font-bold">Dr. Ankita Bisht</strong>. I serve as an <span className="text-brand-700 font-semibold">Assistant Professor (Guest Faculty) at H.N.B. Garhwal University (A Central University)</span>, Srinagar Garhwal, Uttarakhand.
+                  </p>
+                  <p className="text-base">
+                    Having earned my <strong className="text-slate-900 font-semibold">Ph.D. in Home Science (2024)</strong>, <strong className="text-slate-900 font-semibold">M.A. in Education (2026)</strong>, and <strong className="text-slate-900 font-semibold">B.Ed. (2015)</strong>, along with achieving <strong className="text-slate-900 font-semibold">Rank 1 Gold Medalist</strong> honours in M.A. Home Science and <strong className="text-slate-900 font-semibold">UGC-NET qualification</strong>, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams.
+                  </p>
+                  <p className="text-base">
+                    I am also the author of the published academic book <em className="text-brand-800 font-medium">“समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका”</em> and have published 8+ research papers in the <strong>UGC CARE List</strong> and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.
+                  </p>
+                </>
+              )}
             </div>
 
             {/* Academic Profiles Pill Links */}
@@ -108,9 +129,16 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
               </p>
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-brand-800/80">
                 <div className="flex items-center gap-3">
-                  <img src="/images/educator.jpg" alt="Dr. Ankita Bisht" className="w-11 h-11 rounded-full object-cover ring-2 ring-brand-400/50" />
+                  <img 
+                    src={about?.photoUrl || '/images/educator.jpg'} 
+                    alt="Dr. Ankita Bisht" 
+                    className="w-11 h-11 rounded-full object-cover ring-2 ring-brand-400/50" 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/images/educator.jpg';
+                    }}
+                  />
                   <div>
-                    <div className="font-bold text-white text-sm">Dr. Ankita Bisht</div>
+                    <div className="font-bold text-white text-sm">{about?.name || 'Dr. Ankita Bisht'}</div>
                     <div className="text-xs text-brand-300">Ph.D. • M.A. Edu • B.Ed. • Rank 1 Gold Medalist • UGC-NET</div>
                   </div>
                 </div>

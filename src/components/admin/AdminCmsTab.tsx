@@ -1,0 +1,1194 @@
+import React, { useState } from 'react';
+import { 
+  Globe, 
+  Megaphone, 
+  Sparkles, 
+  BookOpen, 
+  User, 
+  Award, 
+  FileText, 
+  MessageSquareQuote, 
+  HelpCircle, 
+  Phone, 
+  Save, 
+  RotateCcw, 
+  Check, 
+  Plus, 
+  Trash2, 
+  Eye
+} from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { useSiteContent } from '../../context/SiteContentContext';
+import type { SiteContentConfig } from '../../services/siteContentService';
+import type { FAQItem, Resource, Testimonial } from '../../types';
+
+export const AdminCmsTab: React.FC = () => {
+  const { content, publishContent, resetToDefaults } = useSiteContent();
+  const [formData, setFormData] = useState<SiteContentConfig>(content);
+  const [activeSubTab, setActiveSubTab] = useState<
+    'announcement' | 'hero' | 'courses' | 'about' | 'features' | 'resources' | 'testimonials' | 'faq' | 'contact'
+  >('announcement');
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+
+  // Sync when content loads
+  React.useEffect(() => {
+    setFormData(content);
+  }, [content]);
+
+  const handleSaveAndPublish = async () => {
+    setIsPublishing(true);
+    await publishContent(formData);
+    setIsPublishing(false);
+    setPublishSuccess(true);
+    setTimeout(() => setPublishSuccess(false), 3000);
+
+
+    confetti({
+      particleCount: 120,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
+
+  const handleReset = () => {
+    if (confirm('Are you sure you want to reset all website sections to default settings? Any unsaved edits will be restored to factory defaults.')) {
+      const defaults = resetToDefaults();
+      setFormData(defaults);
+      alert('Website content reset to factory defaults.');
+    }
+  };
+
+  const subTabs = [
+    { id: 'announcement', label: 'Top Banner', icon: Megaphone },
+    { id: 'hero', label: 'Hero & Tagline', icon: Sparkles },
+    { id: 'courses', label: 'Courses & Pricing', icon: BookOpen },
+    { id: 'about', label: 'About Dr. Ankita', icon: User },
+    { id: 'features', label: 'Teaching Pillars', icon: Award },
+    { id: 'resources', label: 'Free Study Notes', icon: FileText },
+    { id: 'testimonials', label: 'Testimonials & Reviews', icon: MessageSquareQuote },
+    { id: 'faq', label: 'FAQs Manager', icon: HelpCircle },
+    { id: 'contact', label: 'Contact & Socials', icon: Phone },
+  ] as const;
+
+  return (
+    <div className="space-y-6 animate-fadeIn font-sans">
+      
+      {/* 1. Header Toolbar */}
+      <div className="bg-gradient-to-r from-slate-900 via-brand-950 to-indigo-950 rounded-3xl p-6 sm:p-7 text-white shadow-xl border border-brand-800/40 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5 relative overflow-hidden">
+        <div className="space-y-1.5 z-10">
+          <div className="inline-flex items-center gap-2 bg-brand-500/20 text-brand-300 text-xs font-bold px-3 py-1 rounded-full border border-brand-500/30">
+            <Globe className="w-3.5 h-3.5" />
+            <span>Full Website Content Management System (CMS)</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black font-display">
+            Manage &amp; Edit Live Website
+          </h2>
+          <p className="text-xs text-brand-200 max-w-xl">
+            Edit every word, course, fee price, hero banner, FAQ, free PDF, and review on <strong>learnwithdrankita.com</strong> without writing a single line of code.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 z-10 flex-wrap">
+          <button
+            onClick={handleReset}
+            className="bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
+            title="Reset to default text"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset Defaults</span>
+          </button>
+
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>Live Site ↗</span>
+          </a>
+
+          <button
+            onClick={handleSaveAndPublish}
+            disabled={isPublishing}
+            className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-black px-5 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {publishSuccess ? (
+              <>
+                <Check className="w-4 h-4 text-slate-950" />
+                <span>Published Successfully! ✓</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>{isPublishing ? 'Publishing Live...' : '🚀 Save & Publish Live'}</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        <div className="absolute right-0 top-0 w-80 h-80 bg-brand-500/10 blur-3xl rounded-full pointer-events-none" />
+      </div>
+
+      {/* 2. Sub-Tabs Navigation */}
+      <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-subtle flex items-center gap-1.5 overflow-x-auto">
+        {subTabs.map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeSubTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                isActive
+                  ? 'bg-brand-700 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3. Sub-Tab Editors */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-subtle space-y-6">
+        
+        {/* SUBTAB 1: ANNOUNCEMENT BAR */}
+        {activeSubTab === 'announcement' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                Top Announcement Bar Settings
+              </h3>
+              <p className="text-xs text-slate-500">The banner displayed at the very top of all website pages.</p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <label className="flex items-center gap-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.announcement.enabled}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    announcement: { ...formData.announcement, enabled: e.target.checked }
+                  })}
+                  className="w-4 h-4 rounded text-brand-600"
+                />
+                <span className="font-bold text-slate-800">
+                  Enable Top Announcement Bar on Website
+                </span>
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Badge Text (e.g. ADMISSIONS OPEN 🔥)</label>
+                  <input
+                    type="text"
+                    value={formData.announcement.badgeText}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      announcement: { ...formData.announcement, badgeText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Button Label (e.g. Book Free Demo)</label>
+                  <input
+                    type="text"
+                    value={formData.announcement.buttonText}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      announcement: { ...formData.announcement, buttonText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Announcement Message Headline</label>
+                <textarea
+                  rows={2}
+                  value={formData.announcement.headline}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    announcement: { ...formData.announcement, headline: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 2: HERO SECTION */}
+        {activeSubTab === 'hero' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                Hero &amp; Main Headline Section
+              </h3>
+              <p className="text-xs text-slate-500">The main banner at the top of the homepage.</p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Top Badge Label</label>
+                <input
+                  type="text"
+                  value={formData.hero.topBadge}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    hero: { ...formData.hero, topBadge: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Main Heading (Part 1)</label>
+                  <input
+                    type="text"
+                    value={formData.hero.mainTitleLine1}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      hero: { ...formData.hero, mainTitleLine1: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Gradient Highlight (Part 2)</label>
+                  <input
+                    type="text"
+                    value={formData.hero.mainTitleGradient}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      hero: { ...formData.hero, mainTitleGradient: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold text-brand-700"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Description Paragraph</label>
+                <textarea
+                  rows={3}
+                  value={formData.hero.description}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    hero: { ...formData.hero, description: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Primary CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={formData.hero.primaryButtonText}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      hero: { ...formData.hero, primaryButtonText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Secondary CTA Button Label</label>
+                  <input
+                    type="text"
+                    value={formData.hero.secondaryButtonText}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      hero: { ...formData.hero, secondaryButtonText: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              {/* 4 Trust Stats */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-2">4 Trust Metric Chips</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {formData.hero.trustStats.map((stat, idx) => (
+                    <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5">
+                      <input
+                        type="text"
+                        value={stat.value}
+                        onChange={(e) => {
+                          const updated = [...formData.hero.trustStats];
+                          updated[idx] = { ...updated[idx], value: e.target.value };
+                          setFormData({ ...formData, hero: { ...formData.hero, trustStats: updated } });
+                        }}
+                        placeholder="e.g. 15,000+"
+                        className="w-full px-2 py-1 text-xs font-black text-brand-900 border border-slate-300 rounded-lg bg-white"
+                      />
+                      <input
+                        type="text"
+                        value={stat.label}
+                        onChange={(e) => {
+                          const updated = [...formData.hero.trustStats];
+                          updated[idx] = { ...updated[idx], label: e.target.value };
+                          setFormData({ ...formData, hero: { ...formData.hero, trustStats: updated } });
+                        }}
+                        placeholder="Label"
+                        className="w-full px-2 py-1 text-[11px] text-slate-600 border border-slate-300 rounded-lg bg-white"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 3: COURSES & PRICING */}
+        {activeSubTab === 'courses' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                  Courses, Batches &amp; Pricing Manager
+                </h3>
+                <p className="text-xs text-slate-500">Edit course details, original prices, special discounted fees, and batches.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={formData.courses.sectionTitle}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      courses: { ...formData.courses, sectionTitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Section Subtitle</label>
+                  <input
+                    type="text"
+                    value={formData.courses.sectionSubtitle}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      courses: { ...formData.courses, sectionSubtitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              {/* Course Cards List */}
+              <div className="space-y-4 pt-2">
+                {formData.courses.courses.map((course, idx) => (
+                  <div key={course.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-sm text-brand-900">
+                        Course #{idx + 1}: {course.title}
+                      </div>
+                      <span className="font-mono text-[10px] text-slate-400">ID: {course.id}</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Course Title</label>
+                        <input
+                          type="text"
+                          value={course.title}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], title: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Discounted Sale Fee (₹) *</label>
+                        <input
+                          type="number"
+                          value={course.price}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], price: Number(e.target.value) };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-black text-emerald-700 text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Original Price (₹)</label>
+                        <input
+                          type="number"
+                          value={course.originalPrice}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], originalPrice: Number(e.target.value) };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-medium text-slate-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Badge (e.g. Best Seller 🔥)</label>
+                        <input
+                          type="text"
+                          value={course.badge || ''}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], badge: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Duration &amp; Hours</label>
+                        <input
+                          type="text"
+                          value={course.duration}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], duration: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Validity</label>
+                        <input
+                          type="text"
+                          value={course.validity}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], validity: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-700 mb-1">Short Description</label>
+                      <textarea
+                        rows={2}
+                        value={course.shortDesc}
+                        onChange={(e) => {
+                          const updated = [...formData.courses.courses];
+                          updated[idx] = { ...updated[idx], shortDesc: e.target.value };
+                          setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                        }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 4: ABOUT DR. ANKITA */}
+        {activeSubTab === 'about' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                About Dr. Ankita Bisht Section
+              </h3>
+              <p className="text-xs text-slate-500">Educator bio, achievements, qualifications, and profile credentials.</p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Educator Full Name</label>
+                  <input
+                    type="text"
+                    value={formData.about.name}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      about: { ...formData.about, name: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Profile Photo URL</label>
+                  <input
+                    type="text"
+                    value={formData.about.photoUrl}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      about: { ...formData.about, photoUrl: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Headline &amp; Title</label>
+                <input
+                  type="text"
+                  value={formData.about.headline}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    about: { ...formData.about, headline: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Bio Paragraph 1</label>
+                <textarea
+                  rows={3}
+                  value={formData.about.bioParagraphs[0] || ''}
+                  onChange={(e) => {
+                    const bio = [...formData.about.bioParagraphs];
+                    bio[0] = e.target.value;
+                    setFormData({ ...formData, about: { ...formData.about, bioParagraphs: bio } });
+                  }}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Bio Paragraph 2</label>
+                <textarea
+                  rows={3}
+                  value={formData.about.bioParagraphs[1] || ''}
+                  onChange={(e) => {
+                    const bio = [...formData.about.bioParagraphs];
+                    bio[1] = e.target.value;
+                    setFormData({ ...formData, about: { ...formData.about, bioParagraphs: bio } });
+                  }}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs"
+                />
+              </div>
+
+              {/* Qualifications */}
+              <div>
+                <label className="block font-bold text-slate-700 mb-2">Qualifications &amp; Degrees</label>
+                <div className="space-y-2">
+                  {formData.about.qualifications.map((q, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={q}
+                        onChange={(e) => {
+                          const updated = [...formData.about.qualifications];
+                          updated[idx] = e.target.value;
+                          setFormData({ ...formData, about: { ...formData.about, qualifications: updated } });
+                        }}
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-xl bg-slate-50 font-medium"
+                      />
+                      <button
+                        onClick={() => {
+                          const updated = formData.about.qualifications.filter((_, i) => i !== idx);
+                          setFormData({ ...formData, about: { ...formData.about, qualifications: updated } });
+                        }}
+                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        about: {
+                          ...formData.about,
+                          qualifications: [...formData.about.qualifications, 'New Credential / Gold Medalist']
+                        }
+                      });
+                    }}
+                    className="text-xs font-bold text-brand-700 hover:underline flex items-center gap-1 cursor-pointer pt-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Add Qualification</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 5: TEACHING FEATURES */}
+        {activeSubTab === 'features' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                Teaching Features &amp; Pillars
+              </h3>
+              <p className="text-xs text-slate-500">The 4 core learning pillars shown in "The Ankita Bisht Method" section.</p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Section Title</label>
+                  <input
+                    type="text"
+                    value={formData.features.sectionTitle}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      features: { ...formData.features, sectionTitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Section Subtitle</label>
+                  <input
+                    type="text"
+                    value={formData.features.sectionSubtitle}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      features: { ...formData.features, sectionSubtitle: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                {formData.features.items.map((item, idx) => (
+                  <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                    <div className="font-bold text-slate-800 text-xs">Feature #{idx + 1}</div>
+                    <input
+                      type="text"
+                      value={item.title}
+                      onChange={(e) => {
+                        const updated = [...formData.features.items];
+                        updated[idx] = { ...updated[idx], title: e.target.value };
+                        setFormData({ ...formData, features: { ...formData.features, items: updated } });
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold bg-white"
+                      placeholder="Title"
+                    />
+                    <textarea
+                      rows={2}
+                      value={item.desc}
+                      onChange={(e) => {
+                        const updated = [...formData.features.items];
+                        updated[idx] = { ...updated[idx], desc: e.target.value };
+                        setFormData({ ...formData, features: { ...formData.features, items: updated } });
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
+                      placeholder="Description"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 6: FREE RESOURCES */}
+        {activeSubTab === 'resources' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                  Free Study Material &amp; Downloadable PDFs
+                </h3>
+                <p className="text-xs text-slate-500">Manage free PDF notes, formula sheets, and past year question papers.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const newRes: Resource = {
+                    id: `res-${Date.now().toString().slice(-4)}`,
+                    title: 'New High-Yield Study PDF Notes',
+                    category: 'UGC NET Paper 1',
+                    type: 'PDF Notes',
+                    fileSize: '4.2 MB',
+                    pageCount: 25,
+                    downloadCount: '5,000+ Downloads',
+                    isPopular: true,
+                    description: 'Comprehensive revision formula sheet and key concept points.',
+                    topicsCovered: ['Unit 1 High-Yield Points', 'PYQ Solved Questions'],
+                    previewSnippet: 'Key revision summary points.'
+                  };
+                  setFormData({
+                    ...formData,
+                    resources: {
+                      ...formData.resources,
+                      resources: [newRes, ...formData.resources.resources]
+                    }
+                  });
+                }}
+                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Free PDF</span>
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              {formData.resources.resources.map((res, idx) => (
+                <div key={res.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <input
+                      type="text"
+                      value={res.title}
+                      onChange={(e) => {
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], title: e.target.value };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      className="flex-1 px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-bold text-slate-900"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = formData.resources.resources.filter((_, i) => i !== idx);
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      className="ml-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={res.category}
+                      onChange={(e) => {
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], category: e.target.value };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      placeholder="Category"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
+                    />
+                    <input
+                      type="text"
+                      value={res.fileSize}
+                      onChange={(e) => {
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], fileSize: e.target.value };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      placeholder="File Size (e.g. 4.5 MB)"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
+                    />
+                    <input
+                      type="text"
+                      value={res.downloadCount}
+                      onChange={(e) => {
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], downloadCount: e.target.value };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      placeholder="Downloads (e.g. 15,000+)"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+
+                  <textarea
+                    rows={2}
+                    value={res.description}
+                    onChange={(e) => {
+                      const updated = [...formData.resources.resources];
+                      updated[idx] = { ...updated[idx], description: e.target.value };
+                      setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                    }}
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded-xl bg-white text-xs"
+                    placeholder="Short description"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 7: TESTIMONIALS */}
+        {activeSubTab === 'testimonials' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                  Results, Toppers &amp; Testimonials
+                </h3>
+                <p className="text-xs text-slate-500">Student success stories, scorecards, AIR ranks, and review quotes.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const newTest: Testimonial = {
+                    id: `test-${Date.now().toString().slice(-4)}`,
+                    name: 'New Top Ranker',
+                    exam: 'UGC NET JRF Qualified',
+                    scoreOrRank: 'AIR 15 (Score: 218/300)',
+                    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250',
+                    quote: 'Dr. Ankita Bisht ma\'am\'s lectures and mindmaps made my preparation seamless.',
+                    year: '2026 Batch',
+                    collegeOrRole: 'Assistant Professor Aspirant',
+                    badge: 'JRF Qualified'
+                  };
+                  setFormData({
+                    ...formData,
+                    testimonials: {
+                      ...formData.testimonials,
+                      testimonials: [newTest, ...formData.testimonials.testimonials]
+                    }
+                  });
+                }}
+                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Testimonial</span>
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              {formData.testimonials.testimonials.map((test, idx) => (
+                <div key={test.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-800 text-sm">Review #{idx + 1}</span>
+                    <button
+                      onClick={() => {
+                        const updated = formData.testimonials.testimonials.filter((_, i) => i !== idx);
+                        setFormData({ ...formData, testimonials: { ...formData.testimonials, testimonials: updated } });
+                      }}
+                      className="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <input
+                      type="text"
+                      value={test.name}
+                      onChange={(e) => {
+                        const updated = [...formData.testimonials.testimonials];
+                        updated[idx] = { ...updated[idx], name: e.target.value };
+                        setFormData({ ...formData, testimonials: { ...formData.testimonials, testimonials: updated } });
+                      }}
+                      placeholder="Student Name"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-bold"
+                    />
+
+                    <input
+                      type="text"
+                      value={test.exam}
+                      onChange={(e) => {
+                        const updated = [...formData.testimonials.testimonials];
+                        updated[idx] = { ...updated[idx], exam: e.target.value };
+                        setFormData({ ...formData, testimonials: { ...formData.testimonials, testimonials: updated } });
+                      }}
+                      placeholder="Exam / Target"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
+                    />
+
+                    <input
+                      type="text"
+                      value={test.scoreOrRank}
+                      onChange={(e) => {
+                        const updated = [...formData.testimonials.testimonials];
+                        updated[idx] = { ...updated[idx], scoreOrRank: e.target.value };
+                        setFormData({ ...formData, testimonials: { ...formData.testimonials, testimonials: updated } });
+                      }}
+                      placeholder="Score / Rank"
+                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-semibold text-emerald-700"
+                    />
+                  </div>
+
+                  <textarea
+                    rows={2}
+                    value={test.quote}
+                    onChange={(e) => {
+                      const updated = [...formData.testimonials.testimonials];
+                      updated[idx] = { ...updated[idx], quote: e.target.value };
+                      setFormData({ ...formData, testimonials: { ...formData.testimonials, testimonials: updated } });
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
+                    placeholder="Student Quote / Review"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 8: FAQS MANAGER */}
+        {activeSubTab === 'faq' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                  Frequently Asked Questions (FAQs)
+                </h3>
+                <p className="text-xs text-slate-500">Add or edit questions and answers displayed in the FAQ section.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const newFaq: FAQItem = {
+                    id: `faq-${Date.now().toString().slice(-4)}`,
+                    category: 'Courses & Syllabus',
+                    question: 'New Question title?',
+                    answer: 'Detailed answer explanation for student questions.'
+                  };
+                  setFormData({
+                    ...formData,
+                    faq: {
+                      ...formData.faq,
+                      faqs: [newFaq, ...formData.faq.faqs]
+                    }
+                  });
+                }}
+                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add FAQ</span>
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              {formData.faq.faqs.map((faq, idx) => (
+                <div key={faq.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <input
+                      type="text"
+                      value={faq.question}
+                      onChange={(e) => {
+                        const updated = [...formData.faq.faqs];
+                        updated[idx] = { ...updated[idx], question: e.target.value };
+                        setFormData({ ...formData, faq: { ...formData.faq, faqs: updated } });
+                      }}
+                      className="flex-1 px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-bold text-slate-900"
+                      placeholder="Question"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = formData.faq.faqs.filter((_, i) => i !== idx);
+                        setFormData({ ...formData, faq: { ...formData.faq, faqs: updated } });
+                      }}
+                      className="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg cursor-pointer"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <textarea
+                    rows={3}
+                    value={faq.answer}
+                    onChange={(e) => {
+                      const updated = [...formData.faq.faqs];
+                      updated[idx] = { ...updated[idx], answer: e.target.value };
+                      setFormData({ ...formData, faq: { ...formData.faq, faqs: updated } });
+                    }}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
+                    placeholder="Answer explanation"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SUBTAB 9: CONTACT & SOCIALS */}
+        {activeSubTab === 'contact' && (
+          <div className="space-y-5 animate-fadeIn">
+            <div className="border-b border-slate-100 pb-3">
+              <h3 className="font-extrabold text-lg text-slate-900 font-display">
+                Contact Info, Helpline &amp; Social Links
+              </h3>
+              <p className="text-xs text-slate-500">Phone numbers, WhatsApp support, email, address, and social channels in header &amp; footer.</p>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Academy Official Name</label>
+                  <input
+                    type="text"
+                    value={formData.contact.instituteName}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, instituteName: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Official Email Address</label>
+                  <input
+                    type="email"
+                    value={formData.contact.email}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, email: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Primary Phone</label>
+                  <input
+                    type="text"
+                    value={formData.contact.phonePrimary}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, phonePrimary: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Secondary Phone</label>
+                  <input
+                    type="text"
+                    value={formData.contact.phoneSecondary}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, phoneSecondary: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">WhatsApp Chat Number</label>
+                  <input
+                    type="text"
+                    value={formData.contact.whatsappNumber}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, whatsappNumber: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Physical Academy Address</label>
+                <input
+                  type="text"
+                  value={formData.contact.address}
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    contact: { ...formData.contact, address: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl font-medium"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">YouTube Channel URL</label>
+                  <input
+                    type="text"
+                    value={formData.contact.youtubeUrl}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, youtubeUrl: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Telegram Community URL</label>
+                  <input
+                    type="text"
+                    value={formData.contact.telegramUrl}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, telegramUrl: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Instagram URL</label>
+                  <input
+                    type="text"
+                    value={formData.contact.instagramUrl}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      contact: { ...formData.contact, instagramUrl: e.target.value }
+                    })}
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs font-mono"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* 4. Bottom Sticky Publish Bar */}
+      <div className="bg-slate-900 text-white p-4 sm:p-5 rounded-3xl border border-slate-800 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-2 text-xs">
+          <Sparkles className="w-4 h-4 text-amber-400" />
+          <span className="text-slate-300">
+            Changes saved here will immediately update on <strong>learnwithdrankita.com</strong> live for all visitors.
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={handleSaveAndPublish}
+            disabled={isPublishing}
+            className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs sm:text-sm font-black px-6 py-3 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {publishSuccess ? (
+              <>
+                <Check className="w-4 h-4 text-slate-950" />
+                <span>Published Successfully! ✓</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>{isPublishing ? 'Publishing...' : '🚀 Save & Publish All Changes'}</span>
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  );
+};

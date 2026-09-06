@@ -16,7 +16,8 @@ import {
   Key,
   Share2,
   CreditCard,
-  FileText
+  FileText,
+  Globe
 } from 'lucide-react';
 import { AdminStorage, type StudentEnrollment, type LeadInquiry, type BatchConfig } from '../../services/adminStorageService';
 import { AdminDashboardTab } from './AdminDashboardTab';
@@ -27,6 +28,7 @@ import { AdminShareLinkTab } from './AdminShareLinkTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminBatchesTab } from './AdminBatchesTab';
 import { AdminSettingsTab } from './AdminSettingsTab';
+import { AdminCmsTab } from './AdminCmsTab';
 
 interface AdminPanelProps {
   onBackToWebsite: () => void;
@@ -37,7 +39,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
 
@@ -289,7 +292,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'settings';
+    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number | string;
@@ -313,6 +316,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       id: 'invoices', 
       label: 'Invoices & Billing 🧾', 
       icon: FileText 
+    },
+    { 
+      id: 'cms', 
+      label: 'Website CMS & Content 🌐', 
+      icon: Globe,
+      badge: 'Live Editor',
+      badgeStyle: 'bg-indigo-100 text-indigo-800 font-bold'
     },
     { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
     { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
@@ -530,6 +540,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               students={students}
               onRefreshData={refreshData}
             />
+          )}
+
+          {activeTab === 'cms' && (
+            <AdminCmsTab />
           )}
 
           {activeTab === 'share-link' && (

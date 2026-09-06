@@ -7,6 +7,7 @@ import {
   Users, 
   GraduationCap
 } from 'lucide-react';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface HeroSectionProps {
   onOpenDemoModal: () => void;
@@ -14,6 +15,9 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => {
+  const { content } = useSiteContent();
+  const hero = content.hero;
+
   const handleScrollToCourses = (e: React.MouseEvent) => {
     e.preventDefault();
     const elem = document.querySelector('#courses');
@@ -48,7 +52,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
               </span>
-              <span>Rank 1 Gold Medalist &amp; Asst. Professor (Central University)</span>
+              <span>{hero.topBadge || 'Rank 1 Gold Medalist & Asst. Professor (Central University)'}</span>
               <span className="bg-amber-400/30 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-400/40">
                 NTA Pattern 2025-26
               </span>
@@ -56,15 +60,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold font-display text-slate-900 tracking-tight leading-[1.15] mb-5">
-              Crack <span className="gradient-text">UGC NET</span> with Central University Faculty &amp; <span className="relative whitespace-nowrap">
-                <span className="relative z-10">Gold Medalist Guidance</span>
-                <span className="absolute bottom-1 left-0 right-0 h-3 bg-amber-300/40 -rotate-1 rounded-sm -z-0"></span>
-              </span>
+              {hero.mainTitleLine1 || 'Crack UGC NET with Central University Faculty &'} <span className="gradient-text">{hero.mainTitleGradient || 'Gold Medalist Guidance'}</span>
             </h1>
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed mb-6 font-normal max-w-2xl">
-              Transform your preparation with <strong className="text-slate-800 font-semibold">Online Live Classes</strong>, <strong className="text-slate-800 font-semibold">24/7 Recorded Lectures</strong>, bilingual <strong className="text-slate-800 font-semibold">High-Yield PDF Notes</strong>, NTA CBT <strong className="text-slate-800 font-semibold">Mock Tests</strong>, and personal <strong className="text-slate-800 font-semibold">1-on-1 Mentorship</strong> by Dr. Ankita Bisht (Ph.D., UGC-NET Qualified, Assistant Professor HNBGU).
+              {hero.description || 'Transform your preparation with Online Live Classes, 24/7 Recorded Lectures, bilingual High-Yield PDF Notes, NTA CBT Mock Tests, and personal 1-on-1 Mentorship by Dr. Ankita Bisht (Ph.D., UGC-NET Qualified, Assistant Professor HNBGU).'}
             </p>
 
             {/* Value Propositions Quick List */}
@@ -93,7 +94,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
                 onClick={handleScrollToCourses}
                 className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-700 hover:from-brand-800 hover:to-brand-700 text-white font-bold px-7 py-4 rounded-xl shadow-lg hover:shadow-brand-600/30 transition-all duration-200 flex items-center justify-center gap-2 text-base group cursor-pointer"
               >
-                <span>Join Classes &amp; Batches</span>
+                <span>{hero.primaryButtonText || 'Join Classes & Batches'}</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
 
@@ -102,7 +103,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
                 className="bg-white hover:bg-slate-50 text-slate-800 hover:text-brand-700 font-bold px-6 py-4 rounded-xl border-2 border-brand-200/80 hover:border-brand-500 shadow-sm transition-all duration-200 flex items-center justify-center gap-2 text-base group cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
-                <span>Book Free Live Demo</span>
+                <span>{hero.secondaryButtonText || 'Book Free Live Demo'}</span>
               </button>
             </div>
 
@@ -120,9 +121,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
               {/* Image Container */}
               <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-brand-100 to-slate-200 aspect-[4/3.4] sm:aspect-[4/3.2] flex items-end">
                 <img 
-                  src="/images/educator.jpg" 
+                  src={hero.photoUrl || '/images/educator.jpg'} 
                   alt="Dr. Ankita Bisht - Assistant Professor & Gold Medalist"
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-103"
+                  onError={(e) => {
+                    // Fallback to default educator image if custom photo fails
+                    (e.target as HTMLImageElement).src = '/images/educator.jpg';
+                  }}
                 />
 
                 {/* Subtle Image Bottom Gradient */}
@@ -138,7 +143,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
                       Rank 1 Gold Medalist
                     </span>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold font-display text-white drop-shadow-sm">Dr. Ankita Bisht</h3>
+                  <h3 className="text-lg sm:text-xl font-bold font-display text-white drop-shadow-sm">
+                    {hero.educatorBadge || 'Dr. Ankita Bisht'}
+                  </h3>
                   <p className="text-[11px] sm:text-xs text-brand-200 font-medium">
                     Assistant Professor (Guest Faculty), H.N.B. Garhwal Central University • UGC-NET
                   </p>
@@ -185,3 +192,4 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
     </section>
   );
 };
+

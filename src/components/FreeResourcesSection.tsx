@@ -7,9 +7,10 @@ import {
   Layers, 
   HelpCircle 
 } from 'lucide-react';
-import { resourcesData } from '../data/resourcesData';
+import { resourcesData as defaultResourcesData } from '../data/resourcesData';
 import type { Resource } from '../types';
 import { InteractiveQuizWidget } from './InteractiveQuizWidget';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface FreeResourcesSectionProps {
   onOpenResourceModal: (resource: Resource) => void;
@@ -19,13 +20,17 @@ interface FreeResourcesSectionProps {
 export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({ 
   onOpenResourceModal
 }) => {
+  const { content } = useSiteContent();
+  const resourcesConfig = content.resources;
+  const activeResources = (resourcesConfig?.resources && resourcesConfig.resources.length > 0) ? resourcesConfig.resources : defaultResourcesData;
+
   const [activeTab, setActiveTab] = useState<'all' | 'quiz' | 'notes' | 'pyqs'>('all');
 
   const filteredResources = activeTab === 'notes'
-    ? resourcesData.filter(r => r.type === 'PDF Notes' || r.type === 'Mindmap' || r.type === 'Formula Sheet')
+    ? activeResources.filter(r => r.type === 'PDF Notes' || r.type === 'Mindmap' || r.type === 'Formula Sheet')
     : activeTab === 'pyqs'
-    ? resourcesData.filter(r => r.type === 'PYQ Solved')
-    : resourcesData;
+    ? activeResources.filter(r => r.type === 'PYQ Solved')
+    : activeResources;
 
   return (
     <section id="free-resources" className="py-16 sm:py-24 bg-white relative overflow-hidden border-t border-slate-100">
@@ -35,15 +40,16 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-3">
             <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span>100% Free Study Materials &amp; Tools</span>
+            <span>{resourcesConfig?.sectionBadge || '100% Free Study Materials & Tools'}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900 tracking-tight">
-            Free High-Yield Notes, Solved PYQs &amp; <span className="gradient-text">Practice Hub</span>
+            {resourcesConfig?.sectionTitle || 'Free High-Yield Notes, Solved PYQs & Practice Hub'}
           </h2>
           <p className="mt-3 text-slate-600 text-base sm:text-lg">
-            Boost your daily preparation with curated revision mindmaps, solved exam archives, and diagnostic tests.
+            {resourcesConfig?.sectionSubtitle || 'Boost your daily preparation with curated revision mindmaps, solved exam archives, and diagnostic tests.'}
           </p>
         </div>
+
 
         {/* Tab Controls */}
         <div className="flex flex-wrap items-center justify-center gap-2 mb-12">
