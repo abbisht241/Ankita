@@ -292,11 +292,12 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings';
+    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'cms' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number | string;
     badgeStyle?: string;
+    highlight?: boolean;
   }
 
   const pendingPaymentsCount = students.filter(s => s.paymentStatus === 'pending' || s.amount === 0 || s.status === 'pending_payment').length;
@@ -318,14 +319,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       icon: FileText 
     },
     { 
+      id: 'share-link', 
+      label: 'Share Registration Link 🔗', 
+      icon: Share2,
+      badge: 'Send Link 🚀',
+      badgeStyle: 'bg-emerald-600 text-white font-extrabold shadow-xs',
+      highlight: true
+    },
+    { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
+    { 
       id: 'cms', 
       label: 'Website CMS & Content 🌐', 
       icon: Globe,
       badge: 'Live Editor',
       badgeStyle: 'bg-indigo-100 text-indigo-800 font-bold'
     },
-    { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
-    { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
     { id: 'settings', label: 'Settings & Security', icon: Settings },
   ];
 
@@ -397,18 +405,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+              const isHighlight = item.highlight;
+
+              let buttonClasses = 'text-slate-600 hover:text-brand-700 hover:bg-slate-50';
+              if (isActive) {
+                buttonClasses = isHighlight
+                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/50'
+                  : 'bg-brand-700 text-white shadow-md shadow-brand-700/20';
+              } else if (isHighlight) {
+                buttonClasses = 'bg-emerald-50/90 hover:bg-emerald-100 text-emerald-950 border-2 border-emerald-300 font-bold shadow-xs';
+              }
+
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as any)}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-brand-700 text-white shadow-md shadow-brand-700/20'
-                      : 'text-slate-600 hover:text-brand-700 hover:bg-slate-50'
-                  }`}
+                  className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${buttonClasses}`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <Icon className={`w-4 h-4 ${
+                      isActive ? 'text-white' : isHighlight ? 'text-emerald-700' : 'text-slate-400'
+                    }`} />
                     <span>{item.label}</span>
                   </div>
                   {item.badge !== undefined && item.badge !== '' && (
@@ -456,6 +473,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.id;
+                    const isHighlight = item.highlight;
+
+                    let buttonClasses = 'text-slate-600 hover:bg-slate-50';
+                    if (isActive) {
+                      buttonClasses = isHighlight
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
+                        : 'bg-brand-700 text-white';
+                    } else if (isHighlight) {
+                      buttonClasses = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-2 border-emerald-300 font-bold';
+                    }
+
                     return (
                       <button
                         key={item.id}
@@ -463,19 +491,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                           setActiveTab(item.id as any);
                           setMobileSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all ${
-                          isActive
-                            ? 'bg-brand-700 text-white'
-                            : 'text-slate-600 hover:bg-slate-50'
-                        }`}
+                        className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all ${buttonClasses}`}
                       >
                         <div className="flex items-center gap-3">
-                          <Icon className="w-4 h-4" />
+                          <Icon className={`w-4 h-4 ${
+                            isActive ? 'text-white' : isHighlight ? 'text-emerald-700' : 'text-slate-400'
+                          }`} />
                           <span>{item.label}</span>
                         </div>
                         {item.badge !== undefined && item.badge !== '' && (
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            item.badgeStyle || 'bg-brand-100 text-brand-800'
+                            isActive ? 'bg-white text-emerald-800' : (item.badgeStyle || 'bg-brand-100 text-brand-800')
                           }`}>
                             {item.badge}
                           </span>
