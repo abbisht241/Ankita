@@ -350,51 +350,51 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       
       {/* Top Navbar */}
       <header className="bg-slate-950 text-white sticky top-0 z-30 border-b border-slate-800 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-2">
           
-          {/* Brand & Mode */}
-          <div className="flex items-center gap-3">
+          {/* Brand */}
+          <div className="flex items-center gap-2 min-w-0">
             <button
               onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-              className="p-1.5 rounded-lg bg-slate-900 md:hidden text-slate-300 hover:text-white"
+              className="p-1.5 rounded-lg bg-slate-900 md:hidden text-slate-300 hover:text-white shrink-0"
             >
               <Menu className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-brand-700 flex items-center justify-center text-white shadow-xs">
-                <GraduationCap className="w-5 h-5" />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-brand-700 flex items-center justify-center text-white shadow-xs shrink-0">
+                <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <div>
-                <span className="font-bold text-sm sm:text-base tracking-tight text-white block">
+              <div className="min-w-0">
+                <span className="font-bold text-xs sm:text-base tracking-tight text-white block truncate">
                   Dr. Ankita Bisht Academy
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium -mt-0.5 block">
-                  Management Console (learnwithdrankita.com/panel)
+                <span className="text-[10px] text-slate-400 font-medium -mt-0.5 hidden sm:block">
+                  Management Console · learnwithdrankita.com/panel
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Right Live Gateway Status & Actions */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Right Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <span className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/30">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Razorpay Live Active</span>
+              <span>Razorpay Live</span>
             </span>
 
             <button
               onClick={onBackToWebsite}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-3 py-1.5 rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <span>View Website</span>
+              <span className="hidden sm:inline">View Website</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
 
             <button
               onClick={handleLogout}
               className="bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-rose-500/30 transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Logout from Admin Panel"
+              title="Logout"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
