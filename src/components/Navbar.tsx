@@ -6,7 +6,6 @@ import {
   PhoneCall, 
   Sparkles, 
   BookOpen, 
-  Award, 
   FileText, 
   HelpCircle, 
   UserCheck, 
@@ -182,14 +181,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           </a>
 
           <a
-            href="#results"
-            onClick={(e) => handleNavClick(e, '#results')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
-          >
-            Results
-          </a>
-
-          <a
             href="#faqs"
             onClick={(e) => handleNavClick(e, '#faqs')}
             className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
@@ -299,15 +290,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
             >
               <FileText className="w-4 h-4 text-brand-600" />
               <span>Free Study Material &amp; PYQs</span>
-            </a>
-
-            <a
-              href="#results"
-              onClick={(e) => handleNavClick(e, '#results')}
-              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              <Award className="w-4 h-4 text-brand-600" />
-              <span>Results &amp; Testimonials</span>
             </a>
 
             <a

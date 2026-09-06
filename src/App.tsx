@@ -5,7 +5,6 @@ import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
 import { CoursesSection } from './components/CoursesSection';
 import { FeaturesSection } from './components/FeaturesSection';
-import { ResultsTestimonials } from './components/ResultsTestimonials';
 import { FreeResourcesSection } from './components/FreeResourcesSection';
 import { WhyChooseUsSection } from './components/WhyChooseUsSection';
 import { FAQSection } from './components/FAQSection';
@@ -103,13 +102,7 @@ export function App() {
         {/* Section 4: Features Section */}
         <FeaturesSection />
 
-        {/* Section 5: Results & Testimonials */}
-        <ResultsTestimonials 
-          onOpenVideoModal={handleOpenVideoModal}
-          onOpenDemoModal={() => handleOpenDemoModal()}
-        />
-
-        {/* Section 6: Free Resources Hub & Practice Quiz */}
+        {/* Section 5: Free Resources Hub & Practice Quiz */}
         <FreeResourcesSection 
           onOpenResourceModal={(res) => setSelectedResourceForDownload(res)}
           onOpenDemoModal={() => handleOpenDemoModal()}
