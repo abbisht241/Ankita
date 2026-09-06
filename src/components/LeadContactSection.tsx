@@ -29,13 +29,13 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const coursesList = [
-    'UGC NET Home Science (Paper 2 Code 12)',
-    'UGC NET Paper 1 General Masterclass',
-    'Child / Human Development & Pedagogy (CDP)',
-    'Food Science, Nutrition & Maternal Health',
+    'UGC NET Paper 1 Complete Masterclass',
     'Research Methodology & SPSS Data Analysis',
-    'Extension Education & Community Development',
-    'Full Combo Pack (Paper 1 + Home Science)'
+    'Child Development & Pedagogy (CDP)',
+    'Food Science, Nutrition & Maternal Health',
+    'Educational Psychology & Learning Theories',
+    'Teaching Aptitude Masterclass',
+    'Full Combo Pack (Paper 1 + CDP & Research)'
   ];
 
   const prepStages = [

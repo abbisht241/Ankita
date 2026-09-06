@@ -44,13 +44,13 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                   Dr. Ankita Bisht
                 </span>
                 <p className="text-xs text-brand-300 font-medium">
-                  Assistant Professor &amp; Gold Medalist (Home Science &amp; NET)
+                  Assistant Professor &amp; Gold Medalist (Ph.D., UGC-NET)
                 </p>
               </div>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
-              Academic mentorship platform led by Dr. Ankita Bisht (Ph.D., UGC-NET, HNB Garhwal Central University). Specializing in UGC NET Home Science (All 5 Branches), Paper 1 General, Research Methodology &amp; SPSS, and CDP.
+              Academic mentorship platform led by Dr. Ankita Bisht (Ph.D., UGC-NET, HNB Garhwal Central University). Specializing in UGC NET Paper 1, Research Methodology &amp; SPSS, Child Development &amp; Pedagogy (CDP), and Food Science.
             </p>
 
             {/* Social Channels with SVG icons */}
@@ -135,10 +135,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Home Science (Code 12)</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1 Complete</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1 General</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology &amp; SPSS</a>
               </li>
               <li>
                 <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Child Development (CDP 30/30)</a>
@@ -147,10 +147,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Food Science &amp; Nutrition</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology &amp; SPSS</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Educational Psychology Advanced</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Extension Education &amp; SHGs</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Teaching Aptitude Masterclass</a>
               </li>
             </ul>
           </div>

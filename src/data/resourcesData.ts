@@ -3,21 +3,21 @@ import type { Resource } from '../types';
 export const resourcesData: Resource[] = [
   {
     id: 'res-1',
-    title: 'UGC NET Home Science (Code 12) 5-Branch Master Mindmap & Formula Book',
-    category: 'Home Science',
-    type: 'Mindmap',
-    fileSize: '8.4 MB',
-    pageCount: 52,
+    title: 'Teaching Aptitude Bloom’s Revised Taxonomy & Pedagogical Skills Cheat Sheet',
+    category: 'Teaching Aptitude',
+    type: 'Formula Sheet',
+    fileSize: '3.8 MB',
+    pageCount: 24,
     downloadCount: '21,400+ Downloads',
     isPopular: true,
-    description: 'Complete high-yield revision capsule covering all 5 branches: Food & Nutrition, Textiles, Resource Management, Human Development & Extension Education.',
+    description: 'High-yield revision capsule covering Levels of Teaching, Bloom’s action verbs, Micro-teaching 36-min cycle & SWAYAM/MOOCs evaluation models.',
     topicsCovered: [
-      'RDA 2020 Nutritional Nutrient Requirements Table',
-      'Textile Fibers, Weaving & Chemical Finishing Comparison Matrix',
-      'Human Development Lifespan Stages & Developmental Milestones',
-      'Extension Education Models, PRA Tools & SHG Frameworks'
+      'Bloom\'s Revised Taxonomy (Remember, Understand, Apply, Analyze, Evaluate, Create)',
+      'Herbart vs Morrison vs Hunt Teaching Levels Matrix',
+      'Evaluation Systems (CBCS, Formative, Summative, Diagnostic & Norm-referenced)',
+      'Digital Initiatives in Higher Education (DigiLocker, SWAYAM, ABC ID)'
     ],
-    previewSnippet: 'RDA 2020 Reference: Reference Man (65 kg) & Reference Woman (55 kg). Moderate work energy requirement for adult woman = 2130 kcal/day, Protein = 46 g/day (0.83 g/kg/day). ICMR-NIN 2020 latest guidelines.'
+    previewSnippet: 'Micro-Teaching Time Breakdown (NCERT Standard 36 Mins): Teach (6m) -> Feedback (6m) -> Re-plan (12m) -> Re-teach (6m) -> Re-feedback (6m). Developed by Dwight W. Allen at Stanford.'
   },
   {
     id: 'res-2',
@@ -58,7 +58,7 @@ export const resourcesData: Resource[] = [
   {
     id: 'res-4',
     title: 'UGC NET Paper 1 Solved PYQ Compilation (2020-2024)',
-    category: 'Paper 1 General',
+    category: 'UGC NET Paper 1',
     type: 'PYQ Solved',
     fileSize: '12.4 MB',
     pageCount: 140,
@@ -93,20 +93,20 @@ export const resourcesData: Resource[] = [
   },
   {
     id: 'res-6',
-    title: 'Self-Help Groups (SHGs) & Extension Education Field Guide',
-    category: 'Extension & Women Studies',
-    type: 'Field Guide',
-    fileSize: '5.2 MB',
-    pageCount: 36,
-    downloadCount: '11,100+ Downloads',
+    title: 'Educational Psychology Core Thinkers & Learning Theories Handbook',
+    category: 'Educational Psychology',
+    type: 'E-Book',
+    fileSize: '8.5 MB',
+    pageCount: 64,
+    downloadCount: '12,900+ Downloads',
     isPopular: false,
-    description: 'Key insights from Dr. Ankita Bisht’s published book on Self-Help Groups in Uttarakhand, Women Empowerment, PRA Tools, and Rural Development Schemes.',
+    description: 'In-depth study handbook covering Thorndike’s Laws of Learning, Skinner’s Operant Conditioning schedules, Maslow’s hierarchy, and memory processing models.',
     topicsCovered: [
-      'Structure, Functioning & Microfinance of SHGs in India',
-      'Participatory Rural Appraisal (PRA) Techniques & Mapping',
-      'Audio-Visual Media Classification & Communication Models',
-      'DAY-NRLM, PMKVY, and Rural Women Entrepreneurship Models'
+      'Thorndike Primary Laws: Readiness, Exercise, and Effect',
+      'Reinforcement Schedules: Fixed Ratio, Variable Ratio, Fixed Interval, Variable Interval',
+      'Atkinson-Shiffrin Multi-Store Memory Model',
+      'Ego Defense Mechanisms in educational contexts'
     ],
-    previewSnippet: 'Self-Help Groups (SHGs): Affinity-based homogenous groups of 10-20 rural women practicing voluntary small savings, internal lending, and collective decision making for sustainable socio-economic empowerment.'
+    previewSnippet: 'Operant Conditioning: Variable Ratio (VR) schedule produces the highest rate of steady responding and greatest resistance to extinction (e.g., slot machines, lottery, random classroom surprise praises).'
   }
 ];

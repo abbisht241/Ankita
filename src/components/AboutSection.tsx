@@ -40,8 +40,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
       desc: 'Hypothesis testing, parametric/non-parametric statistics, SPSS data analysis, sampling & synopsis defense.'
     },
     {
-      title: 'Extension & Women Studies',
-      desc: 'Self-Help Groups (SHGs) dynamics, participatory appraisal (PRA), rural entrepreneurship & community media.'
+      title: 'Teaching Aptitude & Pedagogy',
+      desc: 'Levels of teaching, Bloom’s taxonomy, micro-teaching, evaluation systems & SWAYAM/MOOCs digital models.'
     }
   ];
 
@@ -148,7 +148,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
                 <span>Core Research &amp; Teaching Specializations</span>
               </div>
               <h3 className="text-xl sm:text-2xl font-bold font-display text-slate-900 mb-2">
-                All 5 Branches of Home Science &amp; Research Mastery
+                UGC NET Paper 1, CDP, Research &amp; Nutrition Mastery
               </h3>
               <p className="text-sm text-slate-600 mb-6">
                 Structured pedagogical modules engineered by a Central University faculty for deep conceptual retention.

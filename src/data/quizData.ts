@@ -3,7 +3,7 @@ import type { QuizQuestion } from '../types';
 export const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
-    subject: 'UGC NET Home Science & Research',
+    subject: 'Research Methodology',
     topic: 'SPSS & Hypothesis Testing',
     question: 'A researcher rejects a null hypothesis (H₀) when it is actually true in the population. Which type of error has been committed by the researcher?',
     options: [
@@ -18,7 +18,7 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: 2,
-    subject: 'Child / Human Development (CDP)',
+    subject: 'Child Development & Pedagogy (CDP)',
     topic: 'Vygotsky Socio-Cultural Theory',
     question: 'According to Lev Vygotsky, the gap between what a child can do independently and what they can achieve with guidance from a competent adult or peer is termed as:',
     options: [
@@ -48,18 +48,18 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: 4,
-    subject: 'Extension Education & Community Development',
-    topic: 'Self-Help Groups (SHGs)',
-    question: 'Which of the following is the primary principle behind the formation of Self-Help Groups (SHGs) for rural women empowerment?',
+    subject: 'Educational Psychology',
+    topic: 'Operant Conditioning & Reinforcement',
+    question: 'In B.F. Skinner\'s Operant Conditioning, which schedule of reinforcement yields the highest and most consistent response rate with the strongest resistance to extinction?',
     options: [
-      'Compulsory government subsidy without personal savings',
-      'Homogeneous group affinity, voluntary regular savings & mutual internal lending',
-      'Commercial banking collateral requirements',
-      'External contractor-driven decision making'
+      'Fixed Interval Schedule (FI)',
+      'Fixed Ratio Schedule (FR)',
+      'Variable Interval Schedule (VI)',
+      'Variable Ratio Schedule (VR)'
     ],
-    correctIndex: 1,
-    explanation: 'Self-Help Groups (SHGs) are voluntary associations of 10-20 homogeneous rural women who pool small regular savings, practice internal lending for emergency & entrepreneurial needs, and build collective socio-economic empowerment.',
-    difficulty: 'Easy'
+    correctIndex: 3,
+    explanation: 'Variable Ratio (VR) schedule provides reinforcement after an unpredictable number of responses. It generates the highest rate of steady responding and is extremely resistant to extinction (e.g., surprise class praises).',
+    difficulty: 'Advanced'
   },
   {
     id: 5,
