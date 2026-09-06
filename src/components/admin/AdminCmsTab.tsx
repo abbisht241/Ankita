@@ -598,7 +598,41 @@ export const AdminCmsTab: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">⭐ Rating (e.g. 4.95)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="1"
+                          max="5"
+                          value={course.rating ?? 4.95}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], rating: parseFloat(e.target.value) || 4.95 };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          placeholder="e.g. 4.95"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold text-amber-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">💬 Reviews Count</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={course.reviewsCount ?? 1420}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], reviewsCount: parseInt(e.target.value, 10) || 0 };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          placeholder="e.g. 1420"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-700"
+                        />
+                      </div>
+
                       <div>
                         <label className="block font-semibold text-slate-700 mb-1">Teaching Medium</label>
                         <input
