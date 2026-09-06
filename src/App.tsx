@@ -15,6 +15,7 @@ import { FloatingWhatsAppCall } from './components/FloatingWhatsAppCall';
 // Admin Panel & Registration
 import { AdminPanel } from './components/admin/AdminPanel';
 import { StudentRegistrationPage } from './components/StudentRegistrationPage';
+import { PublicInvoicePage } from './components/PublicInvoicePage';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -42,13 +43,21 @@ export function App() {
     return p === '/register' || p === '/register/' || p === '/enroll' || p === '/enroll/' || h === '#register' || h === '#/register' || h === '#enroll' || h === '#/enroll';
   };
 
+  const isInvoicePath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/invoice' || p === '/invoice/' || p.startsWith('/invoice') || h === '#invoice' || h.startsWith('#invoice') || h.startsWith('#/invoice');
+  };
+
   const [isPanel, setIsPanel] = useState(isPanelPath);
   const [isRegister, setIsRegister] = useState(isRegisterPath);
+  const [isInvoice, setIsInvoice] = useState(isInvoicePath);
 
   useEffect(() => {
     const handleLocationChange = () => {
       setIsPanel(isPanelPath());
       setIsRegister(isRegisterPath());
+      setIsInvoice(isInvoicePath());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -64,6 +73,7 @@ export function App() {
     window.history.pushState(null, '', '/');
     setIsPanel(false);
     setIsRegister(false);
+    setIsInvoice(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -90,6 +100,10 @@ export function App() {
 
   if (isRegister) {
     return <StudentRegistrationPage onBackToWebsite={handleBackToWebsite} />;
+  }
+
+  if (isInvoice) {
+    return <PublicInvoicePage onBackToWebsite={handleBackToWebsite} />;
   }
 
   const handleOpenDemoModal = (defaultCourseName?: string) => {

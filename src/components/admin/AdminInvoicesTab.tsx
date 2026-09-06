@@ -13,7 +13,9 @@ import {
   Trash2, 
   Edit2, 
   Check, 
-  ShieldCheck
+  ShieldCheck,
+  ExternalLink,
+  Share2
 } from 'lucide-react';
 import { 
   AdminStorage, 
@@ -46,6 +48,7 @@ export const AdminInvoicesTab: React.FC<AdminInvoicesTabProps> = ({
   // Copy success states
   const [copiedBankText, setCopiedBankText] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [copiedInvoiceId, setCopiedInvoiceId] = useState<string | null>(null);
 
   // Create Invoice Form State
   const [createForm, setCreateForm] = useState({
@@ -70,6 +73,14 @@ export const AdminInvoicesTab: React.FC<AdminInvoicesTabProps> = ({
     navigator.clipboard.writeText(text);
     setCopiedField(fieldName);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleCopyInvoiceLink = (inv: Invoice) => {
+    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'https://learnwithdrankita.com';
+    const url = `${origin}/invoice?id=${inv.id}`;
+    navigator.clipboard.writeText(url);
+    setCopiedInvoiceId(inv.id);
+    setTimeout(() => setCopiedInvoiceId(null), 2500);
   };
 
   const handleCopyFullBankDetails = () => {
@@ -625,6 +636,25 @@ Website: https://learnwithdrankita.com`;
                       <td className="py-4 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
                           
+                          {/* Copy Direct Invoice Link */}
+                          <button
+                            onClick={() => handleCopyInvoiceLink(inv)}
+                            className="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] px-2.5 py-1.5 rounded-lg border border-slate-300 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Copy Direct Shareable Invoice Link"
+                          >
+                            {copiedInvoiceId === inv.id ? (
+                              <>
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <span className="text-emerald-700">Link Copied!</span>
+                              </>
+                            ) : (
+                              <>
+                                <Copy className="w-3.5 h-3.5" />
+                                <span>Copy Link</span>
+                              </>
+                            )}
+                          </button>
+
                           {/* View & Print Invoice */}
                           <button
                             onClick={() => setSelectedInvoiceForView(inv)}
@@ -639,8 +669,8 @@ Website: https://learnwithdrankita.com`;
                           <a
                             href={`https://wa.me/91${inv.studentPhone}?text=${encodeURIComponent(
                               isPaid
-                                ? `🎓 *Dr. Ankita Bisht Academic Academy - Fee Invoice Receipt*\n\n✅ *Invoice Number:* ${inv.invoiceNumber}\n👤 *Student:* ${inv.studentName}\n📚 *Course:* ${inv.courseTitle}\n💰 *Amount Paid:* ₹${inv.totalAmount}\n📅 *Status:* Fully Paid & Verified\n\nThank you for enrolling with Dr. Ankita Bisht Academy.\nHelpline: +91 7417268651`
-                                : `🎓 *Dr. Ankita Bisht Academic Academy - Official Fee Invoice*\n\n📄 *Invoice Number:* ${inv.invoiceNumber}\n👤 *Student:* ${inv.studentName}\n📚 *Course Batch:* ${inv.courseTitle}\n💰 *Total Fee Due:* ₹${inv.totalAmount}\n\n👉 *Payment Options:*\n\n1. *Direct Bank Transfer:*\n• Bank: ${bankDetails.bankName}\n• A/C Holder: ${bankDetails.accountName}\n• A/C Number: ${bankDetails.accountNumber}\n• IFSC: ${bankDetails.ifscCode}\n• Primary UPI: ${bankDetails.upiId}\n\n2. *Online Payment Link (Cards/NetBanking/UPI):*\n${bankDetails.razorpayCheckoutUrl}\n\nPlease complete payment to activate batch access.\nHelpline: +91 7417268651`
+                                ? `🎓 *Dr. Ankita Bisht Academic Academy - Fee Invoice Receipt*\n\n✅ *Invoice Number:* ${inv.invoiceNumber}\n👤 *Student:* ${inv.studentName}\n📚 *Course:* ${inv.courseTitle}\n💰 *Amount Paid:* ₹${inv.totalAmount}\n📅 *Status:* Fully Paid & Verified\n\n👉 *View & Download Official Invoice Online:*\nhttps://learnwithdrankita.com/invoice?id=${inv.id}\n\nThank you for enrolling with Dr. Ankita Bisht Academy.\nHelpline: +91 7417268651`
+                                : `🎓 *Dr. Ankita Bisht Academic Academy - Official Fee Invoice*\n\n📄 *Invoice Number:* ${inv.invoiceNumber}\n👤 *Student:* ${inv.studentName}\n📚 *Course Batch:* ${inv.courseTitle}\n💰 *Total Fee Due:* ₹${inv.totalAmount}\n\n👉 *View & Pay Online via Razorpay / Card / UPI:*\nhttps://learnwithdrankita.com/invoice?id=${inv.id}\n\n*Or Direct Bank Transfer (SBI):*\n• Bank: ${bankDetails.bankName}\n• A/C Holder: ${bankDetails.accountName}\n• A/C Number: ${bankDetails.accountNumber}\n• IFSC: ${bankDetails.ifscCode}\n• Primary UPI: ${bankDetails.upiId}\n\nPlease complete payment to activate batch access.\nHelpline: +91 7417268651`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
@@ -848,25 +878,46 @@ Website: https://learnwithdrankita.com`;
           <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative my-auto">
             
             {/* Header Actions Bar (Hidden on print) */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6 print:hidden">
+            <div className="flex flex-wrap items-center justify-between border-b border-slate-100 pb-4 mb-4 gap-3 print:hidden">
               <div className="flex items-center gap-2">
                 <span className="bg-brand-100 text-brand-800 text-xs font-bold px-3 py-1 rounded-full">
                   Official Academic Invoice Preview
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* 1-Click Copy Public Invoice URL */}
+                <button
+                  onClick={() => handleCopyInvoiceLink(selectedInvoiceForView)}
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  title="Copy Direct Public Link for Student"
+                >
+                  {copiedInvoiceId === selectedInvoiceForView.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-emerald-700">Link Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Invoice Link</span>
+                    </>
+                  )}
+                </button>
+
                 <button
                   onClick={() => window.print()}
-                  className="bg-brand-700 hover:bg-brand-600 text-white text-xs font-bold px-3.5 py-2 rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="bg-brand-700 hover:bg-brand-600 text-white text-xs font-bold px-3 py-2 rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Printer className="w-4 h-4" />
-                  <span>Print / Save PDF</span>
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print / PDF</span>
                 </button>
 
                 <a
                   href={`https://wa.me/91${selectedInvoiceForView.studentPhone}?text=${encodeURIComponent(
-                    `🎓 *Dr. Ankita Bisht Academic Academy - Fee Invoice*\n\n📄 *Invoice Number:* ${selectedInvoiceForView.invoiceNumber}\n👤 *Student:* ${selectedInvoiceForView.studentName}\n📚 *Course:* ${selectedInvoiceForView.courseTitle}\n💰 *Total Amount:* ₹${selectedInvoiceForView.totalAmount}\n📅 *Status:* ${selectedInvoiceForView.status.toUpperCase()}\n\n*Bank Transfer Info:*\n• Bank: ${bankDetails.bankName}\n• A/C Name: ${bankDetails.accountName}\n• A/C No: ${bankDetails.accountNumber}\n• IFSC: ${bankDetails.ifscCode}\n• UPI ID: ${bankDetails.upiId}\n\n*Online Checkout Link:* ${bankDetails.razorpayCheckoutUrl}\n\nHelpline: +91 7417268651`
+                    selectedInvoiceForView.status === 'paid'
+                      ? `🎓 *Dr. Ankita Bisht Academic Academy - Fee Invoice Receipt*\n\n✅ *Invoice Number:* ${selectedInvoiceForView.invoiceNumber}\n👤 *Student:* ${selectedInvoiceForView.studentName}\n📚 *Course:* ${selectedInvoiceForView.courseTitle}\n💰 *Amount Paid:* ₹${selectedInvoiceForView.totalAmount}\n📅 *Status:* Fully Paid & Verified\n\n👉 *View & Download Official Invoice Online:*\nhttps://learnwithdrankita.com/invoice?id=${selectedInvoiceForView.id}\n\nThank you for enrolling with Dr. Ankita Bisht Academy.\nHelpline: +91 7417268651`
+                      : `🎓 *Dr. Ankita Bisht Academic Academy - Official Fee Invoice*\n\n📄 *Invoice Number:* ${selectedInvoiceForView.invoiceNumber}\n👤 *Student:* ${selectedInvoiceForView.studentName}\n📚 *Course:* ${selectedInvoiceForView.courseTitle}\n💰 *Total Due Amount:* ₹${selectedInvoiceForView.totalAmount}\n\n👉 *View & Pay Online (Razorpay / UPI / Card):*\nhttps://learnwithdrankita.com/invoice?id=${selectedInvoiceForView.id}\n\n*Or Direct Bank Transfer (SBI):*\n• Bank: ${bankDetails.bankName}\n• A/C Name: ${bankDetails.accountName}\n• A/C No: ${bankDetails.accountNumber}\n• IFSC: ${bankDetails.ifscCode}\n• Primary UPI: ${bankDetails.upiId}\n\nHelpline: +91 7417268651`
                   )}`}
                   target="_blank"
                   rel="noreferrer"
@@ -882,6 +933,49 @@ Website: https://learnwithdrankita.com`;
                 >
                   <X className="w-5 h-5" />
                 </button>
+              </div>
+            </div>
+
+            {/* Public Shareable Link Banner (Hidden on print) */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-2xl p-3 sm:p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 print:hidden">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-blue-900">
+                  <Share2 className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Direct Public Invoice &amp; Payment Link:</span>
+                </div>
+                <div className="font-mono text-xs text-blue-700 break-all select-all font-semibold">
+                  https://learnwithdrankita.com/invoice?id={selectedInvoiceForView.id}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                <button
+                  onClick={() => handleCopyInvoiceLink(selectedInvoiceForView)}
+                  className="flex-1 sm:flex-initial bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer"
+                >
+                  {copiedInvoiceId === selectedInvoiceForView.id ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy Link</span>
+                    </>
+                  )}
+                </button>
+
+                <a
+                  href={`/invoice?id=${selectedInvoiceForView.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-white hover:bg-blue-50 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-xl border border-blue-200 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                  title="Open live student invoice page"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Open Page</span>
+                </a>
               </div>
             </div>
 
