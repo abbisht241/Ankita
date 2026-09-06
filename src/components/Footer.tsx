@@ -164,7 +164,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             <div className="space-y-2.5 text-xs text-slate-400">
               <div className="flex items-start gap-2">
                 <PhoneCall className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>+91 98765 43210 (Mon-Sat, 9am-8:30pm)</span>
+                <span>+91 7417268651 (Mon-Sat, 9am-8:30pm)</span>
               </div>
               <div className="flex items-start gap-2">
                 <Mail className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />

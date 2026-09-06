@@ -61,7 +61,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
     const text = encodeURIComponent(
       `Hello Dr. Ankita Bisht & Team! My name is ${formData.name || 'Aspirant'}. I am interested in *${formData.course}*. Please guide me regarding batch schedule, syllabus, and enrollment.`
     );
-    window.open(`https://wa.me/919876543210?text=${text}`, '_blank');
+    window.open(`https://wa.me/917417268651?text=${text}`, '_blank');
   };
 
   return (
@@ -100,7 +100,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
 
               <div className="space-y-4 text-xs sm:text-sm">
                 <a 
-                  href="tel:+919876543210" 
+                  href="tel:+917417268651" 
                   className="flex items-start gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/15 transition-colors"
                 >
                   <div className="w-8 h-8 rounded-lg bg-amber-400 text-slate-950 flex items-center justify-center shrink-0">
@@ -108,7 +108,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
                   </div>
                   <div>
                     <div className="text-[11px] text-brand-300 font-medium">Admission Helpline (Call Direct)</div>
-                    <div className="font-bold text-white text-sm sm:text-base">+91 98765 43210</div>
+                    <div className="font-bold text-white text-sm sm:text-base">+91 7417268651</div>
                   </div>
                 </a>
 

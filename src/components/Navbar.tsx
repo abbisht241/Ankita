@@ -109,12 +109,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal }) => {
         {/* Desktop CTA Buttons */}
         <div className="hidden sm:flex items-center gap-3">
           <a
-            href="tel:+919876543210"
+            href="tel:+917417268651"
             className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-brand-700 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors border border-slate-200"
             title="Speak with academic counselor"
           >
             <PhoneCall className="w-3.5 h-3.5 text-brand-600 animate-bounce" />
-            <span className="hidden xl:inline">+91 98765 43210</span>
+            <span className="hidden xl:inline">+91 7417268651</span>
             <span className="xl:hidden">Call</span>
           </a>
 
@@ -190,11 +190,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal }) => {
             </button>
             
             <a
-              href="tel:+919876543210"
+              href="tel:+917417268651"
               className="w-full flex items-center justify-center gap-2 border border-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm hover:bg-slate-50"
             >
               <PhoneCall className="w-4 h-4 text-brand-600" />
-              <span>Call Counselor: +91 98765 43210</span>
+              <span>Call Counselor: +91 7417268651</span>
             </a>
           </div>
         </div>

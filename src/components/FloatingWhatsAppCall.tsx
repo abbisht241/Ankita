@@ -19,7 +19,7 @@ export const FloatingWhatsAppCall: React.FC<FloatingWhatsAppCallProps> = () => {
     const text = encodeURIComponent(
       "Hello Dr. Ankita Bisht & Team! I want to inquire about UGC NET Paper 1 & CDP online batch admission."
     );
-    window.open(`https://wa.me/919876543210?text=${text}`, '_blank');
+    window.open(`https://wa.me/917417268651?text=${text}`, '_blank');
   };
 
   return (
@@ -44,7 +44,7 @@ export const FloatingWhatsAppCall: React.FC<FloatingWhatsAppCallProps> = () => {
       <div className="flex items-center gap-3">
         {/* Direct Call Button */}
         <a
-          href="tel:+919876543210"
+          href="tel:+917417268651"
           className="w-12 h-12 rounded-full bg-brand-700 hover:bg-brand-800 text-white shadow-lg hover:shadow-brand-700/40 flex items-center justify-center transition-all duration-300 hover:scale-108 group focus:outline-none"
           title="Call Admission Helpline"
         >

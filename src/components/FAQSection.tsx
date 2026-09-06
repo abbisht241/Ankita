@@ -141,7 +141,7 @@ export const FAQSection: React.FC = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href="https://wa.me/919876543210?text=Hello%20Dr.%20Ankita%20Bisht%20Team,%20I%20have%20a%20question%20regarding%20UGC%20NET%20batches."
+              href="https://wa.me/917417268651?text=Hello%20Dr.%20Ankita%20Bisht%20Team,%20I%20have%20a%20question%20regarding%20UGC%20NET%20batches."
               target="_blank"
               rel="noopener noreferrer"
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition-colors flex items-center gap-2"
@@ -150,7 +150,7 @@ export const FAQSection: React.FC = () => {
               <span>WhatsApp Us</span>
             </a>
             <a
-              href="tel:+919876543210"
+              href="tel:+917417268651"
               className="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl border border-white/20 transition-colors flex items-center gap-2"
             >
               <PhoneCall className="w-4 h-4" />

@@ -227,7 +227,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
               Book Free Trial Class
             </button>
             <a
-              href="tel:+919876543210"
+              href="tel:+917417268651"
               className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl transition-colors shrink-0 text-center"
             >
               Call for Counseling
