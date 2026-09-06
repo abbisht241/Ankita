@@ -47,7 +47,6 @@ const STORAGE_KEYS = {
 
 const DEFAULT_PASSCODE = 'ankita2026';
 
-// Initial realistic seed students
 const INITIAL_STUDENTS: StudentEnrollment[] = [
   {
     id: 'ENR-1001',
@@ -98,36 +97,36 @@ const INITIAL_STUDENTS: StudentEnrollment[] = [
 const INITIAL_INQUIRIES: LeadInquiry[] = [
   {
     id: 'INQ-501',
-    name: 'Meenakshi Bhatt',
-    email: 'meenakshi.b@gmail.com',
-    phone: '9412098765',
-    targetExam: 'UGC NET Paper 1 & CDP',
+    name: 'Meenakshi Sundaram',
+    email: 'meenakshi.s@gmail.com',
+    phone: '9845123456',
+    targetExam: 'UGC NET Paper 1 (Evening Batch)',
     source: 'demo_modal',
     status: 'new',
-    createdAt: new Date(Date.now() - 1 * 3600 * 1000).toISOString(),
-    notes: 'Requested live trial class link for tomorrow batch'
+    createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    notes: 'Requested demo link for Evening Batch (7:00 PM)'
   },
   {
     id: 'INQ-502',
-    name: 'Vikram Singh',
-    email: 'vikram.singh@outlook.com',
-    phone: '9897123456',
-    targetExam: 'Research Methodology & SPSS',
+    name: 'Deepak Bhatt',
+    email: 'deepak.bhatt@yahoo.co.in',
+    phone: '7417268651',
+    targetExam: 'Research Methodology & SPSS Bootcamp',
     source: 'contact_form',
-    status: 'contacted',
-    createdAt: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
-    notes: 'Interested in Ph.D. synopsis writing modules'
+    status: 'demo_scheduled',
+    createdAt: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    notes: 'Ph.D. scholar needing SPSS guidance'
   },
   {
     id: 'INQ-503',
-    name: 'Kavita Sundriyal',
-    email: 'kavita.s@gmail.com',
-    phone: '8958741230',
-    targetExam: 'Food Science & Nutrition',
-    source: 'resource_download',
-    status: 'demo_scheduled',
+    name: 'Kavita Semwal',
+    email: 'kavita.semwal@gmail.com',
+    phone: '9412098765',
+    targetExam: 'Child Development & Pedagogy (CDP 30/30)',
+    source: 'demo_modal',
+    status: 'contacted',
     createdAt: new Date(Date.now() - 36 * 3600 * 1000).toISOString(),
-    notes: 'Downloaded RDA 2020 summary notes'
+    notes: 'Followed up on WhatsApp'
   }
 ];
 
@@ -135,18 +134,18 @@ const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-1',
     courseId: 'ugc-net-paper-1',
-    title: 'UGC NET Paper 1 Complete Masterclass',
-    timing: 'Daily 7:00 PM - 8:30 PM (IST)',
+    title: 'UGC NET Paper 1 - Super 50 Batch (June/Dec)',
+    timing: 'Mon to Fri 7:00 PM - 8:30 PM',
     startDate: '10th Sept 2026',
-    liveClassLink: 'https://meet.google.com/abc-defg-hij',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaUGCNETBatch',
+    liveClassLink: 'https://meet.google.com/ugc-net-paper1-live',
+    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaPaper1Batch',
     status: 'active'
   },
   {
     id: 'batch-2',
     courseId: 'research-methodology-spss',
-    title: 'Research Methodology & SPSS Data Analysis',
-    timing: 'Mon, Wed, Fri 5:30 PM - 7:00 PM',
+    title: 'Research Methodology & SPSS Ph.D. Bootcamp',
+    timing: 'Sat & Sun 8:00 PM - 9:30 PM',
     startDate: '12th Sept 2026',
     liveClassLink: 'https://meet.google.com/res-mthd-spss',
     whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaResearchBatch',
@@ -220,7 +219,7 @@ export const AdminStorage = {
     localStorage.removeItem(STORAGE_KEYS.AUTH_SESSION);
   },
 
-  // Students
+  // Students - Local
   getStudents(): StudentEnrollment[] {
     const data = localStorage.getItem(STORAGE_KEYS.STUDENTS);
     if (!data) {
@@ -234,7 +233,24 @@ export const AdminStorage = {
     }
   },
 
-  addStudent(student: Omit<StudentEnrollment, 'id' | 'enrolledAt'>): StudentEnrollment {
+  // Students - Remote Fetch
+  async fetchRemoteStudents(): Promise<StudentEnrollment[]> {
+    try {
+      const res = await fetch('/api/students');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.students)) {
+          localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(data.students));
+          return data.students;
+        }
+      }
+    } catch (err) {
+      console.warn('Using local students cache', err);
+    }
+    return this.getStudents();
+  },
+
+  async addStudent(student: Omit<StudentEnrollment, 'id' | 'enrolledAt'>): Promise<StudentEnrollment> {
     const students = this.getStudents();
     const newStudent: StudentEnrollment = {
       ...student,
@@ -243,20 +259,33 @@ export const AdminStorage = {
     };
     students.unshift(newStudent);
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+
+    // Send to Cloud API in background
+    try {
+      await fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStudent)
+      });
+    } catch (e) {
+      console.warn('Remote sync failed, stored locally', e);
+    }
+
     return newStudent;
   },
 
-  updateStudent(id: string, updates: Partial<StudentEnrollment>): void {
-    const students = this.getStudents().map(s => s.id === id ? { ...s, ...updates } : s);
-    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
-  },
-
-  deleteStudent(id: string): void {
+  async deleteStudent(id: string): Promise<void> {
     const students = this.getStudents().filter(s => s.id !== id);
     localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+
+    try {
+      await fetch(`/api/students?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {}
   },
 
-  // Inquiries / Leads
+  // Inquiries / Leads - Local
   getInquiries(): LeadInquiry[] {
     const data = localStorage.getItem(STORAGE_KEYS.INQUIRIES);
     if (!data) {
@@ -270,19 +299,48 @@ export const AdminStorage = {
     }
   },
 
-  addInquiry(inquiry: Omit<LeadInquiry, 'id' | 'createdAt'>): LeadInquiry {
+  // Inquiries - Remote Fetch
+  async fetchRemoteInquiries(): Promise<LeadInquiry[]> {
+    try {
+      const res = await fetch('/api/inquiries');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.inquiries)) {
+          localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(data.inquiries));
+          return data.inquiries;
+        }
+      }
+    } catch (err) {
+      console.warn('Using local inquiries cache', err);
+    }
+    return this.getInquiries();
+  },
+
+  async addInquiry(inquiry: Omit<LeadInquiry, 'id' | 'createdAt'>): Promise<LeadInquiry> {
     const inquiries = this.getInquiries();
     const newInquiry: LeadInquiry = {
       ...inquiry,
-      id: `INQ-${Math.floor(500 + Math.random() * 9500)}`,
+      id: `INQ-${Math.floor(1000 + Math.random() * 9000)}`,
       createdAt: new Date().toISOString()
     };
     inquiries.unshift(newInquiry);
     localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(inquiries));
+
+    // Send to Cloud API in background
+    try {
+      await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newInquiry)
+      });
+    } catch (e) {
+      console.warn('Remote inquiry sync failed, stored locally', e);
+    }
+
     return newInquiry;
   },
 
-  updateInquiryStatus(id: string, status: LeadInquiry['status'], notes?: string): void {
+  async updateInquiryStatus(id: string, status: LeadInquiry['status'], notes?: string): Promise<void> {
     const inquiries = this.getInquiries().map(item => {
       if (item.id === id) {
         return {
@@ -294,14 +352,28 @@ export const AdminStorage = {
       return item;
     });
     localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(inquiries));
+
+    try {
+      await fetch('/api/inquiries', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status, notes })
+      });
+    } catch (e) {}
   },
 
-  deleteInquiry(id: string): void {
+  async deleteInquiry(id: string): Promise<void> {
     const inquiries = this.getInquiries().filter(i => i.id !== id);
     localStorage.setItem(STORAGE_KEYS.INQUIRIES, JSON.stringify(inquiries));
+
+    try {
+      await fetch(`/api/inquiries?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {}
   },
 
-  // Batches
+  // Batches - Local
   getBatches(): BatchConfig[] {
     const data = localStorage.getItem(STORAGE_KEYS.BATCHES);
     if (!data) {
@@ -315,9 +387,32 @@ export const AdminStorage = {
     }
   },
 
-  updateBatch(id: string, updates: Partial<BatchConfig>): void {
+  // Batches - Remote Fetch
+  async fetchRemoteBatches(): Promise<BatchConfig[]> {
+    try {
+      const res = await fetch('/api/batches');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.batches)) {
+          localStorage.setItem(STORAGE_KEYS.BATCHES, JSON.stringify(data.batches));
+          return data.batches;
+        }
+      }
+    } catch (err) {}
+    return this.getBatches();
+  },
+
+  async updateBatch(id: string, updates: Partial<BatchConfig>): Promise<void> {
     const batches = this.getBatches().map(b => b.id === id ? { ...b, ...updates } : b);
     localStorage.setItem(STORAGE_KEYS.BATCHES, JSON.stringify(batches));
+
+    try {
+      await fetch('/api/batches', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, updates })
+      });
+    } catch (e) {}
   },
 
   // Export to CSV

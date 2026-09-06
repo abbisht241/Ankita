@@ -41,16 +41,36 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [batches, setBatches] = useState<BatchConfig[]>([]);
   const [currentPasscode, setCurrentPasscode] = useState(AdminStorage.getPasscode());
 
-  const refreshData = () => {
+  const refreshData = async () => {
+    // 1. Instant local cache render
     setStudents(AdminStorage.getStudents());
     setInquiries(AdminStorage.getInquiries());
     setBatches(AdminStorage.getBatches());
     setCurrentPasscode(AdminStorage.getPasscode());
+
+    // 2. Fetch live global cloud data
+    try {
+      const [remoteStudents, remoteInquiries, remoteBatches] = await Promise.all([
+        AdminStorage.fetchRemoteStudents(),
+        AdminStorage.fetchRemoteInquiries(),
+        AdminStorage.fetchRemoteBatches()
+      ]);
+      setStudents(remoteStudents);
+      setInquiries(remoteInquiries);
+      setBatches(remoteBatches);
+    } catch (e) {
+      console.warn('Cloud sync error', e);
+    }
   };
 
   useEffect(() => {
     setIsAuthenticated(AdminStorage.isAuthenticated());
     refreshData();
+
+    // Auto-sync live inquiries and students every 5 seconds
+    const interval = setInterval(() => {
+      refreshData();
+    }, 5000);
 
     // Disallow Google & Search Engines from indexing this panel
     let robotsMeta = document.querySelector('meta[name="robots"]');
@@ -66,6 +86,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     document.title = 'Faculty & Admin Console | Dr. Ankita Bisht';
 
     return () => {
+      clearInterval(interval);
       if (robotsMeta) {
         robotsMeta.setAttribute('content', originalContent || 'index, follow');
       }
@@ -91,28 +112,28 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     setPasscodeAttempt('');
   };
 
-  const handleAddStudent = (studentData: Omit<StudentEnrollment, 'id' | 'enrolledAt'>) => {
-    AdminStorage.addStudent(studentData);
+  const handleAddStudent = async (studentData: Omit<StudentEnrollment, 'id' | 'enrolledAt'>) => {
+    await AdminStorage.addStudent(studentData);
     refreshData();
   };
 
-  const handleDeleteStudent = (id: string) => {
-    AdminStorage.deleteStudent(id);
+  const handleDeleteStudent = async (id: string) => {
+    await AdminStorage.deleteStudent(id);
     refreshData();
   };
 
-  const handleUpdateInquiryStatus = (id: string, status: LeadInquiry['status'], notes?: string) => {
-    AdminStorage.updateInquiryStatus(id, status, notes);
+  const handleUpdateInquiryStatus = async (id: string, status: LeadInquiry['status'], notes?: string) => {
+    await AdminStorage.updateInquiryStatus(id, status, notes);
     refreshData();
   };
 
-  const handleDeleteInquiry = (id: string) => {
-    AdminStorage.deleteInquiry(id);
+  const handleDeleteInquiry = async (id: string) => {
+    await AdminStorage.deleteInquiry(id);
     refreshData();
   };
 
-  const handleUpdateBatch = (id: string, updates: Partial<BatchConfig>) => {
-    AdminStorage.updateBatch(id, updates);
+  const handleUpdateBatch = async (id: string, updates: Partial<BatchConfig>) => {
+    await AdminStorage.updateBatch(id, updates);
     refreshData();
   };
 

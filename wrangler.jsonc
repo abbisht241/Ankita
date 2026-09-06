@@ -7,5 +7,11 @@
   },
   "assets": {
     "not_found_handling": "single-page-application"
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "ADMIN_KV",
+      "id": "aa446d12974047d9bd1721ec3143bd4f"
+    }
+  ]
 }
