@@ -15,12 +15,14 @@ import {
   X,
   Key,
   Share2,
-  CreditCard
+  CreditCard,
+  FileText
 } from 'lucide-react';
 import { AdminStorage, type StudentEnrollment, type LeadInquiry, type BatchConfig } from '../../services/adminStorageService';
 import { AdminDashboardTab } from './AdminDashboardTab';
 import { AdminStudentsTab } from './AdminStudentsTab';
 import { AdminPaymentsTab } from './AdminPaymentsTab';
+import { AdminInvoicesTab } from './AdminInvoicesTab';
 import { AdminShareLinkTab } from './AdminShareLinkTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminBatchesTab } from './AdminBatchesTab';
@@ -35,7 +37,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
 
@@ -245,7 +247,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'payments' | 'share-link' | 'inquiries' | 'batches' | 'settings';
+    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number | string;
@@ -263,6 +265,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       icon: CreditCard, 
       badge: pendingPaymentsCount > 0 ? `${pendingPaymentsCount} Due` : `${students.length} Trans.`,
       badgeStyle: pendingPaymentsCount > 0 ? 'bg-amber-400 text-slate-950 font-extrabold' : 'bg-emerald-100 text-emerald-800 font-bold'
+    },
+    { 
+      id: 'invoices', 
+      label: 'Invoices & Billing 🧾', 
+      icon: FileText 
     },
     { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
     { id: 'inquiries', label: 'Demo Leads & Inquiries', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
@@ -473,6 +480,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               students={students}
               onMarkPaid={handleMarkStudentPaid}
               onExportCSV={handleExportCSV}
+            />
+          )}
+
+          {activeTab === 'invoices' && (
+            <AdminInvoicesTab
+              students={students}
+              onRefreshData={refreshData}
             />
           )}
 
