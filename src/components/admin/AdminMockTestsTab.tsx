@@ -73,6 +73,13 @@ export const AdminMockTestsTab: React.FC = () => {
     }
   };
 
+  const handleDeleteSubmission = async (subId: string, studentName: string) => {
+    if (confirm(`Delete submission by "${studentName}"? This cannot be undone.`)) {
+      await MockTestStorage.deleteSubmission(subId);
+      setSubmissions(MockTestStorage.getSubmissions());
+    }
+  };
+
   const handleSaveTest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingTest) return;
@@ -492,6 +499,13 @@ export const AdminMockTestsTab: React.FC = () => {
                       >
                         <MessageSquare className="w-3 h-3" />
                         <span>WhatsApp</span>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSubmission(sub.id, sub.studentName)}
+                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-800 p-1.5 rounded-lg cursor-pointer"
+                        title="Delete this submission"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
