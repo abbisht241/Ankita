@@ -5,8 +5,8 @@ interface Env {
 
 export const onRequestPost = async (context: { request: Request; env: Env }) => {
   try {
-    const keyId = context.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_TYpzkUMoTQDDVW';
-    const keySecret = context.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'YijPGr0A5rXwCZsE30g4sHdK';
+    const keyId = context.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_live_TYq7MT4zXQd0Lo';
+    const keySecret = context.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'wt8GOSCSNbcUFwBsojIVNXLp';
 
     if (!keyId || !keySecret) {
       return new Response(JSON.stringify({ error: 'Razorpay credentials not configured' }), {

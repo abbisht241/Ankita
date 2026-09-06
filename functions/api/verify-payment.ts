@@ -24,7 +24,7 @@ async function generateHmacSha256(message: string, secret: string): Promise<stri
 
 export const onRequestPost = async (context: { request: Request; env: Env }) => {
   try {
-    const keySecret = context.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'YijPGr0A5rXwCZsE30g4sHdK';
+    const keySecret = context.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'wt8GOSCSNbcUFwBsojIVNXLp';
 
     if (!keySecret) {
       return new Response(JSON.stringify({ error: 'Razorpay secret not configured' }), {

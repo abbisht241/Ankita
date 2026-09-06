@@ -140,7 +140,7 @@ export const startRazorpayCheckout = async ({
       phone: studentPhone
     });
 
-    const keyId = orderData.key_id || (import.meta.env.VITE_RAZORPAY_KEY_ID as string) || 'rzp_test_TYpzkUMoTQDDVW';
+    const keyId = orderData.key_id || (import.meta.env.VITE_RAZORPAY_KEY_ID as string) || 'rzp_live_TYq7MT4zXQd0Lo';
 
     // 2. Configure Razorpay Standard Checkout options
     const options = {

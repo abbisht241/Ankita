@@ -9,8 +9,8 @@ function razorpayDevApiPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
-        const keyId = env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_test_TYpzkUMoTQDDVW';
-        const keySecret = env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'YijPGr0A5rXwCZsE30g4sHdK';
+        const keyId = env.RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || 'rzp_live_TYq7MT4zXQd0Lo';
+        const keySecret = env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_KEY_SECRET || 'wt8GOSCSNbcUFwBsojIVNXLp';
 
         if (req.url === '/api/create-order' && req.method === 'POST') {
           let bodyStr = '';
