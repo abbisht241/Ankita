@@ -14,11 +14,13 @@ import {
   Menu, 
   X,
   Key,
-  Share2
+  Share2,
+  CreditCard
 } from 'lucide-react';
 import { AdminStorage, type StudentEnrollment, type LeadInquiry, type BatchConfig } from '../../services/adminStorageService';
 import { AdminDashboardTab } from './AdminDashboardTab';
 import { AdminStudentsTab } from './AdminStudentsTab';
+import { AdminPaymentsTab } from './AdminPaymentsTab';
 import { AdminShareLinkTab } from './AdminShareLinkTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminBatchesTab } from './AdminBatchesTab';
@@ -33,7 +35,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
 
@@ -243,15 +245,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings';
+    id: 'dashboard' | 'students' | 'payments' | 'share-link' | 'inquiries' | 'batches' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
-    badge?: number;
+    badge?: number | string;
+    badgeStyle?: string;
   }
+
+  const pendingPaymentsCount = students.filter(s => s.paymentStatus === 'pending' || s.amount === 0 || s.status === 'pending_payment').length;
 
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
     { id: 'students', label: 'Students & Enrollments', icon: Users, badge: students.length },
+    { 
+      id: 'payments', 
+      label: 'Payments & Fee Ledger 💳', 
+      icon: CreditCard, 
+      badge: pendingPaymentsCount > 0 ? `${pendingPaymentsCount} Due` : `${students.length} Trans.`,
+      badgeStyle: pendingPaymentsCount > 0 ? 'bg-amber-400 text-slate-950 font-extrabold' : 'bg-emerald-100 text-emerald-800 font-bold'
+    },
     { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
     { id: 'inquiries', label: 'Demo Leads & Inquiries', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
     { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
@@ -340,9 +352,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                     <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </div>
-                  {item.badge !== undefined && item.badge > 0 && (
+                  {item.badge !== undefined && item.badge !== '' && (
                     <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                      isActive ? 'bg-white text-brand-700' : 'bg-brand-50 text-brand-700'
+                      isActive 
+                        ? 'bg-white text-brand-700' 
+                        : (item.badgeStyle || 'bg-brand-50 text-brand-700')
                     }`}>
                       {item.badge}
                     </span>
@@ -400,8 +414,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                           <Icon className="w-4 h-4" />
                           <span>{item.label}</span>
                         </div>
-                        {item.badge !== undefined && item.badge > 0 && (
-                          <span className="bg-brand-100 text-brand-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        {item.badge !== undefined && item.badge !== '' && (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            item.badgeStyle || 'bg-brand-100 text-brand-800'
+                          }`}>
                             {item.badge}
                           </span>
                         )}
@@ -449,6 +465,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               isOpenAddModal={isOpenAddModal}
               onCloseAddModal={() => setIsOpenAddModal(false)}
               onOpenAddModal={() => setIsOpenAddModal(true)}
+            />
+          )}
+
+          {activeTab === 'payments' && (
+            <AdminPaymentsTab
+              students={students}
+              onMarkPaid={handleMarkStudentPaid}
+              onExportCSV={handleExportCSV}
             />
           )}
 

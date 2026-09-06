@@ -18,7 +18,7 @@ import type { StudentEnrollment, LeadInquiry } from '../../services/adminStorage
 interface AdminDashboardTabProps {
   students: StudentEnrollment[];
   inquiries: LeadInquiry[];
-  onNavigateTab: (tab: 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings') => void;
+  onNavigateTab: (tab: 'students' | 'payments' | 'share-link' | 'inquiries' | 'batches' | 'settings') => void;
   onOpenAddStudentModal: () => void;
   onExportCSV: () => void;
 }
@@ -112,10 +112,13 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
         {/* Verified Paid Revenue */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all">
+        <div 
+          onClick={() => onNavigateTab('payments')}
+          className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all cursor-pointer group hover:border-emerald-300"
+        >
           <div className="flex items-center justify-between gap-2 mb-3">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected Revenue</span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <IndianRupee className="w-5 h-5" />
             </div>
           </div>
@@ -124,13 +127,13 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           </div>
           <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>Verified Paid Receipts ({paidStudentsCount} Students)</span>
+            <span>{paidStudentsCount} Verified Paid (View Ledger →)</span>
           </p>
         </div>
 
         {/* Pending Unpaid Fees */}
         <div 
-          onClick={() => onNavigateTab('students')}
+          onClick={() => onNavigateTab('payments')}
           className="bg-white p-6 rounded-3xl border border-amber-200/90 shadow-subtle hover:shadow-premium transition-all cursor-pointer hover:border-amber-400 group"
         >
           <div className="flex items-center justify-between gap-2 mb-3">
