@@ -13,11 +13,13 @@ import {
   Sparkles, 
   Menu, 
   X,
-  Key
+  Key,
+  Share2
 } from 'lucide-react';
 import { AdminStorage, type StudentEnrollment, type LeadInquiry, type BatchConfig } from '../../services/adminStorageService';
 import { AdminDashboardTab } from './AdminDashboardTab';
 import { AdminStudentsTab } from './AdminStudentsTab';
+import { AdminShareLinkTab } from './AdminShareLinkTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminBatchesTab } from './AdminBatchesTab';
 import { AdminSettingsTab } from './AdminSettingsTab';
@@ -31,7 +33,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
 
@@ -220,7 +222,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'inquiries' | 'batches' | 'settings';
+    id: 'dashboard' | 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number;
@@ -229,6 +231,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
     { id: 'students', label: 'Students & Enrollments', icon: Users, badge: students.length },
+    { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
     { id: 'inquiries', label: 'Demo Leads & Inquiries', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
     { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
     { id: 'settings', label: 'Settings & Security', icon: Settings },
@@ -425,6 +428,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               onCloseAddModal={() => setIsOpenAddModal(false)}
               onOpenAddModal={() => setIsOpenAddModal(true)}
             />
+          )}
+
+          {activeTab === 'share-link' && (
+            <AdminShareLinkTab />
           )}
 
           {activeTab === 'inquiries' && (

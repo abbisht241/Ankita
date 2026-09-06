@@ -19,7 +19,7 @@ import type { StudentEnrollment, LeadInquiry } from '../../services/adminStorage
 interface AdminDashboardTabProps {
   students: StudentEnrollment[];
   inquiries: LeadInquiry[];
-  onNavigateTab: (tab: 'students' | 'inquiries' | 'batches' | 'settings') => void;
+  onNavigateTab: (tab: 'students' | 'share-link' | 'inquiries' | 'batches' | 'settings') => void;
   onOpenAddStudentModal: () => void;
   onExportCSV: () => void;
 }
