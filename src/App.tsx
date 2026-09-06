@@ -18,6 +18,9 @@ import { SyllabusModal } from './components/modals/SyllabusModal';
 import { VideoTestimonialModal } from './components/modals/VideoTestimonialModal';
 import { ResourceDownloadModal } from './components/modals/ResourceDownloadModal';
 import { LegalModal } from './components/modals/LegalModal';
+import { RazorpayCheckoutModal } from './components/modals/RazorpayCheckoutModal';
+
+import { coursesData } from './data/coursesData';
 
 import type { Course, Resource } from './types';
 
@@ -25,6 +28,7 @@ export function App() {
   // Modal states
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<Course | null>(null);
+  const [selectedCourseForCheckout, setSelectedCourseForCheckout] = useState<Course | null>(null);
   const [selectedResourceForDownload, setSelectedResourceForDownload] = useState<Resource | null>(null);
   const [videoModalData, setVideoModalData] = useState<{ isOpen: boolean; name: string; exam: string }>({
     isOpen: false,
@@ -54,10 +58,13 @@ export function App() {
   };
 
   const handleEnrollCourse = (course: Course) => {
-    setPrefilledCourse(course.title);
-    const contactElem = document.querySelector('#contact');
-    if (contactElem) {
-      contactElem.scrollIntoView({ behavior: 'smooth' });
+    setSelectedCourseForCheckout(course);
+  };
+
+  const handleSelectCourseModal = (courseId: string) => {
+    const foundCourse = coursesData.find(c => c.id === courseId);
+    if (foundCourse) {
+      setSelectedCourseForCheckout(foundCourse);
     }
   };
 
@@ -76,6 +83,7 @@ export function App() {
       {/* 2. Responsive Header & Navigation */}
       <Navbar 
         onOpenDemoModal={() => handleOpenDemoModal()} 
+        onSelectCourseModal={handleSelectCourseModal}
       />
 
       {/* Main Content Area */}
@@ -165,6 +173,12 @@ export function App() {
         isOpen={legalModalData.isOpen}
         type={legalModalData.type}
         onClose={() => setLegalModalData({ isOpen: false, type: null })}
+      />
+
+      <RazorpayCheckoutModal
+        course={selectedCourseForCheckout}
+        isOpen={!!selectedCourseForCheckout}
+        onClose={() => setSelectedCourseForCheckout(null)}
       />
 
     </div>
