@@ -3,20 +3,17 @@ import {
   Sparkles, 
   CheckCircle2, 
   ArrowRight, 
-  Star, 
   Award, 
   Users, 
-  PlayCircle,
   GraduationCap
 } from 'lucide-react';
-import { statisticsData } from '../data/testimonialsData';
 
 interface HeroSectionProps {
   onOpenDemoModal: () => void;
-  onOpenVideoModal: (name: string, exam: string) => void;
+  onOpenVideoModal?: (name: string, exam: string) => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpenVideoModal }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => {
   const handleScrollToCourses = (e: React.MouseEvent) => {
     e.preventDefault();
     const elem = document.querySelector('#courses');
@@ -34,7 +31,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
   };
 
   return (
-    <section id="hero" className="relative bg-gradient-to-b from-brand-50/70 via-white to-slate-50 pt-8 pb-16 lg:pt-14 lg:pb-24 overflow-hidden">
+    <section id="hero" className="relative bg-gradient-to-b from-brand-50/70 via-white to-slate-50 pt-8 pb-12 lg:pt-14 lg:pb-18 overflow-hidden">
       {/* Background Decorative Gradients & Mesh */}
       <div className="absolute top-0 inset-x-0 h-96 hero-glow pointer-events-none" />
       <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-gradient-to-tr from-brand-200/30 via-sky-200/20 to-indigo-100/30 blur-3xl rounded-full pointer-events-none -z-10" />
@@ -91,7 +88,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 w-full sm:w-auto">
               <button
                 onClick={handleScrollToCourses}
                 className="bg-gradient-to-r from-brand-700 via-brand-600 to-brand-700 hover:from-brand-800 hover:to-brand-700 text-white font-bold px-7 py-4 rounded-xl shadow-lg hover:shadow-brand-600/30 transition-all duration-200 flex items-center justify-center gap-2 text-base group cursor-pointer"
@@ -107,25 +104,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
                 <Sparkles className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
                 <span>Book Free Live Demo</span>
               </button>
-            </div>
-
-            {/* Social Proof Mini Avatars */}
-            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200/80 w-full">
-              <div className="flex -space-x-2 overflow-hidden">
-                <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=120&auto=format&fit=crop" alt="Student" />
-                <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&auto=format&fit=crop" alt="Student" />
-                <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=120&auto=format&fit=crop" alt="Student" />
-                <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=120&auto=format&fit=crop" alt="Student" />
-              </div>
-              <div className="text-xs text-slate-600">
-                <div className="flex items-center gap-1 text-amber-500 font-bold">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
-                  ))}
-                  <span className="text-slate-800 ml-1">4.95 / 5 Rating</span>
-                </div>
-                <p className="text-slate-500 font-medium">Trusted by 15,000+ NET, JRF &amp; CDP aspirants across India</p>
-              </div>
             </div>
 
           </div>
@@ -181,11 +159,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
               {/* Card Footer Quick Links */}
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => onOpenVideoModal('Dr. Priya Sharma', 'UGC NET JRF AIR 09')}
+                  onClick={handleScrollToCourses}
                   className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 text-xs font-bold text-slate-700 hover:text-brand-700 transition-colors cursor-pointer"
                 >
-                  <PlayCircle className="w-4 h-4 text-brand-600" />
-                  <span>Watch Testimonial</span>
+                  <Sparkles className="w-4 h-4 text-brand-600" />
+                  <span>Explore Courses</span>
                 </button>
 
                 <button
@@ -201,25 +179,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
 
           </div>
 
-        </div>
-
-        {/* Highlight Statistics Strip */}
-        <div className="mt-16 pt-10 border-t border-slate-200/80">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
-            {statisticsData.map((stat, idx) => (
-              <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow">
-                <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-display text-brand-900 tracking-tight mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-sm font-bold text-slate-800">
-                  {stat.label}
-                </div>
-                <div className="text-xs text-slate-500 mt-0.5">
-                  {stat.subtext}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
       </div>
