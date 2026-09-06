@@ -9,7 +9,6 @@ import {
   Mail, 
   X, 
   CheckCircle2, 
-  Filter,
   Copy,
   ExternalLink,
   Sparkles,
@@ -122,333 +121,210 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
     <div className="space-y-6 animate-fadeIn">
       
       {/* 1. Public Student Registration Link Share Bar */}
-      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-slate-900 text-white p-5 rounded-3xl border border-brand-700/50 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-slate-950" />
-              <span>Public Student Registration Link</span>
-            </span>
-            <span className="text-xs text-brand-200">Share with students to let them register themselves</span>
-          </div>
-          <div className="font-mono text-xs sm:text-sm text-amber-300 font-bold tracking-tight">
-            https://learnwithdrankita.com/register
+      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-slate-900 text-white p-4 rounded-2xl border border-brand-700/50 shadow-md space-y-3">
+        <div className="flex items-start gap-2 flex-wrap">
+          <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shrink-0">
+            <Sparkles className="w-3 h-3" />
+            <span>Registration Link</span>
+          </span>
+          <div className="font-mono text-xs text-amber-300 font-bold break-all">
+            learnwithdrankita.com/register
           </div>
         </div>
-
-        <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleCopyLink}
-            className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="flex-1 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            {copySuccess ? (
-              <>
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-300">Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                <span>Copy Registration Link</span>
-              </>
-            )}
+            {copySuccess ? <><CheckCircle2 className="w-4 h-4 text-emerald-400" /><span className="text-emerald-300">Copied!</span></> : <><Copy className="w-4 h-4" /><span>Copy Link</span></>}
           </button>
-
           <a
-            href={`https://wa.me/?text=${encodeURIComponent(
-              '🎓 *Dr. Ankita Bisht Academic Academy - Batch Admissions Open*\n\nStudents can now register directly online for UGC NET Paper 1, Research Methodology (SPSS), and CDP batches.\n\n👉 *Direct Admission Link:* https://learnwithdrankita.com/register\n\nAdmissions Helpline: +91 7417268651'
-            )}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            href={`https://wa.me/?text=${encodeURIComponent('🎓 *Dr. Ankita Bisht Academy - Admissions Open*\n\n👉 Register: https://learnwithdrankita.com/register\n\nHelpline: +91 7417268651')}`}
+            target="_blank" rel="noreferrer"
+            className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold px-3 py-2 rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <MessageCircle className="w-4 h-4 text-slate-950" />
+            <MessageCircle className="w-4 h-4" />
             <span>Share on WhatsApp</span>
           </a>
-
-          <a
-            href="/register"
-            target="_blank"
-            rel="noreferrer"
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
-            title="Open Registration Page in New Tab"
-          >
+          <a href="/register" target="_blank" rel="noreferrer"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 shrink-0">
             <ExternalLink className="w-4 h-4" />
           </a>
         </div>
       </div>
       
-      {/* Header Bar with Search & Actions */}
-      <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-subtle flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        
-        {/* Search Input */}
-        <div className="flex-1 relative">
+      {/* Search & Actions */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+        <div className="relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search by student name, phone (+91), email, or enrollment ID..."
-            className="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all"
+            placeholder="Search name, phone, email..."
+            className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all"
           />
         </div>
-
-        {/* Course Filter Dropdown */}
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-slate-400 shrink-0 hidden sm:block" />
           <select
             value={selectedCourseFilter}
             onChange={(e) => setSelectedCourseFilter(e.target.value)}
-            className="px-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="flex-1 min-w-0 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none"
           >
             <option value="All">All Courses ({students.length})</option>
             {coursesData.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.title.split('(')[0]}
-              </option>
+              <option key={c.id} value={c.id}>{c.title.split('(')[0]}</option>
             ))}
           </select>
-
-          <button
-            onClick={onOpenAddModal}
-            className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>+ Add Student</span>
+          <button onClick={onOpenAddModal}
+            className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-3 py-2.5 rounded-xl shadow flex items-center gap-1.5 shrink-0 cursor-pointer">
+            <UserPlus className="w-4 h-4" /><span>+ Add</span>
           </button>
-
-          <button
-            onClick={onExportCSV}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl border border-slate-200 transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-            title="Download CSV"
-          >
+          <button onClick={onExportCSV}
+            className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2.5 rounded-xl border border-slate-200 shrink-0 cursor-pointer" title="Export CSV">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Export</span>
           </button>
         </div>
-
       </div>
 
-      {/* Payment Status Tabs Filter */}
+      {/* Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <button
-          onClick={() => setPaymentStatusFilter('all')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-            paymentStatusFilter === 'all'
-              ? 'bg-slate-900 text-white shadow'
-              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-          }`}
-        >
-          All Students ({students.length})
+        <button onClick={() => setPaymentStatusFilter('all')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap ${paymentStatusFilter === 'all' ? 'bg-slate-900 text-white shadow' : 'bg-white text-slate-600 border border-slate-200'}`}>
+          All ({students.length})
         </button>
-
-        <button
-          onClick={() => setPaymentStatusFilter('paid')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-            paymentStatusFilter === 'paid'
-              ? 'bg-emerald-600 text-white shadow'
-              : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'
-          }`}
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Paid &amp; Active ({paidCount})</span>
+        <button onClick={() => setPaymentStatusFilter('paid')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap flex items-center gap-1 ${paymentStatusFilter === 'paid' ? 'bg-emerald-600 text-white shadow' : 'bg-white text-emerald-700 border border-emerald-200'}`}>
+          <CheckCircle2 className="w-3.5 h-3.5" /><span>Paid ({paidCount})</span>
         </button>
-
-        <button
-          onClick={() => setPaymentStatusFilter('pending')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-            paymentStatusFilter === 'pending'
-              ? 'bg-amber-500 text-slate-950 shadow'
-              : 'bg-white text-amber-800 border border-amber-300 hover:bg-amber-50'
-          }`}
-        >
-          <Clock className="w-3.5 h-3.5" />
-          <span>Fee Pending / Unpaid ({pendingCount})</span>
+        <button onClick={() => setPaymentStatusFilter('pending')}
+          className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap flex items-center gap-1 ${paymentStatusFilter === 'pending' ? 'bg-amber-500 text-slate-950 shadow' : 'bg-white text-amber-800 border border-amber-300'}`}>
+          <Clock className="w-3.5 h-3.5" /><span>Due ({pendingCount})</span>
         </button>
       </div>
 
-      {/* Students Data Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-subtle overflow-hidden">
+      {/* ── MOBILE: Card List ── */}
+      <div className="sm:hidden space-y-3">
+        {filteredStudents.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-400 text-sm">No students match your filter.</div>
+        ) : filteredStudents.map((s) => {
+          const isPaid = s.paymentStatus === 'paid' || (s.amount > 0 && s.status === 'active');
+          const dueAmount = s.feeDue !== undefined ? s.feeDue : (isPaid ? 0 : 999);
+          return (
+            <div key={s.id} className={`bg-white rounded-2xl border shadow-xs p-4 space-y-3 ${isPaid ? 'border-emerald-200' : 'border-amber-200'}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="font-bold text-slate-900">{s.name}</div>
+                  <div className="font-mono text-[10px] text-slate-400 mt-0.5">{s.id}</div>
+                </div>
+                {isPaid ? (
+                  <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0">
+                    <CheckCircle2 className="w-3 h-3" />Paid
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0">
+                    <Clock className="w-3 h-3" />Due ₹{dueAmount}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-slate-700 flex-1">{s.phone}</span>
+                <a href={`https://wa.me/91${s.phone}`} target="_blank" rel="noreferrer"
+                  className="w-8 h-8 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white flex items-center justify-center transition-colors">
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+                <a href={`tel:+91${s.phone}`}
+                  className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center transition-colors">
+                  <PhoneCall className="w-4 h-4" />
+                </a>
+              </div>
+              <div className="text-xs text-slate-500 line-clamp-1">{s.courseTitle.split('(')[0]}</div>
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                {!isPaid && (
+                  <>
+                    <button onClick={() => { if (confirm(`Confirm ₹${dueAmount} received for ${s.name}?`)) onMarkPaid(s.id); }}
+                      className="flex-1 bg-emerald-600 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
+                      <CheckCircle2 className="w-3.5 h-3.5" />Mark Paid
+                    </button>
+                    <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: 7417268651@okbizaxis`)}`}
+                      target="_blank" rel="noreferrer"
+                      className="flex-1 bg-amber-400 text-slate-950 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
+                      <MessageCircle className="w-3.5 h-3.5" />Remind
+                    </a>
+                  </>
+                )}
+                <button onClick={() => { if (confirm(`Remove ${s.name}?`)) onDeleteStudent(s.id); }}
+                  className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 cursor-pointer">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* ── DESKTOP: Table ── */}
+      <div className="hidden sm:block bg-white rounded-3xl border border-slate-200/90 shadow-subtle overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                <th className="py-3.5 px-4">Student &amp; ID</th>
-                <th className="py-3.5 px-4">Contact (WhatsApp / Call)</th>
-                <th className="py-3.5 px-4">Enrolled Course</th>
-                <th className="py-3.5 px-4">Fee Amount &amp; Mode</th>
+                <th className="py-3.5 px-4">Student & ID</th>
+                <th className="py-3.5 px-4">Contact</th>
+                <th className="py-3.5 px-4">Course</th>
+                <th className="py-3.5 px-4">Fee & Mode</th>
                 <th className="py-3.5 px-4">Payment ID / Date</th>
-                <th className="py-3.5 px-4 text-center">Payment Status</th>
+                <th className="py-3.5 px-4 text-center">Status</th>
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
               {filteredStudents.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    No student registrations match your filter criteria.
-                  </td>
-                </tr>
-              ) : (
-                filteredStudents.map((s) => {
-                  const isPaid = s.paymentStatus === 'paid' || (s.amount > 0 && s.status === 'active');
-                  const dueAmount = s.feeDue !== undefined ? s.feeDue : (isPaid ? 0 : 999);
-
-                  return (
-                    <tr key={s.id} className="hover:bg-slate-50/70 transition-colors group">
-                      {/* Name & ID */}
-                      <td className="py-4 px-4">
-                        <div className="font-bold text-slate-900">{s.name}</div>
-                        <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 py-0.2 rounded">
-                          {s.id}
-                        </span>
-                      </td>
-
-                      {/* Contact */}
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-slate-800">{s.phone}</span>
-                          <a
-                            href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(
-                              isPaid
-                                ? `Namaste ${s.name} ji, Dr. Ankita Bisht Academy me aapka swagat hai! Aapka course access active hai.`
-                                : `Namaste ${s.name} ji, Dr. Ankita Bisht Academy me aapka UGC NET registration mila hai. Admission fee (₹${dueAmount}) verification ke liye sampark karein.`
-                            )}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="w-6 h-6 rounded-md bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white flex items-center justify-center transition-colors"
-                            title="WhatsApp Chat"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                          </a>
-                          <a
-                            href={`tel:+91${s.phone}`}
-                            className="w-6 h-6 rounded-md bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center transition-colors"
-                            title="Call Phone"
-                          >
-                            <PhoneCall className="w-3.5 h-3.5" />
-                          </a>
-                        </div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 truncate max-w-[180px]">
-                          <Mail className="w-3 h-3 text-slate-400 shrink-0" />
-                          <span className="truncate">{s.email || 'No email provided'}</span>
-                        </div>
-                      </td>
-
-                      {/* Course */}
-                      <td className="py-4 px-4 max-w-xs">
-                        <div className="font-medium text-slate-800 line-clamp-2">
-                          {s.courseTitle}
-                        </div>
-                      </td>
-
-                      {/* Amount & Mode */}
-                      <td className="py-4 px-4">
-                        {isPaid ? (
-                          <>
-                            <div className="font-extrabold text-sm text-emerald-700">
-                              ₹{s.amount} Paid
-                            </div>
-                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded uppercase ${
-                              s.paymentMode === 'razorpay'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                            }`}>
-                              {s.paymentMode.replace('_', ' ')}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <div className="font-extrabold text-sm text-rose-600 flex items-center gap-1">
-                              <span>₹0 Paid</span>
-                              <span className="text-[11px] font-bold text-amber-700">(₹{dueAmount} Due)</span>
-                            </div>
-                            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded uppercase bg-amber-50 text-amber-800 border border-amber-300">
-                              Direct / UPI (Pending)
-                            </span>
-                          </>
-                        )}
-                      </td>
-
-                      {/* Payment ID & Date */}
-                      <td className="py-4 px-4 text-slate-500">
-                        <div className="font-mono text-[10px] text-slate-700 truncate max-w-[120px]">
-                          {s.paymentId}
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          {new Date(s.enrolledAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </div>
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-4 px-4 text-center">
-                        {isPaid ? (
-                          <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
-                            <CheckCircle2 className="w-3 h-3" />
-                            <span>Paid / Active</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full animate-pulse">
-                            <Clock className="w-3 h-3 text-amber-700" />
-                            <span>Fee Pending ⏳</span>
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-4 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {!isPaid && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  if (confirm(`Confirm fee payment of ₹${dueAmount} received for ${s.name}? This will mark status as Active and add ₹${dueAmount} to Collected Revenue.`)) {
-                                    onMarkPaid(s.id);
-                                  }
-                                }}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                                title="Verify offline / UPI payment and activate student"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Mark Paid</span>
-                              </button>
-
-                              <a
-                                href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(
-                                  `Namaste ${s.name} ji,\n\nDr. Ankita Bisht Academic Academy me aapka registration prapt hua hai.\n\n📚 Course: ${s.courseTitle}\n💰 Admission Fee Due: ₹${dueAmount}\n\n👉 Batch access activate karne ke liye kripya admission fee payment UPI se complete karein:\n\nUPI ID: 7417268651@okbizaxis\nGooglePay / PhonePe / Paytm: +91 7417268651\n\nPayment karne ke baad receipt/screenshot isi WhatsApp par share kar dein taaki batch access turant shuru ho sake.\n\nHelpline: +91 7417268651`
-                                )}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-1.5 rounded-lg shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                                title="Send WhatsApp Fee Reminder"
-                              >
-                                <MessageCircle className="w-3.5 h-3.5" />
-                                <span>Remind</span>
-                              </a>
-                            </>
-                          )}
-
-                          <button
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to remove registration for ${s.name}?`)) {
-                                onDeleteStudent(s.id);
-                              }
-                            }}
-                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
-                            title="Delete record"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
+                <tr><td colSpan={7} className="py-12 text-center text-slate-400">No students match your filter.</td></tr>
+              ) : filteredStudents.map((s) => {
+                const isPaid = s.paymentStatus === 'paid' || (s.amount > 0 && s.status === 'active');
+                const dueAmount = s.feeDue !== undefined ? s.feeDue : (isPaid ? 0 : 999);
+                return (
+                  <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-4 px-4">
+                      <div className="font-bold text-slate-900">{s.name}</div>
+                      <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-1.5 rounded">{s.id}</span>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-slate-800">{s.phone}</span>
+                        <a href={`https://wa.me/91${s.phone}`} target="_blank" rel="noreferrer" className="w-6 h-6 rounded-md bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white flex items-center justify-center transition-colors"><MessageCircle className="w-3.5 h-3.5" /></a>
+                        <a href={`tel:+91${s.phone}`} className="w-6 h-6 rounded-md bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center transition-colors"><PhoneCall className="w-3.5 h-3.5" /></a>
+                      </div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-1 truncate max-w-[180px]">
+                        <Mail className="w-3 h-3 shrink-0" /><span className="truncate">{s.email || 'No email'}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 max-w-xs"><div className="font-medium text-slate-800 line-clamp-2">{s.courseTitle}</div></td>
+                    <td className="py-4 px-4">
+                      {isPaid ? (<><div className="font-extrabold text-sm text-emerald-700">₹{s.amount} Paid</div><span className="text-[10px] font-bold px-1.5 rounded uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">{s.paymentMode.replace('_',' ')}</span></>) 
+                      : (<><div className="font-extrabold text-sm text-rose-600">₹0 <span className="text-[11px] text-amber-700">(₹{dueAmount} Due)</span></div><span className="text-[10px] font-bold px-1.5 rounded uppercase bg-amber-50 text-amber-800 border border-amber-300">Pending</span></>)}
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="font-mono text-[10px] text-slate-700 truncate max-w-[120px]">{s.paymentId}</div>
+                      <div className="text-[10px] text-slate-400">{new Date(s.enrolledAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+                    </td>
+                    <td className="py-4 px-4 text-center">
+                      {isPaid ? (<span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full"><CheckCircle2 className="w-3 h-3" />Paid</span>)
+                      : (<span className="inline-flex items-center gap-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold px-2.5 py-1 rounded-full animate-pulse"><Clock className="w-3 h-3 text-amber-700" />Pending</span>)}
+                    </td>
+                    <td className="py-4 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {!isPaid && (<>
+                          <button onClick={() => { if(confirm(`Confirm ₹${dueAmount} for ${s.name}?`)) onMarkPaid(s.id); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><CheckCircle2 className="w-3.5 h-3.5" />Mark Paid</button>
+                          <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: 7417268651@okbizaxis`)}`} target="_blank" rel="noreferrer" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><MessageCircle className="w-3.5 h-3.5" />Remind</a>
+                        </>)}
+                        <button onClick={() => { if(confirm(`Remove ${s.name}?`)) onDeleteStudent(s.id); }} className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
