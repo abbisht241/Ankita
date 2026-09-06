@@ -13,6 +13,7 @@ import {
 import { coursesData as defaultCoursesData } from '../data/coursesData';
 import type { Course } from '../types';
 import { useSiteContent } from '../context/SiteContentContext';
+import { AdminStorage } from '../services/adminStorageService';
 
 interface CoursesSectionProps {
   onSelectSyllabus: (course: Course) => void;
@@ -30,6 +31,37 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
   const activeCourses = (coursesConfig?.courses && coursesConfig.courses.length > 0) ? coursesConfig.courses : defaultCoursesData;
 
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [liveStudentsRefreshKey, setLiveStudentsRefreshKey] = useState(0);
+
+  // Auto-sync live student count from Students & Enrollments storage
+  React.useEffect(() => {
+    const handleStorage = () => setLiveStudentsRefreshKey(k => k + 1);
+    window.addEventListener('storage', handleStorage);
+    const timer = setInterval(handleStorage, 5000);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      clearInterval(timer);
+    };
+  }, []);
+
+  const getLiveEnrolledBadge = (course: Course) => {
+    void liveStudentsRefreshKey;
+    const liveEnrolled = AdminStorage.getCourseEnrollmentCount(course.id, course.title);
+    const rawBadge = course.studentCount || '';
+    const numMatch = rawBadge.replace(/,/g, '').match(/\d+/);
+
+    if (numMatch) {
+      const baseNum = parseInt(numMatch[0], 10);
+      const total = baseNum + liveEnrolled;
+      return `${total.toLocaleString('en-IN')}+ Enrolled`;
+    }
+
+    if (liveEnrolled > 0) {
+      return `${liveEnrolled.toLocaleString('en-IN')}+ Enrolled`;
+    }
+
+    return rawBadge || '500+ Enrolled';
+  };
 
   const categories = [
     'All',
@@ -76,7 +108,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
                   : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 hover:border-slate-300'
               }`}
             >
-              {cat === 'All' ? '🌟 All 6 Batches' : cat}
+              {cat === 'All' ? '🌟 All Batches' : cat}
             </button>
           ))}
         </div>
@@ -130,7 +162,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
                     </div>
                     <div className="flex items-center gap-1 text-slate-600 font-medium">
                       <Users className="w-3.5 h-3.5 text-brand-600" />
-                      <span>{course.studentCount}</span>
+                      <span>{getLiveEnrolledBadge(course)}</span>
                     </div>
                   </div>
 

@@ -20,6 +20,7 @@ import {
 import confetti from 'canvas-confetti';
 import { useSiteContent } from '../../context/SiteContentContext';
 import type { SiteContentConfig } from '../../services/siteContentService';
+import { AdminStorage } from '../../services/adminStorageService';
 import type { Course, FAQItem, Resource, Testimonial } from '../../types';
 
 export const AdminCmsTab: React.FC = () => {
@@ -649,7 +650,12 @@ export const AdminCmsTab: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block font-semibold text-slate-700 mb-1">Enrolled Count Badge</label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="block font-semibold text-slate-700">Enrolled Count Badge</label>
+                          <span className="text-[10px] bg-brand-50 text-brand-700 font-bold px-1.5 py-0.5 rounded">
+                            Live DB: {AdminStorage.getCourseEnrollmentCount(course.id, course.title)}
+                          </span>
+                        </div>
                         <input
                           type="text"
                           value={course.studentCount || '500+ Enrolled'}
@@ -661,6 +667,25 @@ export const AdminCmsTab: React.FC = () => {
                           placeholder="e.g. 1,500+ Enrolled"
                           className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
                         />
+                        <div className="flex items-center justify-end mt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const liveCount = AdminStorage.getCourseEnrollmentCount(course.id, course.title);
+                              const raw = course.studentCount || '';
+                              const match = raw.replace(/,/g, '').match(/\d+/);
+                              const base = match ? parseInt(match[0], 10) : 0;
+                              const newBadge = `${(base + liveCount).toLocaleString('en-IN')}+ Enrolled`;
+                              const updated = [...formData.courses.courses];
+                              updated[idx] = { ...updated[idx], studentCount: newBadge };
+                              setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                            }}
+                            className="text-[10px] text-brand-700 hover:text-brand-900 font-bold underline cursor-pointer"
+                            title="Set badge based on real enrollments"
+                          >
+                            ⚡ Sync from Students &amp; Enrollments
+                          </button>
+                        </div>
                       </div>
                     </div>
 

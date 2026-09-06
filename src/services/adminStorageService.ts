@@ -280,6 +280,23 @@ export const AdminStorage = {
     }
   },
 
+  getCourseEnrollmentCount(courseId: string, courseTitle?: string): number {
+    const students = this.getStudents();
+    return students.filter(s => {
+      const matchId = s.courseId && courseId && (
+        s.courseId.toLowerCase() === courseId.toLowerCase() ||
+        s.courseId.toLowerCase().includes(courseId.toLowerCase()) ||
+        courseId.toLowerCase().includes(s.courseId.toLowerCase())
+      );
+      const matchTitle = s.courseTitle && courseTitle && (
+        s.courseTitle.toLowerCase().trim() === courseTitle.toLowerCase().trim() ||
+        s.courseTitle.toLowerCase().includes(courseTitle.toLowerCase()) ||
+        courseTitle.toLowerCase().includes(s.courseTitle.toLowerCase())
+      );
+      return matchId || matchTitle;
+    }).length;
+  },
+
   // Students - Remote Fetch
   async fetchRemoteStudents(): Promise<StudentEnrollment[]> {
     try {
