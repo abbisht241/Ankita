@@ -51,6 +51,26 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   useEffect(() => {
     setIsAuthenticated(AdminStorage.isAuthenticated());
     refreshData();
+
+    // Disallow Google & Search Engines from indexing this panel
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    const originalContent = robotsMeta ? robotsMeta.getAttribute('content') : 'index, follow';
+    const originalTitle = document.title;
+
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.setAttribute('name', 'robots');
+      document.head.appendChild(robotsMeta);
+    }
+    robotsMeta.setAttribute('content', 'noindex, nofollow, noarchive, nosnippet');
+    document.title = 'Faculty & Admin Console | Dr. Ankita Bisht';
+
+    return () => {
+      if (robotsMeta) {
+        robotsMeta.setAttribute('content', originalContent || 'index, follow');
+      }
+      document.title = originalTitle;
+    };
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {

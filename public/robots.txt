@@ -1,0 +1,28 @@
+# robots.txt for learnwithdrankita.com
+# Disallow Googlebot and search crawlers from indexing admin & management panel
+
+User-agent: *
+Allow: /
+Disallow: /panel
+Disallow: /panel/
+Disallow: /panel/*
+Disallow: /api/
+Disallow: /api/*
+
+User-agent: Googlebot
+Allow: /
+Disallow: /panel
+Disallow: /panel/
+Disallow: /panel/*
+Disallow: /api/
+Disallow: /api/*
+
+User-agent: Bingbot
+Allow: /
+Disallow: /panel
+Disallow: /panel/
+Disallow: /panel/*
+Disallow: /api/
+Disallow: /api/*
+
+Sitemap: https://learnwithdrankita.com/sitemap.xml
