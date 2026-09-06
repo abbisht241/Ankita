@@ -120,8 +120,24 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   };
 
   const handleMarkStudentPaid = async (id: string) => {
+    // 1. Optimistically update local state immediately
+    setStudents(prev => prev.map(s => {
+      if (s.id === id) {
+        return {
+          ...s,
+          amount: 999,
+          feeDue: 0,
+          paymentStatus: 'paid',
+          status: 'active',
+          notes: 'Payment verified and confirmed by Admin'
+        };
+      }
+      return s;
+    }));
+
+    // 2. Persist to storage & cloud
     await AdminStorage.markStudentPaid(id);
-    refreshData();
+    await refreshData();
   };
 
   const handleDeleteStudent = async (id: string) => {

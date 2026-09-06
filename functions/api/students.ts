@@ -51,13 +51,18 @@ async function getStudentsList(env: Env): Promise<StudentEnrollment[]> {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
           return parsed.map((s: any) => {
-            const isPending = s.paymentStatus === 'pending' || (s.paymentMode === 'upi_direct' && s.paymentId?.startsWith('pay_REG_')) || s.amount === 0;
+            const paymentStatus = s.paymentStatus || (s.paymentMode === 'razorpay' || (Number(s.amount) > 0 && s.status === 'active') ? 'paid' : 'pending');
+            const isPaid = paymentStatus === 'paid';
+            const amount = isPaid ? (Number(s.amount) > 0 ? Number(s.amount) : 999) : 0;
+            const feeDue = s.feeDue !== undefined ? Number(s.feeDue) : (isPaid ? 0 : 999);
+            const status = s.status || (isPaid ? 'active' : 'pending_payment');
+
             return {
               ...s,
-              amount: isPending ? 0 : (Number(s.amount) || 0),
-              feeDue: isPending ? (s.feeDue || 999) : 0,
-              paymentStatus: isPending ? 'pending' : (s.paymentStatus || 'paid'),
-              status: isPending ? 'pending_payment' : (s.status || 'active')
+              amount,
+              feeDue,
+              paymentStatus,
+              status
             };
           });
         }
@@ -98,7 +103,7 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
 
     const isPaid = body.paymentStatus === 'paid' || body.paymentMode === 'razorpay';
     const amountPaid = isPaid ? (Number(body.amount) || 999) : 0;
-    const feeDue = isPaid ? 0 : 999;
+    const feeDue = isPaid ? 0 : (Number(body.feeDue) || 999);
 
     const currentList = await getStudentsList(context.env);
     
@@ -138,14 +143,7 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
 
 export const onRequestPut = async (context: { request: Request; env: Env }) => {
   try {
-    const body = await context.request.json().catch(() => ({})) as {
-      id: string;
-      amount?: number;
-      paymentStatus?: 'paid' | 'pending' | 'partially_paid';
-      status?: 'active' | 'pending_payment' | 'completed' | 'refunded';
-      paymentMode?: StudentEnrollment['paymentMode'];
-      notes?: string;
-    };
+    const body = await context.request.json().catch(() => ({})) as Partial<StudentEnrollment>;
 
     if (!body.id) {
       return new Response(JSON.stringify({ success: false, error: 'Student ID is required' }), {
@@ -157,13 +155,15 @@ export const onRequestPut = async (context: { request: Request; env: Env }) => {
     const currentList = await getStudentsList(context.env);
     const updatedList = currentList.map(s => {
       if (s.id === body.id) {
-        const newPaymentStatus = body.paymentStatus !== undefined ? body.paymentStatus : s.paymentStatus;
-        const newAmount = body.amount !== undefined ? body.amount : (newPaymentStatus === 'paid' ? 999 : s.amount);
-        const newFeeDue = newPaymentStatus === 'paid' ? 0 : 999;
-        const newStatus = body.status !== undefined ? body.status : (newPaymentStatus === 'paid' ? 'active' : s.status);
+        const newPaymentStatus = body.paymentStatus !== undefined ? body.paymentStatus : (body.status === 'active' ? 'paid' : s.paymentStatus);
+        const isPaid = newPaymentStatus === 'paid';
+        const newAmount = body.amount !== undefined ? Number(body.amount) : (isPaid ? (Number(s.amount) > 0 ? Number(s.amount) : 999) : 0);
+        const newFeeDue = body.feeDue !== undefined ? Number(body.feeDue) : (isPaid ? 0 : 999);
+        const newStatus = body.status !== undefined ? body.status : (isPaid ? 'active' : 'pending_payment');
 
         return {
           ...s,
+          ...body,
           amount: newAmount,
           feeDue: newFeeDue,
           paymentStatus: newPaymentStatus,

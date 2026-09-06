@@ -206,13 +206,17 @@ export const AdminStorage = {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
         return parsed.map((s: any) => {
-          const isPending = s.paymentStatus === 'pending' || (s.paymentMode === 'upi_direct' && s.paymentId?.startsWith('pay_REG_')) || s.amount === 0;
+          const paymentStatus = s.paymentStatus || (s.paymentMode === 'razorpay' || (Number(s.amount) > 0 && s.status === 'active') ? 'paid' : 'pending');
+          const isPaid = paymentStatus === 'paid';
+          const amount = isPaid ? (Number(s.amount) > 0 ? Number(s.amount) : 999) : 0;
+          const feeDue = s.feeDue !== undefined ? Number(s.feeDue) : (isPaid ? 0 : 999);
+          const status = s.status || (isPaid ? 'active' : 'pending_payment');
           return {
             ...s,
-            amount: isPending ? 0 : (Number(s.amount) || 0),
-            feeDue: isPending ? (s.feeDue || 999) : 0,
-            paymentStatus: isPending ? 'pending' : (s.paymentStatus || 'paid'),
-            status: isPending ? 'pending_payment' : (s.status || 'active')
+            amount,
+            feeDue,
+            paymentStatus,
+            status
           };
         });
       }
@@ -243,7 +247,7 @@ export const AdminStorage = {
     const students = this.getStudents();
     const isPaid = student.paymentStatus === 'paid' || student.paymentMode === 'razorpay';
     const amountPaid = isPaid ? (Number(student.amount) || 999) : 0;
-    const feeDue = isPaid ? 0 : 999;
+    const feeDue = isPaid ? 0 : (Number(student.feeDue) || 999);
 
     const newStudent: StudentEnrollment = {
       ...student,
@@ -274,7 +278,13 @@ export const AdminStorage = {
   async updateStudent(id: string, updates: Partial<StudentEnrollment>): Promise<void> {
     const students = this.getStudents().map(s => {
       if (s.id === id) {
-        return { ...s, ...updates };
+        const merged = { ...s, ...updates };
+        const isPaid = merged.paymentStatus === 'paid';
+        if (isPaid && merged.amount === 0) {
+          merged.amount = 999;
+          merged.feeDue = 0;
+        }
+        return merged;
       }
       return s;
     });
@@ -286,7 +296,9 @@ export const AdminStorage = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...updates })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.warn('PUT failed, updated locally', e);
+    }
   },
 
   async markStudentPaid(id: string, amount: number = 999, paymentMode: StudentEnrollment['paymentMode'] = 'upi_direct'): Promise<void> {
