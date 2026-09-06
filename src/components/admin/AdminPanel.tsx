@@ -159,6 +159,48 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     refreshData();
   };
 
+  const handleEnrollLead = async (
+    inquiryId: string, 
+    studentData: Omit<StudentEnrollment, 'id' | 'enrolledAt'>,
+    generateInvoice: boolean = true
+  ): Promise<StudentEnrollment> => {
+    // 1. Add student record
+    const newStudent = await AdminStorage.addStudent(studentData);
+
+    // 2. Auto-generate invoice if requested
+    if (generateInvoice) {
+      const isPaid = studentData.paymentStatus === 'paid';
+      const amt = isPaid ? (Number(studentData.amount) || 999) : (Number(studentData.feeDue) || 999);
+      await AdminStorage.addInvoice({
+        studentId: newStudent.id,
+        studentName: studentData.name,
+        studentPhone: studentData.phone,
+        studentEmail: studentData.email,
+        studentCity: 'India',
+        courseId: studentData.courseId,
+        courseTitle: studentData.courseTitle,
+        subtotal: amt,
+        discount: 0,
+        totalAmount: amt,
+        dueDate: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+        status: isPaid ? 'paid' : 'pending',
+        paymentMode: isPaid ? (studentData.paymentMode || 'upi_direct') : undefined,
+        notes: `Converted from Demo Lead (${inquiryId})`
+      });
+    }
+
+    // 3. Mark inquiry status as 'enrolled'
+    await AdminStorage.updateInquiryStatus(
+      inquiryId, 
+      'enrolled', 
+      `Enrolled in ${studentData.courseTitle} (Ref: ${newStudent.id})`
+    );
+
+    // 4. Refresh live data
+    await refreshData();
+    return newStudent;
+  };
+
   const handleUpdateBatch = async (id: string, updates: Partial<BatchConfig>) => {
     await AdminStorage.updateBatch(id, updates);
     refreshData();
@@ -497,8 +539,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
           {activeTab === 'inquiries' && (
             <AdminInquiriesTab
               inquiries={inquiries}
+              students={students}
               onUpdateStatus={handleUpdateInquiryStatus}
               onDeleteInquiry={handleDeleteInquiry}
+              onEnrollLead={handleEnrollLead}
+              onNavigateTab={(tab) => setActiveTab(tab)}
             />
           )}
 
