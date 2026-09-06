@@ -1140,13 +1140,13 @@ export const AdminCmsTab: React.FC = () => {
                       <label className="block font-semibold text-slate-600 mb-1">Downloads Badge</label>
                       <input
                         type="text"
-                        value={res.downloadCount || '15,000+ Downloads'}
+                        value={res.downloadCount || 'Free Study PDF'}
                         onChange={(e) => {
                           const updated = [...formData.resources.resources];
                           updated[idx] = { ...updated[idx], downloadCount: e.target.value };
                           setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
                         }}
-                        placeholder="e.g. 21,400+ Downloads"
+                        placeholder="e.g. Free Study PDF"
                         className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
                       />
                     </div>

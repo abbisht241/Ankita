@@ -133,7 +133,7 @@ export const WhyChooseUsSection: React.FC<WhyChooseUsSectionProps> = ({ onOpenDe
                 Join our next live class without paying a single rupee.
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Attend a full live demo class, evaluate teaching quality, and see why 15,000+ students trust this academy.
+                Attend a full live demo class, evaluate teaching quality, and experience concept-first learning directly from Central University faculty.
               </p>
             </div>
 

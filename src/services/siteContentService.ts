@@ -117,7 +117,7 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
       { value: 'Ph.D. (2024)', label: 'Doctoral Degree' },
       { value: 'Rank 1', label: 'University Gold Medalist' },
       { value: '8+ Papers', label: 'UGC-CARE Published' },
-      { value: '15,000+', label: 'Students Mentored' }
+      { value: 'Central Univ.', label: 'Assistant Professor' }
     ],
     educatorBadge: 'Dr. Ankita Bisht (Ph.D., Gold Medalist, Asst. Professor)',
     photoUrl: '/images/ankita-photo.png'
@@ -151,7 +151,7 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
       { value: 'Ph.D. (2024)', label: 'Doctoral Degree' },
       { value: 'Rank 1', label: 'Gold Medalist' },
       { value: '8+ Papers', label: 'UGC-CARE Published' },
-      { value: '15,000+', label: 'Aspirants Guided' }
+      { value: '1-on-1', label: 'Doubt Mentorship' }
     ]
   },
   features: {

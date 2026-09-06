@@ -94,8 +94,8 @@ export const testimonialsData: Testimonial[] = [
 ];
 
 export const statisticsData = [
-  { value: '15,000+', label: 'Students Mentored Across India', subtext: 'UG/PG, UGC NET & TET Learners' },
-  { value: '500+', label: 'JRF & NET Selections', subtext: 'Top All-India Rankers in Home Science & Paper 1' },
-  { value: '94.8%', label: 'Success & Qualification Rate', subtext: 'Aspirants clearing cutoffs on 1st/2nd attempt' },
-  { value: '4.95 / 5', label: 'Average Student Rating', subtext: 'Rated by 4,500+ verified learners' }
+  { value: 'Central Univ.', label: 'Assistant Professor Faculty', subtext: 'Department of Home Science, HNBGU' },
+  { value: 'Ph.D. (2024)', label: 'Doctoral Degree in Home Science', subtext: 'H.N.B. Garhwal Central University' },
+  { value: 'Rank 1', label: 'University Gold Medalist', subtext: 'M.A. Home Science (8.4 CGPA)' },
+  { value: '8+ Papers', label: 'UGC-CARE Research Publications', subtext: 'Published Author & Academician' }
 ];
