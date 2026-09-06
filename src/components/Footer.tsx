@@ -35,11 +35,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
           {/* Brand & Educator Summary (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="bg-white/95 p-2 rounded-2xl inline-block shadow-sm">
+              <div className="bg-white p-2.5 rounded-2xl inline-block shadow-md">
                 <img 
                   src="/images/logo.png" 
                   alt="Learn With Dr. Ankita" 
-                  className="h-12 w-auto object-contain" 
+                  className="h-16 sm:h-20 w-auto max-w-[260px] sm:max-w-[320px] object-contain" 
                 />
               </div>
             </div>

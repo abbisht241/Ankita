@@ -71,8 +71,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
   return (
     <header className={`sticky top-0 z-40 transition-all duration-200 ${
       isScrolled 
-        ? 'bg-white/95 backdrop-blur-md shadow-sm py-2.5 border-b border-slate-200/80' 
-        : 'bg-white py-3.5 border-b border-slate-100'
+        ? 'bg-white/95 backdrop-blur-md shadow-sm py-2 border-b border-slate-200/80' 
+        : 'bg-white py-2.5 sm:py-3 border-b border-slate-100'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         
@@ -80,12 +80,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
         <a 
           href="#hero" 
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center group focus:outline-none shrink-0 py-0.5"
+          className="flex items-center group focus:outline-none shrink-0"
         >
           <img 
             src="/images/logo.png" 
             alt="Learn With Dr. Ankita" 
-            className="h-10 sm:h-12 md:h-13 w-auto object-contain transition-transform group-hover:scale-[1.02]" 
+            className="h-12 sm:h-14 md:h-16 lg:h-17 w-auto max-w-[220px] sm:max-w-[280px] md:max-w-[320px] object-contain transition-transform group-hover:scale-[1.02]" 
           />
         </a>
 
