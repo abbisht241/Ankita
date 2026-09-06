@@ -298,51 +298,100 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     icon: React.ComponentType<{ className?: string }>;
     badge?: number | string;
     badgeStyle?: string;
-    highlight?: boolean;
+  }
+
+  interface NavSection {
+    title: string;
+    items: NavItem[];
   }
 
   const pendingPaymentsCount = students.filter(s => s.paymentStatus === 'pending' || s.amount === 0 || s.status === 'pending_payment').length;
+  const newInquiriesCount = inquiries.filter(i => i.status === 'new').length;
 
-  const navItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
-    { id: 'students', label: 'Students & Enrollments', icon: Users, badge: students.length },
-    { id: 'inquiries', label: 'Demo Leads & Inquiries 📞', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
-    { 
-      id: 'payments', 
-      label: 'Payments & Fee Ledger 💳', 
-      icon: CreditCard, 
-      badge: pendingPaymentsCount > 0 ? `${pendingPaymentsCount} Due` : `${students.length} Trans.`,
-      badgeStyle: pendingPaymentsCount > 0 ? 'bg-amber-400 text-slate-950 font-extrabold' : 'bg-emerald-100 text-emerald-800 font-bold'
+  const navSections: NavSection[] = [
+    {
+      title: 'Overview',
+      items: [
+        { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard }
+      ]
     },
-    { 
-      id: 'invoices', 
-      label: 'Invoices & Billing 🧾', 
-      icon: FileText 
+    {
+      title: 'Academics & Tests',
+      items: [
+        { 
+          id: 'students', 
+          label: 'Students & Enrollments', 
+          icon: Users, 
+          badge: students.length > 0 ? students.length : undefined,
+          badgeStyle: 'bg-slate-100 text-slate-700 font-semibold'
+        },
+        { 
+          id: 'mock-tests', 
+          label: 'CBT Mock Tests', 
+          icon: FileCheck, 
+          badge: 'NTA CBT', 
+          badgeStyle: 'bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200' 
+        },
+        { 
+          id: 'batches', 
+          label: 'Batches & Class Links', 
+          icon: BookOpen 
+        }
+      ]
     },
-    { 
-      id: 'mock-tests', 
-      label: 'CBT Mock Tests 📝', 
-      icon: FileCheck,
-      badge: 'NTA CBT',
-      badgeStyle: 'bg-indigo-100 text-indigo-800 font-bold'
+    {
+      title: 'Admissions & Inquiries',
+      items: [
+        { 
+          id: 'inquiries', 
+          label: 'Demo Leads & Inquiries', 
+          icon: PhoneCall, 
+          badge: newInquiriesCount > 0 ? `${newInquiriesCount} New` : undefined,
+          badgeStyle: 'bg-amber-100 text-amber-800 font-bold'
+        },
+        { 
+          id: 'share-link', 
+          label: 'Registration Page Link', 
+          icon: Share2,
+          badge: 'Share',
+          badgeStyle: 'bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200'
+        }
+      ]
     },
-    { 
-      id: 'share-link', 
-      label: 'Share Registration Link 🔗', 
-      icon: Share2,
-      badge: 'Send Link 🚀',
-      badgeStyle: 'bg-emerald-600 text-white font-extrabold shadow-xs',
-      highlight: true
+    {
+      title: 'Finance & Billing',
+      items: [
+        { 
+          id: 'payments', 
+          label: 'Fee Ledger & Payments', 
+          icon: CreditCard, 
+          badge: pendingPaymentsCount > 0 ? `${pendingPaymentsCount} Due` : undefined,
+          badgeStyle: 'bg-rose-50 text-rose-700 border border-rose-200 font-bold'
+        },
+        { 
+          id: 'invoices', 
+          label: 'Invoices & Billing', 
+          icon: FileText 
+        }
+      ]
     },
-    { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
-    { 
-      id: 'cms', 
-      label: 'Website CMS & Content 🌐', 
-      icon: Globe,
-      badge: 'Live Editor',
-      badgeStyle: 'bg-indigo-100 text-indigo-800 font-bold'
-    },
-    { id: 'settings', label: 'Settings & Security', icon: Settings },
+    {
+      title: 'Configuration',
+      items: [
+        { 
+          id: 'cms', 
+          label: 'Website CMS & Content', 
+          icon: Globe, 
+          badge: 'Live',
+          badgeStyle: 'bg-indigo-50 text-indigo-700 font-semibold'
+        },
+        { 
+          id: 'settings', 
+          label: 'Settings & Security', 
+          icon: Settings 
+        }
+      ]
+    }
   ];
 
   return (
@@ -408,108 +457,39 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 flex flex-col md:flex-row gap-6 w-full">
         
         {/* Desktop Sidebar */}
-        <aside className="hidden md:block w-64 shrink-0 space-y-2">
-          <div className="bg-white p-3 rounded-3xl border border-slate-200/90 shadow-subtle space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              const isHighlight = item.highlight;
-
-              let buttonClasses = 'text-slate-600 hover:text-brand-700 hover:bg-slate-50';
-              if (isActive) {
-                buttonClasses = isHighlight
-                  ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/50'
-                  : 'bg-brand-700 text-white shadow-md shadow-brand-700/20';
-              } else if (isHighlight) {
-                buttonClasses = 'bg-emerald-50/90 hover:bg-emerald-100 text-emerald-950 border-2 border-emerald-300 font-bold shadow-xs';
-              }
-
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id as any)}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${buttonClasses}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${
-                      isActive ? 'text-white' : isHighlight ? 'text-emerald-700' : 'text-slate-400'
-                    }`} />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge !== undefined && item.badge !== '' && (
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                      isActive 
-                        ? 'bg-white text-brand-700' 
-                        : (item.badgeStyle || 'bg-brand-50 text-brand-700')
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Help Card */}
-          <div className="bg-gradient-to-br from-brand-900 to-navy-950 p-5 rounded-3xl text-white space-y-2 shadow-lg">
-            <div className="flex items-center gap-1.5 text-amber-300 text-xs font-bold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Admissions Support</span>
-            </div>
-            <p className="text-xs text-brand-200 leading-relaxed">
-              Helpline: <strong>+91 7417268651</strong>
-            </p>
-            <p className="text-[11px] text-slate-400">
-              Payments auto-sync directly via Razorpay webhook / API.
-            </p>
-          </div>
-        </aside>
-
-        {/* Mobile Drawer */}
-        {mobileSidebarOpen && (
-          <div className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs md:hidden flex">
-            <div className="bg-white w-72 h-full p-5 space-y-4 flex flex-col justify-between animate-fadeIn">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                  <span className="font-extrabold text-sm text-slate-900">Admin Navigation</span>
-                  <button onClick={() => setMobileSidebarOpen(false)} className="text-slate-400 p-1">
-                    <X className="w-5 h-5" />
-                  </button>
+        <aside className="hidden md:block w-64 shrink-0 space-y-4">
+          <div className="bg-white p-3.5 rounded-3xl border border-slate-200/90 shadow-subtle space-y-4">
+            {navSections.map((section) => (
+              <div key={section.title} className="space-y-1">
+                <div className="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 pt-1 pb-0.5">
+                  {section.title}
                 </div>
-
-                <div className="space-y-1">
-                  {navItems.map((item) => {
+                <div className="space-y-0.5">
+                  {section.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeTab === item.id;
-                    const isHighlight = item.highlight;
-
-                    let buttonClasses = 'text-slate-600 hover:bg-slate-50';
-                    if (isActive) {
-                      buttonClasses = isHighlight
-                        ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white shadow-md'
-                        : 'bg-brand-700 text-white';
-                    } else if (isHighlight) {
-                      buttonClasses = 'bg-emerald-50 hover:bg-emerald-100 text-emerald-950 border-2 border-emerald-300 font-bold';
-                    }
 
                     return (
                       <button
                         key={item.id}
-                        onClick={() => {
-                          setActiveTab(item.id as any);
-                          setMobileSidebarOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between p-3 rounded-2xl text-xs font-semibold transition-all ${buttonClasses}`}
+                        onClick={() => setActiveTab(item.id as any)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer group ${
+                          isActive
+                            ? 'bg-brand-700 text-white shadow-xs font-bold'
+                            : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 font-medium'
+                        }`}
                       >
-                        <div className="flex items-center gap-3">
-                          <Icon className={`w-4 h-4 ${
-                            isActive ? 'text-white' : isHighlight ? 'text-emerald-700' : 'text-slate-400'
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <Icon className={`w-4 h-4 shrink-0 transition-colors ${
+                            isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-700'
                           }`} />
-                          <span>{item.label}</span>
+                          <span className="truncate text-left">{item.label}</span>
                         </div>
                         {item.badge !== undefined && item.badge !== '' && (
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                            isActive ? 'bg-white text-emerald-800' : (item.badgeStyle || 'bg-brand-100 text-brand-800')
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ml-1.5 ${
+                            isActive 
+                              ? 'bg-white/20 text-white font-bold' 
+                              : (item.badgeStyle || 'bg-slate-100 text-slate-600')
                           }`}>
                             {item.badge}
                           </span>
@@ -519,13 +499,112 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                   })}
                 </div>
               </div>
+            ))}
+          </div>
 
-              <div className="pt-3 border-t border-slate-100">
-                <button
-                  onClick={onBackToWebsite}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5"
+          {/* Quick Help Card */}
+          <div className="bg-gradient-to-br from-brand-900 to-navy-950 p-4 rounded-2xl text-white space-y-1.5 shadow-md">
+            <div className="flex items-center gap-1.5 text-amber-300 text-xs font-bold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Admissions Support</span>
+            </div>
+            <p className="text-xs text-brand-200">
+              Helpline: <strong>+91 7417268651</strong>
+            </p>
+            <p className="text-[11px] text-slate-400">
+              Auto-syncs with Razorpay & Student Portal.
+            </p>
+          </div>
+        </aside>
+
+        {/* Mobile Drawer */}
+        {mobileSidebarOpen && (
+          <div className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-xs md:hidden flex animate-fadeIn">
+            {/* Backdrop click to dismiss */}
+            <div 
+              className="absolute inset-0"
+              onClick={() => setMobileSidebarOpen(false)}
+            />
+
+            <div className="relative z-10 bg-white w-80 max-w-[85vw] h-full flex flex-col shadow-2xl animate-slideRight">
+              {/* Drawer Header */}
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-brand-700 flex items-center justify-center text-white shadow-xs">
+                    <GraduationCap className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="font-extrabold text-sm text-slate-900 block leading-tight">Admin Console</span>
+                    <span className="text-[10px] text-slate-400 font-medium block">Dr. Ankita Bisht Academy</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setMobileSidebarOpen(false)} 
+                  className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Close Navigation"
                 >
-                  <span>Back to Website</span>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Scrollable Navigation Body */}
+              <div className="flex-1 overflow-y-auto p-3 space-y-4">
+                {navSections.map((section) => (
+                  <div key={section.title} className="space-y-1">
+                    <div className="text-[10px] font-bold tracking-wider uppercase text-slate-400 px-3 pt-1 pb-0.5">
+                      {section.title}
+                    </div>
+                    <div className="space-y-0.5">
+                      {section.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => {
+                              setActiveTab(item.id as any);
+                              setMobileSidebarOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? 'bg-brand-700 text-white shadow-xs font-bold'
+                                : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100/80 font-medium active:bg-slate-200'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Icon className={`w-4 h-4 shrink-0 ${
+                                isActive ? 'text-white' : 'text-slate-400'
+                              }`} />
+                              <span className="truncate text-left">{item.label}</span>
+                            </div>
+                            {item.badge !== undefined && item.badge !== '' && (
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ml-1.5 ${
+                                isActive 
+                                  ? 'bg-white/20 text-white font-bold' 
+                                  : (item.badgeStyle || 'bg-slate-100 text-slate-600')
+                              }`}>
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Drawer Footer */}
+              <div className="p-3 border-t border-slate-100 bg-slate-50/50 space-y-2">
+                <button
+                  onClick={() => {
+                    setMobileSidebarOpen(false);
+                    onBackToWebsite();
+                  }}
+                  className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                >
+                  <span>View Public Website</span>
                   <ExternalLink className="w-3.5 h-3.5" />
                 </button>
               </div>
