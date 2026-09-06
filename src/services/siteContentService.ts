@@ -97,29 +97,29 @@ export interface SiteContentConfig {
 }
 
 export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
-  version: 1,
+  version: 2,
   lastUpdated: new Date().toISOString(),
   announcement: {
     enabled: true,
     badgeText: 'ADMISSIONS OPEN 🔥',
-    headline: '⚡ New 2026 Target Batches (UGC NET Paper 1 & CDP 30/30) Starting Soon! Flat 50% Scholarship',
+    headline: '⚡ New 2026 Target Batches (UGC NET Paper 1 & CDP 30/30) Starting Soon! Learn from Central University Gold Medalist',
     buttonText: 'Book Free Demo',
     buttonAction: 'demo_modal'
   },
   hero: {
-    topBadge: '🌟 #1 Trusted Online Academy for UGC NET & Pedagogy',
+    topBadge: '🌟 Rank 1 Gold Medalist & Asst. Professor (Central University)',
     mainTitleLine1: 'Crack UGC NET, CDP & Research',
     mainTitleGradient: 'In First Attempt',
-    description: 'Learn directly from Dr. Ankita Bisht (Ph.D., UGC NET JRF, Gold Medalist). Live interactive classes, high-yield PDF notes, NTA CBT mock test series & personalized 1-on-1 mentorship.',
-    primaryButtonText: 'Explore 2026 Masterclasses',
+    description: 'Transform your preparation with Online Live Classes, 24/7 Recorded Lectures, bilingual High-Yield PDF Notes, NTA CBT Mock Tests, and personal 1-on-1 Mentorship by Dr. Ankita Bisht (Ph.D. Home Science 2024, UGC-NET Qualified, Assistant Professor HNBGU).',
+    primaryButtonText: 'Explore 2026 Batches',
     secondaryButtonText: 'Book Free Live Demo',
     trustStats: [
-      { value: '15,000+', label: 'Aspirants Mentored' },
-      { value: '94.8%', label: 'Exam Success Rate' },
-      { value: '88+', label: 'Avg. Paper 1 Score' },
-      { value: '100%', label: 'Live Doubt Support' }
+      { value: 'Ph.D. (2024)', label: 'Doctoral Degree' },
+      { value: 'Rank 1', label: 'University Gold Medalist' },
+      { value: '8+ Papers', label: 'UGC-CARE Published' },
+      { value: '15,000+', label: 'Students Mentored' }
     ],
-    educatorBadge: 'Dr. Ankita Bisht (Ph.D., Gold Medalist)',
+    educatorBadge: 'Dr. Ankita Bisht (Ph.D., Gold Medalist, Asst. Professor)',
     photoUrl: '/images/ankita-photo.png'
   },
   courses: {
@@ -131,25 +131,27 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
   about: {
     sectionBadge: 'Meet Your Chief Educator',
     name: 'Dr. Ankita Bisht',
-    headline: 'Ph.D., UGC NET JRF Qualified, University Gold Medalist & Senior Academic Mentor',
+    headline: 'Assistant Professor (Guest Faculty), Central University • Ph.D. in Home Science (2024) • Rank 1 Gold Medalist • UGC-NET Qualified',
     bioParagraphs: [
-      'Dr. Ankita Bisht is an accomplished educator, author, and researcher with over a decade of specialized experience in preparing aspirants for UGC NET General Paper 1, Child Development & Pedagogy (CDP 30/30), and advanced Research Methodology with SPSS data analysis.',
-      'Having mentored over 15,000 students across India, her pedagogy focuses on dismantling complex theoretical concepts into visual memory frameworks, logical reasoning shortcuts, and practical real-world analogies.',
-      'Her mission is to provide affordable, highest-quality higher education coaching to every aspiring Assistant Professor, Ph.D. scholar, and school educator nationwide.'
+      'Hello and welcome! I am Dr. Ankita Bisht. I serve as an Assistant Professor (Guest Faculty) in the Department of Home Science at H.N.B. Garhwal Central University, Srinagar Garhwal, Uttarakhand (2023–2026).',
+      'Having earned my Ph.D. in Home Science (2024), M.A. in Education (2026), and B.Ed. (2015), along with achieving Rank 1 Gold Medalist honours in M.A. Home Science (8.4 CGPA) and UGC-NET qualification, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams with top percentiles.',
+      'I am also the published author of the academic research book “समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका” and have published 8+ research papers in UGC-CARE Listed and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.'
     ],
     qualifications: [
-      'Ph.D. in Education & Applied Sciences',
-      'UGC NET JRF Qualified (Top Percentile Ranker)',
-      'University Gold Medalist in Post-Graduation',
-      'Author of multiple UGC-CARE indexed research papers & academic books',
-      '10+ Years of proven teaching & mentorship track record'
+      'Assistant Professor (Guest Faculty), HNB Garhwal Central University (2023-2026)',
+      'Doctoral Qualification: Ph.D. in Home Science (2024), H.N.B. Garhwal University',
+      'Education Degrees: M.A. Education (2026) & B.Ed. (2015)',
+      'Academic Distinction: Rank 1 - Gold Medalist (M.A. Home Science 2018, 8.4 CGPA)',
+      'National Milestone: UGC-NET Qualified (NTA) in Home Science (2020)',
+      'Published Author: Book "समृद्ध स्त्रियां, समृद्ध समाज" & 8+ UGC-CARE Papers',
+      'Researcher Profiles: ORCID (0009-0008-5085-3278) & Academia.edu Verified'
     ],
     photoUrl: '/images/ankita-photo.png',
     stats: [
-      { value: '10+ Years', label: 'Teaching Experience' },
-      { value: '15,000+', label: 'Successful Students' },
-      { value: '250+', label: 'JRF & NET Selections' },
-      { value: '98%', label: 'Positive Feedback' }
+      { value: 'Ph.D. (2024)', label: 'Doctoral Degree' },
+      { value: 'Rank 1', label: 'Gold Medalist' },
+      { value: '8+ Papers', label: 'UGC-CARE Published' },
+      { value: '15,000+', label: 'Aspirants Guided' }
     ]
   },
   features: {
@@ -181,8 +183,8 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
   },
   resources: {
     sectionBadge: '100% Free Study Material',
-    sectionTitle: 'Download High-Yield PDF Notes & Solved PYQs',
-    sectionSubtitle: 'Free sample revision notes, formula sheets, and past year question papers to supercharge your preparation.',
+    sectionTitle: 'Free High-Yield Notes, Solved PYQs & Practice Hub',
+    sectionSubtitle: 'Boost your daily preparation with curated revision mindmaps, solved exam archives, and diagnostic tests.',
     resources: resourcesData
   },
   testimonials: {
@@ -205,7 +207,7 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
     email: 'contact@learnwithdrankita.com',
     address: 'Kanoth, Uttarakhand, India - 246149',
     youtubeUrl: 'https://youtube.com/@learnwithdrankita',
-    telegramUrl: 'https://t.me/DrAnkitaBishtUGC',
+    telegramUrl: 'https://t.me/drankitaeducator',
     instagramUrl: 'https://instagram.com/learnwithdrankita',
     footerCopyright: '© 2026 Dr. Ankita Bisht Academic Academy. All rights reserved.'
   }
@@ -223,6 +225,11 @@ export const SiteContentService = {
     }
     try {
       const parsed = JSON.parse(local);
+      // Auto-migrate if older version or empty
+      if (!parsed.version || parsed.version < 2) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_SITE_CONTENT));
+        return DEFAULT_SITE_CONTENT;
+      }
       // Merge with defaults to ensure all keys exist
       return {
         ...DEFAULT_SITE_CONTENT,
@@ -246,6 +253,7 @@ export const SiteContentService = {
     if (typeof window === 'undefined') return;
     const updated = {
       ...config,
+      version: 2,
       lastUpdated: new Date().toISOString()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -256,7 +264,7 @@ export const SiteContentService = {
       const res = await fetch('/api/site-content');
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.content) {
+        if (data.success && data.content && data.content.version >= 2) {
           this.setSiteContent(data.content);
           return this.getSiteContent();
         }
@@ -273,7 +281,7 @@ export const SiteContentService = {
       const res = await fetch('/api/site-content', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: config })
+        body: JSON.stringify({ content: { ...config, version: 2 } })
       });
       return res.ok;
     } catch (e) {
@@ -286,6 +294,12 @@ export const SiteContentService = {
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_SITE_CONTENT));
     }
+    // Automatically trigger cloud update
+    fetch('/api/site-content', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: DEFAULT_SITE_CONTENT })
+    }).catch(() => {});
     return DEFAULT_SITE_CONTENT;
   }
 };

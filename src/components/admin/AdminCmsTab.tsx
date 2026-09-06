@@ -54,11 +54,23 @@ export const AdminCmsTab: React.FC = () => {
     });
   };
 
-  const handleReset = () => {
-    if (confirm('Are you sure you want to reset all website sections to default settings? Any unsaved edits will be restored to factory defaults.')) {
+  const handleReset = async () => {
+    if (confirm('Kya aap Dr. Ankita Bisht ki authentic CV details (Ph.D. Home Science 2024, Assistant Professor Central University, Gold Medalist, Published Book & Research Papers, 6 Batches, Contact info) ko restore karke Live website par publish karna chahte hain?')) {
       const defaults = resetToDefaults();
       setFormData(defaults);
-      alert('Website content reset to factory defaults.');
+      setIsPublishing(true);
+      await publishContent(defaults);
+      setIsPublishing(false);
+      setPublishSuccess(true);
+      setTimeout(() => setPublishSuccess(false), 3000);
+      try {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {}
+      alert('✅ Dr. Ankita Bisht ki complete verified CV information successfully restore aur live website par publish ho chuki hai!');
     }
   };
 
@@ -95,11 +107,11 @@ export const AdminCmsTab: React.FC = () => {
         <div className="flex items-center gap-3 z-10 flex-wrap">
           <button
             onClick={handleReset}
-            className="bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white text-xs font-semibold px-3.5 py-2.5 rounded-xl border border-white/10 transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Reset to default text"
+            className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 hover:text-amber-200 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-amber-500/40 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Restore official CV details from Dr. Ankita Bisht resume"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Defaults</span>
+            <span>🔄 Restore Official CV Details</span>
           </button>
 
           <a
