@@ -6,7 +6,8 @@ import {
   MapPin, 
   Send, 
   Heart,
-  ArrowRight
+  ArrowRight,
+  BookOpen
 } from 'lucide-react';
 
 interface FooterProps {
@@ -43,27 +44,25 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                   Dr. Ankita Bisht
                 </span>
                 <p className="text-xs text-brand-300 font-medium">
-                  UGC NET &amp; Pedagogy Master Academy
+                  Assistant Professor &amp; Gold Medalist (Home Science &amp; NET)
                 </p>
               </div>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
-              India's dedicated academic platform for UGC NET Paper 1, Research Methodology, Child Development &amp; Pedagogy (CDP), and Educational Psychology. Over 15,000+ mentored scholars across India.
+              Academic mentorship platform led by Dr. Ankita Bisht (Ph.D., UGC-NET, HNB Garhwal Central University). Specializing in UGC NET Home Science (All 5 Branches), Paper 1 General, Research Methodology &amp; SPSS, and CDP.
             </p>
 
             {/* Social Channels with SVG icons */}
             <div className="pt-2 flex items-center gap-2.5">
               <a 
-                href="https://youtube.com" 
+                href="https://uttara.academia.edu/AnkitaBisht" 
                 target="_blank" 
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-rose-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
-                title="YouTube Channel"
+                className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-brand-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
+                title="Academia.edu Profile"
               >
-                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
+                <BookOpen className="w-4 h-4" />
               </a>
               <a 
                 href="https://t.me" 
@@ -86,14 +85,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 </svg>
               </a>
               <a 
-                href="https://linkedin.com" 
+                href="https://youtube.com" 
                 target="_blank" 
                 rel="noreferrer"
-                className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-blue-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
-                title="LinkedIn Profile"
+                className="w-9 h-9 rounded-xl bg-slate-900 hover:bg-rose-600 hover:text-white border border-slate-800 flex items-center justify-center text-slate-400 transition-colors"
+                title="YouTube Channel"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
-                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
               </a>
             </div>
@@ -136,22 +135,22 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Home Science (Code 12)</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1 General</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">CDP Super Batch (30/30)</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Child Development (CDP 30/30)</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Educational Psychology</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Food Science &amp; Nutrition</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Teaching Aptitude</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology &amp; SPSS</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Paper 2 Education</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Extension Education &amp; SHGs</a>
               </li>
             </ul>
           </div>
@@ -168,11 +167,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
               </div>
               <div className="flex items-start gap-2">
                 <Mail className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>admissions@ugcnetpedagogy.com</span>
+                <span>abbisht241@gmail.com</span>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" />
-                <span>Knowledge Park, New Delhi, India</span>
+                <span>Srinagar Garhwal, Uttarakhand, India</span>
               </div>
             </div>
 
@@ -191,14 +190,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
 
         {/* SEO Keywords Cloud */}
         <div className="py-6 border-b border-slate-900 text-[11px] text-slate-500 leading-relaxed">
-          <strong className="text-slate-400 font-semibold">Popular Keywords: </strong>
-          UGC NET Coaching • UGC NET Online Classes • Research Methodology Classes • CDP Classes • Child Development and Pedagogy • Educational Psychology • Teaching Aptitude Preparation • UGC NET Paper 1 Coaching • Online NET Preparation • Pedagogy Classes • CTET Pedagogy 30/30 • Assistant Professor Screening Coaching.
+          <strong className="text-slate-400 font-semibold">Specialized Areas: </strong>
+          UGC NET Home Science Coaching • UGC NET Paper 1 Classes • Research Methodology &amp; SPSS • Child Development and Pedagogy • Food and Nutrition Dietetics • Extension Education &amp; Self-Help Groups • Clothing and Textiles • Home Management • Assistant Professor Home Science Coaching • CTET CDP 30/30 • Ph.D. Entrance PET Preparation.
         </div>
 
         {/* Bottom Bar: Copyright and Legal links */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <div>
-            © {currentYear} Dr. Ankita Bisht UGC NET &amp; Pedagogy Academy. All rights reserved.
+            © {currentYear} Dr. Ankita Bisht Academic Academy. All rights reserved.
           </div>
           <div className="flex items-center gap-4">
             <button

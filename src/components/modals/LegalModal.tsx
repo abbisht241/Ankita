@@ -59,7 +59,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, type, onClose })
               </p>
               <h4 className="font-bold text-slate-900">4. Contacting Our Data Privacy Officer</h4>
               <p>
-                For questions regarding data removal or privacy preferences, contact us at <code>privacy@ugcnetpedagogy.com</code>.
+                For questions regarding data removal or privacy preferences, contact us at <code>abbisht241@gmail.com</code>.
               </p>
             </>
           ) : (
@@ -73,7 +73,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, type, onClose })
               </p>
               <h4 className="font-bold text-slate-900">2. Intellectual Property Rights</h4>
               <p>
-                All lectures, slide decks, PDF mindmaps, question banks, and video recordings are the exclusive intellectual property of Dr. Ankita Bisht and EduPrerna Academy. Reproduction or unauthorized redistribution will result in immediate termination of access and legal action.
+                All lectures, slide decks, PDF mindmaps, question banks, and video recordings are the exclusive intellectual property of Dr. Ankita Bisht. Reproduction or unauthorized redistribution will result in immediate termination of access and legal action.
               </p>
               <h4 className="font-bold text-slate-900">3. Live Class Conduct &amp; Community Guidelines</h4>
               <p>

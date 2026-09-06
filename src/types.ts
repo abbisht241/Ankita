@@ -2,7 +2,7 @@ export interface Course {
   id: string;
   title: string;
   slug: string;
-  category: 'UGC NET' | 'Research' | 'Pedagogy & CDP' | 'Psychology';
+  category: string;
   badge?: string;
   isPopular?: boolean;
   shortDesc: string;
@@ -49,8 +49,8 @@ export interface Testimonial {
 export interface Resource {
   id: string;
   title: string;
-  category: 'UGC NET Paper 1' | 'Research Methodology' | 'CDP & Pedagogy' | 'Educational Psychology' | 'PYQ Papers';
-  type: 'PDF Notes' | 'PYQ Solved' | 'Mindmap' | 'Formula Sheet' | 'E-Book';
+  category: string;
+  type: string;
   fileSize: string;
   pageCount: number;
   downloadCount: string;

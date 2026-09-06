@@ -3,9 +3,9 @@ import type { QuizQuestion } from '../types';
 export const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
-    subject: 'Research Methodology',
-    topic: 'Hypothesis Testing & Errors',
-    question: 'A researcher rejects a null hypothesis (H₀) when it is actually true in reality. Which type of error has been committed by the researcher?',
+    subject: 'UGC NET Home Science & Research',
+    topic: 'SPSS & Hypothesis Testing',
+    question: 'A researcher rejects a null hypothesis (H₀) when it is actually true in the population. Which type of error has been committed by the researcher?',
     options: [
       'Type I Error (Alpha Error)',
       'Type II Error (Beta Error)',
@@ -13,12 +13,12 @@ export const quizQuestions: QuizQuestion[] = [
       'Systematic Measurement Error'
     ],
     correctIndex: 0,
-    explanation: 'Type I error (denoted by alpha α) occurs when a true null hypothesis is incorrectly rejected (false positive). Type II error (beta β) occurs when a false null hypothesis is not rejected (false negative).',
+    explanation: 'Type I error (denoted by alpha α) occurs when a true null hypothesis is incorrectly rejected (false positive). In SPSS testing, this is checked against the chosen significance level (typically p < 0.05).',
     difficulty: 'Medium'
   },
   {
     id: 2,
-    subject: 'Child Development & Pedagogy',
+    subject: 'Child / Human Development (CDP)',
     topic: 'Vygotsky Socio-Cultural Theory',
     question: 'According to Lev Vygotsky, the gap between what a child can do independently and what they can achieve with guidance from a competent adult or peer is termed as:',
     options: [
@@ -33,7 +33,37 @@ export const quizQuestions: QuizQuestion[] = [
   },
   {
     id: 3,
-    subject: 'Teaching Aptitude',
+    subject: 'Food Science & Nutrition',
+    topic: 'RDA 2020 & Maternal Health',
+    question: 'According to ICMR-NIN RDA 2020 guidelines, what is the additional daily protein requirement recommended during the second and third trimesters of pregnancy in India?',
+    options: [
+      '+5.5 g/day (2nd Trim) & +15.5 g/day (3rd Trim)',
+      '+9.5 g/day (2nd Trim) & +22.0 g/day (3rd Trim)',
+      '+18.0 g/day for both trimesters',
+      '+2.0 g/day during pregnancy'
+    ],
+    correctIndex: 1,
+    explanation: 'As per ICMR-NIN RDA 2020 recommendations for an adult reference woman, the additional protein requirement during pregnancy is +9.5 g/day in the second trimester and +22.0 g/day in the third trimester for fetal tissue growth.',
+    difficulty: 'Medium'
+  },
+  {
+    id: 4,
+    subject: 'Extension Education & Community Development',
+    topic: 'Self-Help Groups (SHGs)',
+    question: 'Which of the following is the primary principle behind the formation of Self-Help Groups (SHGs) for rural women empowerment?',
+    options: [
+      'Compulsory government subsidy without personal savings',
+      'Homogeneous group affinity, voluntary regular savings & mutual internal lending',
+      'Commercial banking collateral requirements',
+      'External contractor-driven decision making'
+    ],
+    correctIndex: 1,
+    explanation: 'Self-Help Groups (SHGs) are voluntary associations of 10-20 homogeneous rural women who pool small regular savings, practice internal lending for emergency & entrepreneurial needs, and build collective socio-economic empowerment.',
+    difficulty: 'Easy'
+  },
+  {
+    id: 5,
+    subject: 'UGC NET Paper 1 - Teaching Aptitude',
     topic: 'Levels of Teaching',
     question: 'Which level of teaching aims at developing problem-solving abilities, critical thinking, and independent cognitive inquiry among students?',
     options: [
@@ -45,35 +75,5 @@ export const quizQuestions: QuizQuestion[] = [
     correctIndex: 2,
     explanation: 'Reflective Level of teaching (formulated by Hunt) is the highest, most thoughtful level of teaching where students analyze problems, formulate hypotheses, and critically evaluate real-life situations.',
     difficulty: 'Medium'
-  },
-  {
-    id: 4,
-    subject: 'Educational Psychology',
-    topic: 'Operant Conditioning',
-    question: 'In B.F. Skinner\'s Operant Conditioning, which schedule of reinforcement yields the highest and most consistent response rate with the strongest resistance to extinction?',
-    options: [
-      'Fixed Interval Schedule (FI)',
-      'Fixed Ratio Schedule (FR)',
-      'Variable Interval Schedule (VI)',
-      'Variable Ratio Schedule (VR)'
-    ],
-    correctIndex: 3,
-    explanation: 'Variable Ratio (VR) schedule provides reinforcement after an unpredictable number of responses. It generates the highest rate of steady responding and is extremely resistant to extinction (e.g., gambling, surprise class praises).',
-    difficulty: 'Advanced'
-  },
-  {
-    id: 5,
-    subject: 'UGC NET Paper 1 - Evaluation',
-    topic: 'Assessment Systems',
-    question: 'An evaluation conducted throughout the instructional process to monitor student learning progress and provide ongoing feedback to improve teaching-learning is known as:',
-    options: [
-      'Summative Evaluation',
-      'Formative Evaluation',
-      'Norm-Referenced Evaluation',
-      'Prognostic Evaluation'
-    ],
-    correctIndex: 1,
-    explanation: 'Formative Assessment is diagnostic, continuous, and process-oriented conducted DURING instruction to identify learning gaps, unlike Summative Assessment which occurs at the END of instruction for grading.',
-    difficulty: 'Easy'
   }
 ];

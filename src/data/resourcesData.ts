@@ -3,32 +3,68 @@ import type { Resource } from '../types';
 export const resourcesData: Resource[] = [
   {
     id: 'res-1',
-    title: 'Research Methodology 50 Golden Concepts & Formula Sheet',
-    category: 'Research Methodology',
-    type: 'PDF Notes',
-    fileSize: '4.8 MB',
-    pageCount: 32,
-    downloadCount: '18,400+ Downloads',
+    title: 'UGC NET Home Science (Code 12) 5-Branch Master Mindmap & Formula Book',
+    category: 'Home Science',
+    type: 'Mindmap',
+    fileSize: '8.4 MB',
+    pageCount: 52,
+    downloadCount: '21,400+ Downloads',
     isPopular: true,
-    description: 'High-yield revision capsule covering Research Types, Parametric vs Non-Parametric Tests, Sampling Techniques, Types of Validity & APA 7th Referencing rules.',
+    description: 'Complete high-yield revision capsule covering all 5 branches: Food & Nutrition, Textiles, Resource Management, Human Development & Extension Education.',
     topicsCovered: [
-      'Positivism vs Post-Positivism comparison chart',
-      't-test, ANOVA, Chi-Square decision tree',
-      'Internal vs External Validity threats',
-      'APA 7th referencing quick table'
+      'RDA 2020 Nutritional Nutrient Requirements Table',
+      'Textile Fibers, Weaving & Chemical Finishing Comparison Matrix',
+      'Human Development Lifespan Stages & Developmental Milestones',
+      'Extension Education Models, PRA Tools & SHG Frameworks'
     ],
-    previewSnippet: 'Hypothesis Testing Framework: When sample size is small (<30) and population standard deviation is unknown, use Student\'s t-distribution. Type I error (alpha) = Rejecting null hypothesis when true. Type II error (beta) = Failing to reject null hypothesis when false.'
+    previewSnippet: 'RDA 2020 Reference: Reference Man (65 kg) & Reference Woman (55 kg). Moderate work energy requirement for adult woman = 2130 kcal/day, Protein = 46 g/day (0.83 g/kg/day). ICMR-NIN 2020 latest guidelines.'
   },
   {
     id: 'res-2',
+    title: 'Research Methodology & SPSS Statistical Tests Decision Tree',
+    category: 'Research Methodology',
+    type: 'Formula Sheet',
+    fileSize: '4.6 MB',
+    pageCount: 34,
+    downloadCount: '19,800+ Downloads',
+    isPopular: true,
+    description: 'Visual step-by-step flowchart to choose between t-test, ANOVA, Chi-Square, Pearson r, Mann-Whitney U, and Regression in SPSS with APA 7th reporting.',
+    topicsCovered: [
+      'Parametric vs Non-Parametric Test Selection Matrix',
+      'SPSS Output Interpretation: p-value, F-ratio, t-value, Effect Size',
+      'Formulating Null (H0) vs Alternative (H1) Hypotheses',
+      'UGC Plagiarism Regulations 2018 (Levels 0-3 Penalties)'
+    ],
+    previewSnippet: 'SPSS Decision Rule: If p-value (Sig. 2-tailed) < 0.05, reject the Null Hypothesis (H0) and conclude a statistically significant difference/relationship exists between the study groups at 95% confidence level.'
+  },
+  {
+    id: 'res-3',
+    title: 'Child / Human Development & Pedagogy (CDP) 100 Theorists Mindmap',
+    category: 'CDP & Pedagogy',
+    type: 'PDF Notes',
+    fileSize: '6.2 MB',
+    pageCount: 30,
+    downloadCount: '26,500+ Downloads',
+    isPopular: true,
+    description: 'Visual color-coded mindmaps for Piaget’s 4 stages, Vygotsky’s ZPD & Scaffolding, Kohlberg’s moral stages, Erikson’s psychosocial crises, and RPWD Act 2016.',
+    topicsCovered: [
+      'Piagetian concepts: Assimilation, Accommodation, Schema, Conservation',
+      'Vygotsky Socio-Cultural Theory vs Piaget Comparative Table',
+      'Howard Gardner 8 Multiple Intelligences with classroom applications',
+      'RPWD Act 2016 (21 Disability Conditions & Pedagogical Adaptations)'
+    ],
+    previewSnippet: 'Vygotsky\'s Zone of Proximal Development (ZPD): The distance between the actual developmental level determined by independent problem solving and the potential developmental level achieved under adult guidance or with more capable peers (MKO).'
+  },
+  {
+    id: 'res-4',
     title: 'UGC NET Paper 1 Solved PYQ Compilation (2020-2024)',
-    category: 'PYQ Papers',
+    category: 'Paper 1 General',
     type: 'PYQ Solved',
     fileSize: '12.4 MB',
     pageCount: 140,
-    downloadCount: '24,200+ Downloads',
+    downloadCount: '28,200+ Downloads',
     isPopular: true,
-    description: 'Unit-wise sorted Previous Year Questions with step-by-step detailed explanations, option elimination rationale, and trend analysis for the upcoming exam.',
+    description: 'Unit-wise sorted Previous Year Questions with step-by-step detailed explanations, option elimination rationale, and trend analysis for upcoming NTA CBT exams.',
     topicsCovered: [
       'Unit 1 Teaching Aptitude (120+ Solved PYQs)',
       'Unit 2 Research Aptitude (110+ Solved PYQs)',
@@ -38,57 +74,39 @@ export const resourcesData: Resource[] = [
     previewSnippet: 'Question: In the Classical Square of Opposition, if statement "All swans are white" (A) is true, what is the truth value of "Some swans are not white" (O)? Answer: Contradictory proposition — therefore "O" is definitely FALSE.'
   },
   {
-    id: 'res-3',
-    title: 'Child Development & Pedagogy (CDP) 100 Key Theorists Mindmap',
-    category: 'CDP & Pedagogy',
-    type: 'Mindmap',
-    fileSize: '6.2 MB',
-    pageCount: 28,
-    downloadCount: '15,800+ Downloads',
-    isPopular: true,
-    description: 'Visual color-coded mindmaps for Piaget’s 4 stages, Vygotsky’s ZPD & Scaffolding, Kohlberg’s 6 stages of moral development, and Erikson’s psychosocial stages.',
-    topicsCovered: [
-      'Piagetian concepts: Assimilation, Accommodation, Schema, Conservation',
-      'Vygotsky vs Piaget core differences table',
-      'Howard Gardner 8 Multiple Intelligences with classroom applications',
-      'RPWD Act 2016 21 disability conditions summary'
-    ],
-    previewSnippet: 'Vygotsky\'s Zone of Proximal Development (ZPD): The distance between actual developmental level determined by independent problem solving and level of potential development determined through problem solving under adult guidance or in collaboration with more capable peers.'
-  },
-  {
-    id: 'res-4',
-    title: 'Teaching Aptitude Bloom’s Revised Taxonomy & Maxims Cheat Sheet',
-    category: 'UGC NET Paper 1',
-    type: 'Formula Sheet',
-    fileSize: '3.1 MB',
-    pageCount: 18,
-    downloadCount: '11,300+ Downloads',
-    isPopular: false,
-    description: 'Concise summary of Bloom’s Taxonomy verbs, Micro-teaching 36-minute cycle, Evaluation types (Formative, Summative, Diagnostic, Ipsative), and ICT in education.',
-    topicsCovered: [
-      'Bloom\'s cognitive domain action verbs for question design',
-      'Microteaching 6-step cycle with exact time distribution',
-      'Evaluation types: Norm vs Criterion referenced comparison',
-      'SWAYAM, SWAYAM PRABHA & MOOCs quadrant architecture'
-    ],
-    previewSnippet: 'Micro-Teaching Time Breakdown (NCERT Standard 36 Mins): Teach (6m) -> Feedback (6m) -> Re-plan (12m) -> Re-teach (6m) -> Re-feedback (6m). Developed by Dwight W. Allen at Stanford.'
-  },
-  {
     id: 'res-5',
-    title: 'Educational Psychology Core Thinkers & Learning Laws Handbook',
-    category: 'Educational Psychology',
+    title: 'Food Science & Therapeutic Nutrition Clinical Diets Handbook',
+    category: 'Nutrition & Health',
     type: 'E-Book',
-    fileSize: '8.5 MB',
-    pageCount: 64,
-    downloadCount: '9,900+ Downloads',
+    fileSize: '7.8 MB',
+    pageCount: 48,
+    downloadCount: '14,300+ Downloads',
     isPopular: false,
-    description: 'In-depth study handbook covering Thorndike’s Laws of Learning, Skinner’s Operant Conditioning schedules, Maslow’s hierarchy, and memory processing models.',
+    description: 'In-depth nutritional manual covering Dietary Management of Diabetes, Hypertension, Renal diseases, Maternal Nutrition programs & POSHAN 2.0 metrics.',
     topicsCovered: [
-      'Thorndike Primary Laws: Readiness, Exercise, and Effect',
-      'Reinforcement Schedules: Fixed Ratio, Variable Ratio, Fixed Interval, Variable Interval',
-      'Atkinson-Shiffrin Multi-Store Memory Model',
-      'Ego Defense Mechanisms in educational contexts'
+      'Glycemic Index & Glycemic Load of Indian Foods Table',
+      'Dietary Modifications for Renal & Cardiovascular Patients',
+      'Assessment of Nutritional Status (Anthropometry, Biochemical, ABCD)',
+      'National Nutrition Programs (ICDS, Mid-Day Meal, PMMVY, Anemia Mukt Bharat)'
     ],
-    previewSnippet: 'Operant Conditioning: Variable Ratio (VR) schedule produces the highest rate of steady responding and greatest resistance to extinction (e.g., slot machines, lottery, random classroom surprise quizzes).'
+    previewSnippet: 'Therapeutic Diet for Chronic Kidney Disease (CKD): Protein intake restricted to 0.6-0.8 g/kg body weight with high biological value (HBV) proteins, alongside controlled Potassium and Phosphorus levels.'
+  },
+  {
+    id: 'res-6',
+    title: 'Self-Help Groups (SHGs) & Extension Education Field Guide',
+    category: 'Extension & Women Studies',
+    type: 'Field Guide',
+    fileSize: '5.2 MB',
+    pageCount: 36,
+    downloadCount: '11,100+ Downloads',
+    isPopular: false,
+    description: 'Key insights from Dr. Ankita Bisht’s published book on Self-Help Groups in Uttarakhand, Women Empowerment, PRA Tools, and Rural Development Schemes.',
+    topicsCovered: [
+      'Structure, Functioning & Microfinance of SHGs in India',
+      'Participatory Rural Appraisal (PRA) Techniques & Mapping',
+      'Audio-Visual Media Classification & Communication Models',
+      'DAY-NRLM, PMKVY, and Rural Women Entrepreneurship Models'
+    ],
+    previewSnippet: 'Self-Help Groups (SHGs): Affinity-based homogenous groups of 10-20 rural women practicing voluntary small savings, internal lending, and collective decision making for sustainable socio-economic empowerment.'
   }
 ];

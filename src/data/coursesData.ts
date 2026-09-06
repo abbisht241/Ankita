@@ -2,10 +2,105 @@ import type { Course } from '../types';
 
 export const coursesData: Course[] = [
   {
+    id: 'ugc-net-home-science',
+    title: 'UGC NET Home Science (Paper 2 Complete Masterclass - Code 12)',
+    slug: 'ugc-net-home-science-masterclass',
+    category: 'Home Science',
+    badge: 'Flagship Batch 🔥',
+    isPopular: true,
+    shortDesc: 'Complete 10-Unit coverage of Home Science (All 5 Branches) designed on latest NTA CBT pattern by Central University Gold Medalist.',
+    fullDesc: 'Master all 10 units of UGC NET Home Science (Code 12) under the direct mentorship of Dr. Ankita Bisht (Ph.D., UGC-NET, Gold Medalist). Covers Food and Nutrition, Clothing and Textiles, Resource Management, Human Development and Family Studies, Extension Education and Communication, along with Research Methods and Statistics.',
+    duration: '5 Months (150+ Hours)',
+    liveHours: '150+ Live Interactive Hours',
+    validity: '1 Year Full Access (Including Recordings)',
+    originalPrice: 9999,
+    price: 4999,
+    rating: 4.98,
+    reviewsCount: 1680,
+    studentCount: '3,850+ Enrolled',
+    medium: 'Bilingual (Hindi + English Explanation & Notes)',
+    targetExams: ['UGC NET JRF Home Science (Code 12)', 'Assistant Professor PSC Exams', 'State SET Home Science', 'Ph.D. Entrance PET / RET'],
+    highlights: [
+      'Comprehensive 10 Units Coverage across all 5 Home Science Branches',
+      'Daily Live Classes with Direct Audio/Chat Doubt Resolution',
+      'High-Yield Unit-wise Bilingual PDF Mindmaps & Formula Sheets',
+      '25+ Full Length NTA CBT Mock Tests with Instant Analytical Ranking',
+      '10-Year Topic-wise PYQ Breakdown (2014 to 2024 Cycles)'
+    ],
+    keyBenefits: [
+      'Target 150+ marks in Paper 2 Home Science to secure Top All India Rank in JRF',
+      'Clear tough concepts in Textile Chemistry, Food Science, and Nutritional Biochemistry',
+      'Master Extension Education, Audio-Visual Media, and Community Development Models',
+      '1-on-1 personal mentorship and study timetable guidance from Dr. Ankita Bisht'
+    ],
+    syllabusModules: [
+      {
+        unitNumber: 'Unit 1 & 2',
+        unitTitle: 'Food Science & Nutrition and Dietetics',
+        hours: '32 Hours',
+        topics: [
+          'Food Chemistry: Carbohydrates, Lipids, Proteins, Enzymes, Pigments & Food Flavors',
+          'Nutritional Biochemistry: Macro & Micro Nutrients, RDA 2020 guidelines, Metabolism',
+          'Maternal & Child Nutrition, Infant Feeding, Pregnancy & Lactation Dietary Plans',
+          'Therapeutic Nutrition: Diabetes, CVD, Renal, Gastrointestinal & Hepatic disorders',
+          'Community Nutrition, Assessment of Nutritional Status, National Programs (POSHAN 2.0)'
+        ]
+      },
+      {
+        unitNumber: 'Unit 3 & 4',
+        unitTitle: 'Textiles & Apparel Designing',
+        hours: '28 Hours',
+        topics: [
+          'Textile Fibers: Natural & Synthetic, Fiber identification, Polymerization & Spinning',
+          'Yarn Classification, Fabric Construction (Weaving, Knitting, Non-wovens)',
+          'Finishing, Dyeing & Printing: Traditional Indian Textiles, Eco-friendly dyes',
+          'Principles and Elements of Apparel Design, Pattern Making, Fashion Forecasting',
+          'Care and Maintenance of Textiles, Stain removal, Textile testing & Quality control'
+        ]
+      },
+      {
+        unitNumber: 'Unit 5 & 6',
+        unitTitle: 'Resource Management & Consumer Economics',
+        hours: '28 Hours',
+        topics: [
+          'Management Concepts, Systems Approach, Decision Making & Values, Goals, Standards',
+          'Time, Energy and Money Management, Work Simplification (Mundel’s Classes of Change)',
+          'Ergonomics and Housing: Kitchen planning, Space design, Lighting and Ventilation',
+          'Consumer Rights, Consumer Protection Act 2019, Consumer Redressal Forums',
+          'Financial Management: Family Budgets, Savings, Investments, Insurance and Credit'
+        ]
+      },
+      {
+        unitNumber: 'Unit 7 & 8',
+        unitTitle: 'Human Development & Family Studies',
+        hours: '32 Hours',
+        topics: [
+          'Principles of Growth and Development: Prenatal to Late Adulthood Lifespan stages',
+          'Theories of Human Development: Piaget, Erikson, Freud, Kohlberg, Vygotsky, Bowlby',
+          'Family Dynamics, Marriage Systems, Family Counseling & Crisis intervention',
+          'Children with Special Needs (CWSN), Inclusive Education & RPWD Act 2016',
+          'Gerontology: Psychological, Social and Physical aspects of Aging in India'
+        ]
+      },
+      {
+        unitNumber: 'Unit 9 & 10',
+        unitTitle: 'Extension Education & Communication with Research Methods',
+        hours: '30 Hours',
+        topics: [
+          'Extension Systems: Principles, Philosophy, History & Community Development in India',
+          'Communication Models (Aristotle, Berlo, Shannon-Weaver), Media and Audio-Visual Aids',
+          'Self-Help Groups (SHGs), Women Empowerment, Microfinance & Rural Development',
+          'Program Planning, Monitoring, Evaluation and Participatory Rural Appraisal (PRA)',
+          'Research Methods, Sampling Designs, Measurement Scales, SPSS Data Analysis & Ethics'
+        ]
+      }
+    ]
+  },
+  {
     id: 'ugc-net-paper-1',
-    title: 'UGC NET Paper 1 Complete Masterclass (Target 85+ Marks)',
+    title: 'UGC NET Paper 1 Complete General Masterclass (Target 85+ Marks)',
     slug: 'ugc-net-paper-1-masterclass',
-    category: 'UGC NET',
+    category: 'Paper 1 General',
     badge: 'Best Seller 🔥',
     isPopular: true,
     shortDesc: 'Comprehensive 10-Unit preparation designed on latest NTA CBT pattern with concept breakdowns, PYQs & 30+ Mock Tests.',
@@ -104,97 +199,11 @@ export const coursesData: Course[] = [
     ]
   },
   {
-    id: 'research-methodology',
-    title: 'Research Methodology Masterclass (Ph.D. & UGC NET)',
-    slug: 'research-methodology-masterclass',
-    category: 'Research',
-    badge: 'Specialized 🎓',
-    isPopular: true,
-    shortDesc: 'Complete research guide for Ph.D. Entrance, Coursework, Thesis Writing, Quantitative & Qualitative Data Analysis.',
-    fullDesc: 'Designed for Ph.D. scholars, UGC NET aspirants, and university educators. Master qualitative & quantitative research designs, sampling techniques, hypothesis testing (parametric & non-parametric), statistical tools (SPSS/R basics), and academic publishing in SCOPUS/UGC-CARE journals.',
-    duration: '3 Months (60+ Hours)',
-    liveHours: '60+ Live Interactive Hours',
-    validity: '1 Year Full Access',
-    originalPrice: 5999,
-    price: 2999,
-    rating: 4.98,
-    reviewsCount: 890,
-    studentCount: '2,300+ Enrolled',
-    medium: 'Bilingual (English & Hindi)',
-    targetExams: ['Ph.D. Entrance (PET/RET/JNU/DU/BHU/AMU)', 'UGC NET Paper 1 & Paper 2', 'Ph.D. Coursework Exam', 'Research Paper Writing'],
-    highlights: [
-      'Comprehensive Coverage of Positivism, Interpretivism & Mixed Methods',
-      'Step-by-Step Statistical Hypothesis Testing (t-test, ANOVA, Chi-Square, Regression)',
-      'Practical Guide to Writing Research Proposals (Synopsis) for Ph.D. Interviews',
-      'Plagiarism Rules, Turnitin Best Practices & Reference Management (Mendeley/Zotero)',
-      '1-on-1 Synopsis / Research Proposal Review Session'
-    ],
-    keyBenefits: [
-      'Crack Ph.D. entrance tests with top ranks and clear interview defense effortlessly',
-      'Understand complex statistical tests without memorization through visual logic',
-      'Learn how to publish in UGC-CARE & Scopus indexed journals',
-      'Download 50+ high-standard research proposals, templates & sample questionnaires'
-    ],
-    syllabusModules: [
-      {
-        unitNumber: 'Module 1',
-        unitTitle: 'Foundations of Research & Epistemology',
-        hours: '10 Hours',
-        topics: [
-          'Ontology, Epistemology, and Methodology in Social & Educational Research',
-          'Positivism, Post-Positivism, Constructivism, and Critical Realism',
-          'Formulating Research Problems, Research Questions & Specific Objectives'
-        ]
-      },
-      {
-        unitNumber: 'Module 2',
-        unitTitle: 'Research Designs & Sampling Frameworks',
-        hours: '14 Hours',
-        topics: [
-          'Experimental, Quasi-Experimental, Ex-Post Facto, and Descriptive Designs',
-          'Qualitative Designs: Grounded Theory, Phenomenology, Ethnography, Case Studies',
-          'Probability vs Non-Probability Sampling Techniques & Sample Size Calculation (G*Power)'
-        ]
-      },
-      {
-        unitNumber: 'Module 3',
-        unitTitle: 'Measurement, Tool Standardization & Data Collection',
-        hours: '12 Hours',
-        topics: [
-          'Scales of Measurement (Nominal, Ordinal, Interval, Ratio)',
-          'Reliability (Cronbach Alpha, Test-Retest) and Validity (Content, Construct, Criterion)',
-          'Developing Questionnaires, Interview Schedules & Likert Scales'
-        ]
-      },
-      {
-        unitNumber: 'Module 4',
-        unitTitle: 'Statistical Analysis & Hypothesis Testing',
-        hours: '16 Hours',
-        topics: [
-          'Descriptive Statistics (Mean, SD, Skewness, Kurtosis, Normal Probability Curve)',
-          'Inferential Statistics: Parametric (t-test, z-test, ANOVA, Pearson r)',
-          'Non-Parametric Tests (Chi-Square, Mann-Whitney U, Kruskal-Wallis, Spearman rho)',
-          'Type I and Type II Errors, p-value interpretation, Effect Size'
-        ]
-      },
-      {
-        unitNumber: 'Module 5',
-        unitTitle: 'Thesis Writing, Ethics & Academic Publishing',
-        hours: '8 Hours',
-        topics: [
-          'Structure of Ph.D. Thesis (Chapterization from Introduction to References)',
-          'Citation Styles (APA 7th, MLA 9th, Harvard, Chicago) & Software (Zotero/Mendeley)',
-          'UGC Plagiarism Regulations (Levels 0, 1, 2, 3 penalties) & Publication Ethics'
-        ]
-      }
-    ]
-  },
-  {
     id: 'child-development-pedagogy',
-    title: 'Child Development & Pedagogy (CDP) Super Batch',
+    title: 'Child / Human Development & Pedagogy (CDP Super Batch)',
     slug: 'child-development-pedagogy-cdp',
     category: 'Pedagogy & CDP',
-    badge: 'High Success Rate 🌟',
+    badge: 'Target 30/30 🌟',
     isPopular: true,
     shortDesc: 'Master 30/30 in CDP for CTET, State TETs, DSSSB, KVS, NVS & Teacher Recruitment Exams with zero rote-learning.',
     fullDesc: 'The ultimate Child Development and Pedagogy course curated by Dr. Ankita Bisht. Understand the psychological foundations of childhood development, constructivist learning paradigms (Piaget, Vygotsky, Bruner), inclusive classrooms, evaluation, and CCE with classroom case studies and PYQs.',
@@ -281,231 +290,237 @@ export const coursesData: Course[] = [
     ]
   },
   {
-    id: 'educational-psychology',
-    title: 'Educational Psychology & Learning Theories Advanced',
-    slug: 'educational-psychology-advanced',
-    category: 'Psychology',
-    badge: 'In-Depth Theory 🧠',
+    id: 'food-nutrition-dietetics',
+    title: 'Food Science, Nutrition & Maternal Health Masterclass',
+    slug: 'food-nutrition-maternal-health',
+    category: 'Nutrition & Health',
+    badge: 'Specialized 🍎',
     isPopular: false,
-    shortDesc: 'Deep theoretical foundation for B.Ed, M.Ed, UGC NET Education, Assistant Professor & Lecturer recruitment exams.',
-    fullDesc: 'A comprehensive academic masterclass covering the entire spectrum of educational psychology: behavioral, cognitive, humanistic, and constructivist learning theories, motivation theories (Maslow, Herzberg, McClelland), memory & forgetting models, personality dynamics, and mental hygiene.',
+    shortDesc: 'Comprehensive masterclass on Food Chemistry, Clinical Nutrition, Maternal Programs & Diet Planning.',
+    fullDesc: 'Curated by Dr. Ankita Bisht based on extensive research in nutrition and maternal health. Master macronutrients, micronutrients, therapeutic diet therapy (Diabetes, Renal, Cardiac), food preservation, community nutrition programs, and National Nutrition Month benchmarks.',
     duration: '3 Months (60+ Hours)',
     liveHours: '60+ Live Interactive Hours',
     validity: '1 Year Full Access',
-    originalPrice: 4999,
-    price: 2499,
-    rating: 4.93,
-    reviewsCount: 640,
-    studentCount: '1,800+ Enrolled',
-    medium: 'Bilingual (Hindi & English)',
-    targetExams: ['UGC NET Education (Paper 2)', 'B.Ed & M.Ed University Exams', 'Assistant Professor College Cadre (PSC Exams)', 'PGT Education & Lecturer Exams'],
+    originalPrice: 5999,
+    price: 2999,
+    rating: 4.97,
+    reviewsCount: 750,
+    studentCount: '1,950+ Enrolled',
+    medium: 'Bilingual (Hindi + English)',
+    targetExams: ['UGC NET Home Science (Unit 1 & 2)', 'Dietitian & Nutritionist Exams', 'FSSAI Technical Officer', 'Assistant Professor Home Science'],
     highlights: [
-      'In-Depth Analysis of 25+ Renowned Psychologists & Thinkers',
-      'Behaviorism, Cognitivism, Humanism, Constructivism, Gestalt Psychology',
-      'Motivation, Emotion, Memory, Forgetting & Transfer of Learning',
-      'Clinical & Psychometric Assessment Techniques',
-      'Full Chapter-wise Notes & Mindmaps for Academic & Competitive Exams'
+      'In-Depth Coverage of RDA 2020 (ICMR-NIN) Nutritional Standards',
+      'Clinical & Therapeutic Diet Calculations with Case Studies',
+      'Maternal & Child Health Programs in India (PMMVY, ICDS, POSHAN)',
+      'Food Micro-biology, Spoilage, Packaging & Food Safety Regulations',
+      'Unit-wise Objective Practice MCQs & Numerical Problem Solving'
     ],
     keyBenefits: [
-      'Score high in Subject Paper (Education / Psychology) in UGC NET and PSC Assistant Professor exams',
-      'Deep conceptual clarity for M.Ed / B.Ed coursework and university distinction',
-      'Understand how psychological principles translate into effective teaching methodologies',
-      'Includes 500+ advanced analytical questions with detailed conceptual explanations'
+      'Master all nutrition & biochemistry calculations for NET and Competitive exams',
+      'Clear understanding of maternal and infant nutritional physiology',
+      'Learn practical dietetics calculation hacks for therapeutic cases',
+      'Download comprehensive RDA tables, nutrition charts, and clinical summaries'
     ],
     syllabusModules: [
       {
-        unitNumber: 'Unit 1',
-        unitTitle: 'Introduction to Educational Psychology & Human Growth',
-        hours: '12 Hours',
+        unitNumber: 'Module 1',
+        unitTitle: 'Food Chemistry, Composition & Food Processing',
+        hours: '15 Hours',
         topics: [
-          'Scope, Methods and Significance of Educational Psychology',
-          'Biological and Environmental Determinants of Human Behavior',
-          'Developmental Tasks (Havighurst) and Emotional Development throughout Life Span'
+          'Physico-chemical properties of food: Emulsions, Sols, Gels, Foams',
+          'Cereals, Pulses, Milk, Meat, Eggs, Fruits & Vegetables: Structure & Processing',
+          'Food Additives, Preservatives, Colors, Flavors & Adulteration testing methods',
+          'Food Preservation techniques: High temperature, Low temperature, Radiation & Drying'
         ]
       },
       {
-        unitNumber: 'Unit 2',
-        unitTitle: 'Schools of Psychology & Learning Paradigms',
+        unitNumber: 'Module 2',
+        unitTitle: 'Human Nutrition, Metabolism & Nutrient Balance',
         hours: '18 Hours',
         topics: [
-          'Behavioristic Theories: Classical Conditioning (Pavlov), Operant Conditioning (Skinner), Connectionism (Thorndike)',
-          'Cognitive & Gestalt Theories: Kohler (Insight Learning), Lewin (Field Theory), Tolman (Sign Learning)',
-          'Social Cognition: Albert Bandura (Observational Learning, Self-Efficacy)',
-          'Humanistic Psychology: Carl Rogers (Experiential Learning, Unconditional Positive Regard), Abraham Maslow (Hierarchy of Needs)'
+          'Energy Metabolism: BMR, Thermic effect of food, Physical activity factor',
+          'Carbohydrates, Proteins, Lipids: Digestion, Absorption, Transport & Metabolic pathways',
+          'Fat-soluble & Water-soluble Vitamins: Functions, Deficiency, Toxicity & Food sources',
+          'Minerals & Trace Elements (Iron, Calcium, Iodine, Zinc, Selenium) & Bioavailability',
+          'Water and Electrolyte balance, Acid-base regulation in the human body'
         ]
       },
       {
-        unitNumber: 'Unit 3',
-        unitTitle: 'Cognitive Processes: Memory, Thinking & Problem Solving',
-        hours: '14 Hours',
+        unitNumber: 'Module 3',
+        unitTitle: 'Maternal Nutrition, Infant Feeding & Life-Cycle Diets',
+        hours: '15 Hours',
         topics: [
-          'Information Processing Model of Memory (Atkinson-Shiffrin, Baddeley Working Memory)',
-          'Theories of Forgetting (Decay, Interference, Retrieval Failure, Repression)',
-          'Transfer of Learning (Positive, Negative, Zero, Bilateral) & Theories of Transfer',
-          'Metacognition, Critical Thinking, Creative Thinking & Problem Solving Strategies'
+          'Physiological changes during Pregnancy & Lactation and nutritional requirements',
+          'Infant growth milestones, Exclusive breastfeeding advantages & Weaning foods',
+          'Nutrition during Childhood, Adolescence, Adulthood & Geriatric Population',
+          'Nutritional Assessment Methods: Anthropometric, Biochemical, Clinical, Dietary (ABCD)'
         ]
       },
       {
-        unitNumber: 'Unit 4',
-        unitTitle: 'Personality, Mental Health & Adjustment',
-        hours: '16 Hours',
+        unitNumber: 'Module 4',
+        unitTitle: 'Therapeutic Dietetics & Public Health Nutrition',
+        hours: '12 Hours',
         topics: [
-          'Trait Theories (Allport, Cattell 16PF, Big Five Traits) vs Type Theories',
-          'Psychoanalytic Theory (Freud: Id, Ego, Superego, Defense Mechanisms)',
-          'Ego Defense Mechanisms in Classroom Situations',
-          'Mental Health and Mental Hygiene: Concepts, Indicators, and Teacher’s Role in Guidance & Counseling'
+          'Medical Nutrition Therapy (MNT): Diabetes Mellitus, Hypertension, Atherosclerosis',
+          'Renal Disorders, Liver Cirrhosis, Peptic Ulcers, Celiac disease, Inborn errors of metabolism',
+          'National Health and Nutrition Programs: ICDS, Mid-Day Meal, POSHAN Abhiyaan, Anemia Mukt Bharat',
+          'International Agencies in Nutrition: WHO, UNICEF, FAO, World Bank & Global Hunger Index'
         ]
       }
     ]
   },
   {
-    id: 'teaching-aptitude-mastery',
-    title: 'Teaching Aptitude Masterclass & Pedagogical Skills',
-    slug: 'teaching-aptitude-masterclass',
-    category: 'Pedagogy & CDP',
-    badge: 'Quick Score Booster ⚡',
-    isPopular: false,
-    shortDesc: 'Focused masterclass on Modern Teaching Methods, Micro-Teaching, Bloom’s Taxonomy, CCE & Digital Education Tools.',
-    fullDesc: 'Score 10/10 in the Teaching Aptitude section of UGC NET Paper 1 and all Assistant Professor screening tests. Covers microteaching cycles, Bloom’s revised taxonomy of educational objectives, diagnostic & remedial teaching, modern pedagogical strategies, and educational technology.',
-    duration: '1.5 Months (35+ Hours)',
-    liveHours: '35+ Live Interactive Hours',
-    validity: '6 Months Full Access',
-    originalPrice: 3499,
-    price: 1799,
-    rating: 4.97,
-    reviewsCount: 780,
-    studentCount: '2,900+ Enrolled',
-    medium: 'Bilingual (Hindi + English)',
-    targetExams: ['UGC NET Paper 1 (Unit 1)', 'State SET Exams', 'College Assistant Professor Screening Tests', 'KVS / NVS / EMRS Pedagogy Section'],
+    id: 'research-methodology-spss',
+    title: 'Research Methodology & SPSS Data Analysis Masterclass',
+    slug: 'research-methodology-spss-masterclass',
+    category: 'Research',
+    badge: 'Ph.D. & NET 🎓',
+    isPopular: true,
+    shortDesc: 'Hands-on guide for Ph.D. Entrance PET, Synopsis Writing, Quantitative/Qualitative Research & SPSS Statistical Tests.',
+    fullDesc: 'Designed by Dr. Ankita Bisht (Ph.D., author of 8+ research papers in UGC CARE List and Scopus journals). Learn how to formulate research problems, design questionnaires, perform hypothesis testing (t-test, ANOVA, Chi-Square, Correlation, Regression) on SPSS, and publish in indexed journals.',
+    duration: '3 Months (60+ Hours)',
+    liveHours: '60+ Live Interactive Hours',
+    validity: '1 Year Full Access',
+    originalPrice: 6999,
+    price: 3499,
+    rating: 4.98,
+    reviewsCount: 920,
+    studentCount: '2,600+ Enrolled',
+    medium: 'Bilingual (English & Hindi)',
+    targetExams: ['Ph.D. Entrance (PET/RET/JNU/DU/BHU/HNBGU)', 'UGC NET Paper 1 & Paper 2', 'Ph.D. Coursework Exam', 'Research Paper Publishing'],
     highlights: [
-      'Bloom’s Taxonomy (Cognitive, Affective, Psychomotor) Mastered with Real Questions',
-      'Micro-Teaching, Simulated Teaching & Team Teaching Techniques',
-      'Traditional vs Modern ICT-Enabled Teaching Methods & Learning Management Systems',
-      'Diagnostic Testing, Remedial Teaching, and Continuous Assessment',
-      '300+ Solved Questions with Option-Elimination Strategies'
+      'Comprehensive Coverage of Positivism, Interpretivism & Mixed Methods',
+      'Step-by-Step Hands-on SPSS Training (t-test, ANOVA, Chi-Square, Regression)',
+      'Practical Guide to Writing Research Proposals (Synopsis) for Ph.D. Interviews',
+      'Plagiarism Rules, Turnitin Best Practices & Reference Management (Mendeley/Zotero)',
+      '1-on-1 Synopsis / Research Proposal Review Session with Dr. Ankita Bisht'
     ],
     keyBenefits: [
-      'Never lose a single mark in the 5 questions (10 marks) of Teaching Aptitude in NET Paper 1',
-      'Understand nuances of SWAYAM, SWAYAM PRABHA, MOOCs, and blended learning models',
-      'Master the art of solving tricky situational & assertion-reason questions effortlessly',
-      'Includes downloadable cheat sheets for fast 15-minute pre-exam revision'
+      'Crack Ph.D. entrance tests with top ranks and clear university interview defense effortlessly',
+      'Understand complex statistical tests with SPSS outputs without memorization',
+      'Learn how to draft and publish papers in UGC-CARE & Scopus indexed journals',
+      'Download sample Ph.D. proposals, validated questionnaires & SPSS practice datasets'
+    ],
+    syllabusModules: [
+      {
+        unitNumber: 'Module 1',
+        unitTitle: 'Foundations of Research, Epistemology & Topic Selection',
+        hours: '10 Hours',
+        topics: [
+          'Ontology, Epistemology, and Methodology in Social and Behavioral Research',
+          'Positivism, Post-Positivism, Constructivism, and Mixed Methods paradigms',
+          'Formulating Research Problems, Research Questions & Specific Objectives',
+          'Literature Review Strategies, Finding Research Gaps using Google Scholar, Scopus & Shodhganga'
+        ]
+      },
+      {
+        unitNumber: 'Module 2',
+        unitTitle: 'Research Designs, Sampling & Tool Construction',
+        hours: '14 Hours',
+        topics: [
+          'Experimental, Quasi-Experimental, Descriptive, Ex-Post Facto & Case Study Designs',
+          'Probability vs Non-Probability Sampling Techniques & Sample Size Calculation',
+          'Scales of Measurement: Nominal, Ordinal, Interval, Ratio & Likert Scale Construction',
+          'Tool Standardization: Reliability (Cronbach’s Alpha) & Validity (Content, Construct, Criterion)'
+        ]
+      },
+      {
+        unitNumber: 'Module 3',
+        unitTitle: 'Statistical Analysis & Hands-on SPSS Software',
+        hours: '20 Hours',
+        topics: [
+          'Data Coding, Variable View, Data Cleaning & Normality Testing (Shapiro-Wilk, NPC)',
+          'Parametric Tests: Independent Samples t-test, Paired t-test, One-Way & Two-Way ANOVA',
+          'Non-Parametric Tests: Chi-Square Test of Independence, Mann-Whitney U, Kruskal-Wallis',
+          'Correlation (Pearson r, Spearman rho) & Simple/Multiple Linear Regression in SPSS',
+          'Interpreting SPSS Output Tables, p-values, and Reporting Results in APA 7th Format'
+        ]
+      },
+      {
+        unitNumber: 'Module 4',
+        unitTitle: 'Thesis Writing, Citation Styles & Journal Publishing',
+        hours: '16 Hours',
+        topics: [
+          'Structure of Ph.D. Thesis: Chapterization from Introduction to Summary & Recommendations',
+          'Referencing Styles: APA 7th, MLA 9th, Chicago, Harvard & Software (Zotero/Mendeley)',
+          'Plagiarism Policies (UGC Plagiarism Regulations 2018), Turnitin/Urkund Similarity checks',
+          'Submitting to UGC-CARE & Scopus Indexed Journals: Peer-review process and addressing reviewer comments'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'extension-education-shg',
+    title: 'Extension Education, Community Development & SHGs Masterclass',
+    slug: 'extension-education-community-development',
+    category: 'Extension & Women Studies',
+    badge: 'Empowerment Focus 🤝',
+    isPopular: false,
+    shortDesc: 'Specialized masterclass on Extension Teaching Methods, Self-Help Groups (SHGs), Rural Development & Women Empowerment.',
+    fullDesc: 'Drawn from Dr. Ankita Bisht’s doctoral research and published book on Self-Help Groups in Uttarakhand. Covers extension teaching methods, communication models, program planning, leadership, microfinance, rural entrepreneurship, and community development schemes.',
+    duration: '2 Months (45+ Hours)',
+    liveHours: '45+ Live Interactive Hours',
+    validity: '1 Year Full Access',
+    originalPrice: 4499,
+    price: 2199,
+    rating: 4.96,
+    reviewsCount: 560,
+    studentCount: '1,450+ Enrolled',
+    medium: 'Bilingual (Hindi + English)',
+    targetExams: ['UGC NET Home Science (Unit 9 & 10)', 'State Rural Development Officer (BDO/ADO)', 'Assistant Professor Extension Education', 'NGO & Social Work Roles'],
+    highlights: [
+      'In-Depth Insights from Dr. Ankita’s Published Book on Uttarakhand Self-Help Groups',
+      'Extension Communication Models, Audio-Visual Aids & Folk Media',
+      'Program Planning Cycle: Needs Assessment, Implementation, Monitoring & Evaluation (PRA/RRA)',
+      'Rural Development Schemes: DAY-NRLM, MGNREGA, PMKVY, Digital India',
+      '250+ High-Yield Questions with Case Study Analysis'
+    ],
+    keyBenefits: [
+      'Master Extension Education questions in UGC NET Home Science Paper 2 with 100% accuracy',
+      'Understand real-world functioning of Self-Help Groups, micro-enterprises & women empowerment',
+      'Learn Participatory Rural Appraisal (PRA) techniques and community engagement frameworks',
+      'Includes summary notes of all major Indian government rural development programs'
     ],
     syllabusModules: [
       {
         unitNumber: 'Unit 1',
-        unitTitle: 'Nature, Objectives & Levels of Teaching',
-        hours: '8 Hours',
+        unitTitle: 'Philosophy, Principles & History of Extension Education',
+        hours: '10 Hours',
         topics: [
-          'Memory Level (Herbart), Understanding Level (Morrison), Reflective Level (Hunt)',
-          'Autonomous Development Level of Teaching',
-          'Teacher’s Roles: Facilitator, Counselor, Mentor, and Leader'
+          'Concept, Principles, Scope and Philosophy of Extension Education',
+          'Pre-Independence & Post-Independence Extension Initiatives in India (Etawah, Nilokheri, CDP 1952)',
+          'Role of KVKs, ICAR, State Agricultural Universities (SAUs) and Home Science Extension'
         ]
       },
       {
         unitNumber: 'Unit 2',
-        unitTitle: 'Educational Objectives & Taxonomy',
-        hours: '10 Hours',
+        unitTitle: 'Communication Models, Audio-Visual Aids & Social Media',
+        hours: '12 Hours',
         topics: [
-          'Benjamin Bloom’s Revised Taxonomy (Remember, Understand, Apply, Analyze, Evaluate, Create)',
-          'Krathwohl Affective Domain & Simpson Psychomotor Domain',
-          'Formulating Specific Learning Outcomes (SLOs) and Behavioral Objectives'
+          'Communication Process, Models (Aristotle, Shannon-Weaver, Berlo, Schramm) and Barriers',
+          'Classification of Audio-Visual Aids: Projected, Non-Projected, Display Boards & Folk Media',
+          'ICT in Extension: Kisan Call Centers, Mobile Apps, SWAYAM MOOCs & Community Radio'
         ]
       },
       {
         unitNumber: 'Unit 3',
-        unitTitle: 'Teaching Methods, Maxims & Micro-Teaching',
-        hours: '10 Hours',
+        unitTitle: 'Self-Help Groups (SHGs), Women Empowerment & Rural Livelihoods',
+        hours: '13 Hours',
         topics: [
-          'Maxims of Teaching (Known to Unknown, Simple to Complex, Concrete to Abstract)',
-          'Direct vs Indirect, Deductive vs Inductive, Problem Solving, Project Method, Heuristic Method',
-          'Micro-Teaching Cycle (Plan, Teach, Feedback, Re-plan, Re-teach, Re-feedback) and Skill Integration'
+          'Concept, Formation, Structure, and Functioning of Self-Help Groups (SHGs)',
+          'Socio-Economic Empowerment of Rural Women: Micro-credit, Panchayati Raj & Decision Making',
+          'Case Studies of Successful Women Collectives & Product Value Addition (e.g. Chaulai / Millets)',
+          'Deendayal Antyodaya Yojana - National Rural Livelihoods Mission (DAY-NRLM)'
         ]
       },
       {
         unitNumber: 'Unit 4',
-        unitTitle: 'Evaluation Systems & ICT in Teaching',
-        hours: '7 Hours',
+        unitTitle: 'Program Planning, PRA Techniques & Leadership',
+        hours: '10 Hours',
         topics: [
-          'Norm-Referenced vs Criterion-Referenced Evaluation',
-          'Choice Based Credit System (CBCS), Grading Systems, and Item Analysis',
-          'Digital Platforms: SWAYAM, Diksha, MOOCs, LMS Tools, Virtual Labs & Flipped Classrooms'
-        ]
-      }
-    ]
-  },
-  {
-    id: 'pedagogy-education-paper-2',
-    title: 'Pedagogy & Education Subjects (UGC NET Paper 2 Education)',
-    slug: 'pedagogy-education-paper-2',
-    category: 'Pedagogy & CDP',
-    badge: 'JRF Focused 🎯',
-    isPopular: true,
-    shortDesc: 'Complete syllabus coverage for UGC NET Education (Code 09), Curriculum Studies, Teacher Education & NEP 2020.',
-    fullDesc: 'Comprehensive master course for UGC NET Education (Subject Code 09) and M.A./M.Ed. scholars. Covers Philosophical, Sociological, and Psychological foundations, Curriculum Development & Models, Teacher Education, Educational Management & Administration, and Inclusive Pedagogy.',
-    duration: '5 Months (150+ Hours)',
-    liveHours: '150+ Live Interactive Hours',
-    validity: '1 Year Full Access',
-    originalPrice: 9999,
-    price: 4999,
-    rating: 4.96,
-    reviewsCount: 1120,
-    studentCount: '3,100+ Enrolled',
-    medium: 'Bilingual (Hindi + English)',
-    targetExams: ['UGC NET Education (Code 09)', 'State SET Education', 'Assistant Professor in Education (B.Ed/M.Ed Colleges)', 'DIET / SCERT Lecturer Exams'],
-    highlights: [
-      'Complete 10 Units of UGC NET Education Subject Code 09',
-      'Western & Indian Philosophies (Sankhya, Yoga, Vedanta, Buddhism, Idealism, Naturalism, Pragmatism)',
-      'Curriculum Models (Tyler, Wheeler, Taba, Saylor & Alexander)',
-      'Teacher Education Policies, NCTE Guidelines, and Justice Verma Commission',
-      'Weekly Subject Mock Tests + Chapter-wise 10-Year PYQ Solutions'
-    ],
-    keyBenefits: [
-      'Target 150+ marks in Paper 2 Education to secure Top 50 All India Rank in JRF',
-      'Master intricate philosophical & curriculum questions that standard books fail to clarify',
-      'Includes complete bilingual unit-wise printed notes delivered to your home / downloadable PDF',
-      'Dedicated weekly live discussion on difficult PYQs from 2012 to 2024'
-    ],
-    syllabusModules: [
-      {
-        unitNumber: 'Unit 1 & 2',
-        unitTitle: 'Philosophical & Sociological Foundations of Education',
-        hours: '30 Hours',
-        topics: [
-          'Indian Schools: Sankhya, Yoga, Vedanta, Buddhism, Jainism with educational implications',
-          'Western Schools: Idealism, Realism, Naturalism, Pragmatism, Existentialism, Postmodernism',
-          'Contributions of Thinkers: Vivekananda, Gandhi, Tagore, Aurobindo, Dewey, Freire, Krishnamurti',
-          'Sociology of Education, Social Mobility, Equality vs Equity, Education for Marginalized Groups'
-        ]
-      },
-      {
-        unitNumber: 'Unit 3 & 4',
-        unitTitle: 'Learner and Learning Process & Teacher Education',
-        hours: '30 Hours',
-        topics: [
-          'Growth & Development, Cognitive Theories, Intelligence, Personality & Mental Health',
-          'Teacher Education: Pre-service & In-service models, NCTE, NCERT, SCERT roles',
-          'Curriculum of Teacher Education, Professionalism, and Code of Professional Ethics'
-        ]
-      },
-      {
-        unitNumber: 'Unit 5 & 6',
-        unitTitle: 'Curriculum Studies & Research in Education',
-        hours: '32 Hours',
-        topics: [
-          'Curriculum Design, Models of Curriculum (Tyler, Wheeler, Taba, Oliva)',
-          'Curriculum Evaluation Models: Scriven Goal-Free, Kirkpatrick, Stufflebeam CIPP Model',
-          'Research in Education: Methodologies, Sampling, Measurement, and Statistical Hypotheses'
-        ]
-      },
-      {
-        unitNumber: 'Unit 7, 8, 9, 10',
-        unitTitle: 'Pedagogy, Andragogy, Technology, Management & Inclusion',
-        hours: '58 Hours',
-        topics: [
-          'Pedagogy vs Andragogy (Knowles), Heutagogy, Assessment in Teaching',
-          'Educational Technology: ICT Integration, E-learning, SWAYAM, Blended Learning',
-          'Educational Management & Administration: POSDCORB, CPM, PERT, Total Quality Management (TQM)',
-          'Inclusive Education: Policies, Universal Design for Learning (UDL), RPWD Act 2016'
+          'Program Planning Cycle: Situation Analysis, Objective Setting, Plan of Work, Evaluation',
+          'Participatory Rural Appraisal (PRA) & Rapid Rural Appraisal (RRA) Tools',
+          'Leadership in Rural Communities: Types of Local Leaders, Training and Motivation Techniques'
         ]
       }
     ]

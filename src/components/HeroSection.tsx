@@ -4,10 +4,10 @@ import {
   CheckCircle2, 
   ArrowRight, 
   Star, 
-  ShieldCheck, 
   Award, 
   Users, 
-  PlayCircle
+  PlayCircle,
+  GraduationCap
 } from 'lucide-react';
 import { statisticsData } from '../data/testimonialsData';
 
@@ -46,12 +46,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             
             {/* Trust Pill */}
-            <div className="inline-flex items-center gap-2 bg-brand-100/80 border border-brand-200/80 text-brand-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5 shadow-xs">
+            <div className="inline-flex items-center gap-2 bg-brand-100/80 border border-brand-200/80 text-brand-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5 shadow-xs flex-wrap">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
               </span>
-              <span>India's #1 Dedicated Mentor for UGC NET &amp; Pedagogy</span>
+              <span>Rank 1 Gold Medalist &amp; Asst. Professor (Central University)</span>
               <span className="bg-amber-400/30 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-400/40">
                 NTA Pattern 2025-26
               </span>
@@ -59,30 +59,30 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
 
             {/* Main Headline */}
             <h1 className="text-3xl sm:text-5xl lg:text-5xl xl:text-6xl font-extrabold font-display text-slate-900 tracking-tight leading-[1.15] mb-5">
-              Crack <span className="gradient-text">UGC NET</span> with Expert Guidance &amp; <span className="relative whitespace-nowrap">
-                <span className="relative z-10">Smart Preparation</span>
+              Crack <span className="gradient-text">UGC NET</span> with Central University Faculty &amp; <span className="relative whitespace-nowrap">
+                <span className="relative z-10">Gold Medalist Guidance</span>
                 <span className="absolute bottom-1 left-0 right-0 h-3 bg-amber-300/40 -rotate-1 rounded-sm -z-0"></span>
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="text-base sm:text-lg text-slate-600 leading-relaxed mb-6 font-normal max-w-2xl">
-              Transform your preparation with <strong className="text-slate-800 font-semibold">Online Live Classes</strong>, <strong className="text-slate-800 font-semibold">24/7 Recorded Lectures</strong>, bilingual <strong className="text-slate-800 font-semibold">High-Yield PDF Notes</strong>, NTA CBT <strong className="text-slate-800 font-semibold">Mock Tests</strong>, and personal <strong className="text-slate-800 font-semibold">1-on-1 Mentorship</strong> by Dr. Ankita Bisht (Ph.D., JRF Qualified).
+              Transform your preparation with <strong className="text-slate-800 font-semibold">Online Live Classes</strong>, <strong className="text-slate-800 font-semibold">24/7 Recorded Lectures</strong>, bilingual <strong className="text-slate-800 font-semibold">High-Yield PDF Notes</strong>, NTA CBT <strong className="text-slate-800 font-semibold">Mock Tests</strong>, and personal <strong className="text-slate-800 font-semibold">1-on-1 Mentorship</strong> by Dr. Ankita Bisht (Ph.D., UGC-NET Qualified, Assistant Professor HNBGU).
             </p>
 
             {/* Value Propositions Quick List */}
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-2.5 mb-8 w-full max-w-xl text-xs sm:text-sm">
               <div className="flex items-center gap-2 text-slate-700 bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-medium">Paper 1 &amp; Education Mastery</span>
+                <span className="font-medium">UGC NET Home Science (All 5 Branches)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-700 bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-medium">Research Methodology &amp; Ph.D. PET</span>
+                <span className="font-medium">Research Methodology &amp; SPSS (Ph.D. PET)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-700 bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-medium">CDP &amp; Teaching Aptitude 30/30</span>
+                <span className="font-medium">Child Development &amp; Pedagogy (30/30)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-700 bg-white/80 backdrop-blur-xs p-2.5 rounded-xl border border-slate-200/80 shadow-xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -143,7 +143,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
               <div className="relative rounded-2xl overflow-hidden bg-gradient-to-b from-brand-100 to-slate-200 aspect-[4/3.4] sm:aspect-[4/3.2] flex items-end">
                 <img 
                   src="/images/educator.jpg" 
-                  alt="Dr. Ankita Bisht - UGC NET & Pedagogy Expert Educator"
+                  alt="Dr. Ankita Bisht - Assistant Professor & Gold Medalist"
                   className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-103"
                 />
 
@@ -154,15 +154,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
                 <div className="absolute bottom-0 inset-x-0 p-3.5 sm:p-4 text-white z-10">
                   <div className="flex flex-wrap items-center gap-1.5 mb-1">
                     <span className="bg-brand-600 text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
-                      <ShieldCheck className="w-3.5 h-3.5" /> Verified Master Faculty
+                      <GraduationCap className="w-3.5 h-3.5" /> Ph.D. Home Science (2024)
                     </span>
                     <span className="bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
-                      JRF AIR 07
+                      Rank 1 Gold Medalist
                     </span>
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold font-display text-white drop-shadow-sm">Dr. Ankita Bisht</h3>
                   <p className="text-[11px] sm:text-xs text-brand-200 font-medium">
-                    Ph.D. in Education • Former University Asst. Professor • 12+ Years Exp.
+                    Assistant Professor (Guest Faculty), H.N.B. Garhwal Central University • UGC-NET Qualified
                   </p>
                 </div>
               </div>
@@ -173,15 +173,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
                   <Award className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Top Results</div>
-                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">500+ JRF Selections</div>
+                  <div className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Academic Record</div>
+                  <div className="text-xs sm:text-sm font-extrabold text-slate-900">Rank 1 Gold Medalist</div>
                 </div>
               </div>
 
               {/* Card Footer Quick Links */}
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => onOpenVideoModal('Dr. Priya Sharma', 'UGC NET JRF AIR 12')}
+                  onClick={() => onOpenVideoModal('Dr. Priya Sharma', 'UGC NET JRF AIR 09')}
                   className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-50 hover:bg-brand-50 border border-slate-200/80 text-xs font-bold text-slate-700 hover:text-brand-700 transition-colors cursor-pointer"
                 >
                   <PlayCircle className="w-4 h-4 text-brand-600" />

@@ -46,7 +46,7 @@ export const WhyChooseUsSection: React.FC<WhyChooseUsSectionProps> = ({ onOpenDe
 
   const comparisonRows = [
     {
-      feature: 'Master Faculty with Ph.D. & AIR 07 JRF',
+      feature: 'Central University Faculty & Gold Medalist Ph.D.',
       ourPlatform: true,
       genericEdtech: false,
       offlineCoaching: 'Variable / Junior Tutors'

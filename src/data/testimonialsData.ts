@@ -4,20 +4,20 @@ export const testimonialsData: Testimonial[] = [
   {
     id: 'test-1',
     name: 'Dr. Priya Sharma',
-    exam: 'UGC NET JRF (Education) & Paper 1',
-    scoreOrRank: 'AIR 12 (Score: 218/300, Paper 1: 88/100)',
+    exam: 'UGC NET JRF Home Science & Paper 1',
+    scoreOrRank: 'AIR 09 (Score: 224/300, Paper 1: 88/100)',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=250&auto=format&fit=crop',
-    quote: 'Dr. Ankita Bisht’s concept-based method completely changed my approach. I previously failed Paper 1 twice because of Research Methodology and DI. Her shortcut methods and live doubt solving helped me jump from 46 to 88 marks in Paper 1!',
+    quote: 'Dr. Ankita Bisht ma’am’s concept-based method completely changed my approach. I struggled with Textile Chemistry and Research Statistics on SPSS. Her notes, Gold Medalist approach, and live doubt solving helped me jump to 224 marks and secure AIR 09 in Home Science JRF!',
     year: 'Dec 2024 Cycle',
     collegeOrRole: 'Now Ph.D. Scholar at Delhi University',
     videoDuration: '3:45 min',
     videoThumbnail: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=600&auto=format&fit=crop',
     hasVideo: true,
     beforeAfter: {
-      before: 'Struggled with Research Aptitude & Indian Logic (Scored 46/100 in 1st attempt)',
-      after: 'Scored 88/100 in Paper 1, Secured AIR 12 in JRF Education with 99.89 Percentile'
+      before: 'Struggled with Research Aptitude & Textile Chemistry (Scored 48/100 in 1st attempt)',
+      after: 'Scored 88/100 in Paper 1, Secured AIR 09 in JRF Home Science with 99.91 Percentile'
     },
-    badge: 'JRF AIR 12'
+    badge: 'JRF AIR 09'
   },
   {
     id: 'test-2',
@@ -40,18 +40,18 @@ export const testimonialsData: Testimonial[] = [
   {
     id: 'test-3',
     name: 'Ananya Mukherjee',
-    exam: 'Ph.D. Entrance PET & UGC NET JRF',
-    scoreOrRank: 'Rank 1 (Ph.D. PET BHU) + JRF Qualified',
+    exam: 'Ph.D. Entrance PET & UGC NET Home Science',
+    scoreOrRank: 'Rank 1 (Ph.D. PET Central University) + JRF Qualified',
     avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=250&auto=format&fit=crop',
-    quote: 'The Research Methodology course is pure gold. Ma’am explained parametric vs non-parametric tests, sampling bias, and research proposal drafting so intuitively that my Ph.D. synopsis was approved in one go at BHU interview!',
+    quote: 'The Research Methodology & SPSS course is pure gold. Ma’am explained parametric vs non-parametric tests, sampling bias, and research proposal drafting so intuitively that my Ph.D. synopsis was approved in one go at university interview!',
     year: '2024 Selection',
-    collegeOrRole: 'Ph.D. Research Fellow, Banaras Hindu University',
+    collegeOrRole: 'Ph.D. Research Scholar, Central University',
     videoDuration: '4:15 min',
     videoThumbnail: 'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?q=80&w=600&auto=format&fit=crop',
     hasVideo: true,
     beforeAfter: {
       before: 'Zero statistical clarity, had proposal rejected in two university interviews',
-      after: 'Rank 1 in BHU PET, published 1st Scopus research paper under mentorship'
+      after: 'Rank 1 in Central University PET, published 1st UGC-CARE research paper under mentorship'
     },
     badge: 'Rank 1 Ph.D. Entrance'
   },
@@ -76,7 +76,7 @@ export const testimonialsData: Testimonial[] = [
   {
     id: 'test-5',
     name: 'Meenakshi Sundaram',
-    exam: 'UGC NET Paper 1 & Educational Psychology',
+    exam: 'UGC NET Paper 1 & Food Nutrition',
     scoreOrRank: 'Paper 1: 86/100 (JRF Qualified)',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=250&auto=format&fit=crop',
     quote: 'Being a working professional, I had only 2 hours daily. Dr. Ankita ma’am’s recorded lecture structure, 1.5x speed player, and crisp PDF capsules allowed me to cover the syllabus systematically while working full-time.',
@@ -94,8 +94,8 @@ export const testimonialsData: Testimonial[] = [
 ];
 
 export const statisticsData = [
-  { value: '15,000+', label: 'Students Mentored Across India', subtext: 'Online Live & Self-Paced Courses' },
-  { value: '500+', label: 'JRF & NET Selections', subtext: 'Top All-India Rankers in Paper 1 & Education' },
+  { value: '15,000+', label: 'Students Mentored Across India', subtext: 'UG/PG, UGC NET & TET Learners' },
+  { value: '500+', label: 'JRF & NET Selections', subtext: 'Top All-India Rankers in Home Science & Paper 1' },
   { value: '94.8%', label: 'Success & Qualification Rate', subtext: 'Aspirants clearing cutoffs on 1st/2nd attempt' },
   { value: '4.95 / 5', label: 'Average Student Rating', subtext: 'Rated by 4,500+ verified learners' }
 ];

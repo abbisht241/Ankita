@@ -28,10 +28,12 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
 
   const categories = [
     'All',
-    'UGC NET',
-    'Research',
+    'Home Science',
+    'Paper 1 General',
     'Pedagogy & CDP',
-    'Psychology'
+    'Nutrition & Health',
+    'Research',
+    'Extension & Women Studies'
   ];
 
   const filteredCourses = activeCategory === 'All' 

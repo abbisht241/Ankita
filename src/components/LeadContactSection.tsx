@@ -29,13 +29,13 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const coursesList = [
-    'UGC NET Paper 1 Complete Masterclass',
-    'Research Methodology Masterclass (Ph.D. & NET)',
-    'Child Development & Pedagogy (CDP) Super Batch',
-    'Educational Psychology & Learning Theories Advanced',
-    'Teaching Aptitude Masterclass & Pedagogical Skills',
-    'Pedagogy & Education Subjects (UGC NET Paper 2 Education)',
-    'Full Combo Pack (Paper 1 + Education / CDP)'
+    'UGC NET Home Science (Paper 2 Code 12)',
+    'UGC NET Paper 1 General Masterclass',
+    'Child / Human Development & Pedagogy (CDP)',
+    'Food Science, Nutrition & Maternal Health',
+    'Research Methodology & SPSS Data Analysis',
+    'Extension Education & Community Development',
+    'Full Combo Pack (Paper 1 + Home Science)'
   ];
 
   const prepStages = [
@@ -118,7 +118,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
                   </div>
                   <div>
                     <div className="text-[11px] text-brand-300 font-medium">Official Academic Email</div>
-                    <div className="font-bold text-white">admissions@ugcnetpedagogy.com</div>
+                    <div className="font-bold text-white">abbisht241@gmail.com</div>
                   </div>
                 </div>
 
@@ -127,8 +127,8 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
                     <MapPin className="w-4 h-4" />
                   </div>
                   <div>
-                    <div className="text-[11px] text-brand-300 font-medium">Academic Center &amp; Studio</div>
-                    <div className="font-medium text-white">EduPrerna Tower, Knowledge Park, New Delhi, India</div>
+                    <div className="text-[11px] text-brand-300 font-medium">Academic Center &amp; Location</div>
+                    <div className="font-medium text-white">Srinagar Garhwal, Uttarakhand, India</div>
                   </div>
                 </div>
               </div>

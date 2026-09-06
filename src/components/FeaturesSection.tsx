@@ -242,7 +242,7 @@ export const FeaturesSection: React.FC = () => {
                       <ShieldCheck className="w-4 h-4 text-brand-400" />
                       <span>Included in all active course enrollments</span>
                     </div>
-                    <span className="font-semibold text-brand-300">EduPrerna Academy System</span>
+                    <span className="font-semibold text-brand-300">Dr. Ankita Bisht Mentorship</span>
                   </div>
 
                 </div>
