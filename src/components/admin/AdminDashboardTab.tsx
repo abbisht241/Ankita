@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, 
   IndianRupee, 
@@ -10,7 +10,9 @@ import {
   Calendar,
   MessageCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Copy,
+  CheckCircle2
 } from 'lucide-react';
 import type { StudentEnrollment, LeadInquiry } from '../../services/adminStorageService';
 
@@ -29,6 +31,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
   onOpenAddStudentModal,
   onExportCSV
 }) => {
+  const [copiedLink, setCopiedLink] = useState(false);
   const totalRevenue = students.reduce((sum, s) => sum + s.amount, 0);
   const paidStudentsCount = students.length;
   const newInquiriesCount = inquiries.filter(i => i.status === 'new').length;
@@ -36,6 +39,12 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
 
   const recentStudents = students.slice(0, 5);
   const recentInquiries = inquiries.slice(0, 5);
+
+  const handleCopyRegLink = () => {
+    navigator.clipboard.writeText('https://learnwithdrankita.com/register');
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+  };
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -55,17 +64,35 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 z-10">
+        <div className="flex flex-wrap items-center gap-2.5 z-10">
+          <button
+            onClick={handleCopyRegLink}
+            className="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs sm:text-sm font-extrabold px-3.5 py-2.5 rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            {copiedLink ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-emerald-800" />
+                <span>Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                <span>Copy /register Link</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={onOpenAddStudentModal}
-            className="bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-xl shadow transition-all flex items-center gap-2 cursor-pointer"
+            className="bg-brand-600 hover:bg-brand-500 text-white text-xs sm:text-sm font-bold px-3.5 py-2.5 rounded-xl shadow transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>+ Add Student</span>
           </button>
+
           <button
             onClick={onExportCSV}
-            className="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl border border-white/20 transition-all flex items-center gap-2 cursor-pointer"
+            className="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold px-3 py-2.5 rounded-xl border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>

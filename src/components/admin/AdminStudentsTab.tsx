@@ -9,7 +9,10 @@ import {
   Mail, 
   X, 
   CheckCircle2, 
-  Filter
+  Filter,
+  Copy,
+  ExternalLink,
+  Sparkles
 } from 'lucide-react';
 import type { StudentEnrollment } from '../../services/adminStorageService';
 import { coursesData } from '../../data/coursesData';
@@ -35,6 +38,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCourseFilter, setSelectedCourseFilter] = useState('All');
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Manual Add Student Form State
   const [newStudentForm, setNewStudentForm] = useState({
@@ -46,6 +50,12 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
     paymentMode: 'upi_direct' as StudentEnrollment['paymentMode'],
     notes: 'Direct Enrollment'
   });
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText('https://learnwithdrankita.com/register');
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2500);
+  };
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,6 +102,63 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
 
   return (
     <div className="space-y-6 animate-fadeIn">
+      
+      {/* 1. Public Student Registration Link Share Bar */}
+      <div className="bg-gradient-to-r from-brand-900 via-brand-800 to-slate-900 text-white p-5 rounded-3xl border border-brand-700/50 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="bg-amber-400 text-slate-950 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-slate-950" />
+              <span>Public Student Registration Link</span>
+            </span>
+            <span className="text-xs text-brand-200">Share with students to let them register themselves</span>
+          </div>
+          <div className="font-mono text-xs sm:text-sm text-amber-300 font-bold tracking-tight">
+            https://learnwithdrankita.com/register
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 w-full md:w-auto flex-wrap sm:flex-nowrap">
+          <button
+            onClick={handleCopyLink}
+            className="flex-1 sm:flex-none bg-white/10 hover:bg-white/20 text-white text-xs font-semibold px-4 py-2.5 rounded-xl border border-white/10 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            {copySuccess ? (
+              <>
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300">Link Copied!</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4" />
+                <span>Copy Registration Link</span>
+              </>
+            )}
+          </button>
+
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              '🎓 *Dr. Ankita Bisht Academic Academy - Batch Admissions Open*\n\nStudents can now register directly online for UGC NET Paper 1, Research Methodology (SPSS), and CDP batches.\n\n👉 *Direct Admission Link:* https://learnwithdrankita.com/register\n\nAdmissions Helpline: +91 7417268651'
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 sm:flex-none bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <MessageCircle className="w-4 h-4 text-slate-950" />
+            <span>Share on WhatsApp</span>
+          </a>
+
+          <a
+            href="/register"
+            target="_blank"
+            rel="noreferrer"
+            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+            title="Open Registration Page in New Tab"
+          >
+            <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
       
       {/* Header Bar with Search & Actions */}
       <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-subtle flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">

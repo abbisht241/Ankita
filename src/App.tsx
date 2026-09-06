@@ -12,8 +12,9 @@ import { LeadContactSection } from './components/LeadContactSection';
 import { Footer } from './components/Footer';
 import { FloatingWhatsAppCall } from './components/FloatingWhatsAppCall';
 
-// Admin Panel
+// Admin Panel & Registration
 import { AdminPanel } from './components/admin/AdminPanel';
+import { StudentRegistrationPage } from './components/StudentRegistrationPage';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -28,18 +29,26 @@ import { coursesData } from './data/coursesData';
 import type { Course, Resource } from './types';
 
 export function App() {
-  // Panel Route Detection
+  // Route Detection
   const isPanelPath = () => {
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
     return p === '/panel' || p === '/panel/' || h === '#panel' || h === '#/panel' || h.startsWith('#panel') || h.startsWith('#/panel');
   };
 
+  const isRegisterPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/register' || p === '/register/' || p === '/enroll' || p === '/enroll/' || h === '#register' || h === '#/register' || h === '#enroll' || h === '#/enroll';
+  };
+
   const [isPanel, setIsPanel] = useState(isPanelPath);
+  const [isRegister, setIsRegister] = useState(isRegisterPath);
 
   useEffect(() => {
     const handleLocationChange = () => {
       setIsPanel(isPanelPath());
+      setIsRegister(isRegisterPath());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -54,6 +63,7 @@ export function App() {
   const handleBackToWebsite = () => {
     window.history.pushState(null, '', '/');
     setIsPanel(false);
+    setIsRegister(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -76,6 +86,10 @@ export function App() {
 
   if (isPanel) {
     return <AdminPanel onBackToWebsite={handleBackToWebsite} />;
+  }
+
+  if (isRegister) {
+    return <StudentRegistrationPage onBackToWebsite={handleBackToWebsite} />;
   }
 
   const handleOpenDemoModal = (defaultCourseName?: string) => {
