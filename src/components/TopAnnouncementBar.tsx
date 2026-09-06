@@ -44,7 +44,7 @@ export const TopAnnouncementBar: React.FC<TopAnnouncementBarProps> = ({ onOpenDe
             NEW BATCH ADMISSIONS OPEN
           </span>
           <span className="text-slate-200 font-medium text-center">
-            Target UGC NET & CDP 2025/26 — Get <span className="text-amber-300 font-bold">Flat 25% OFF</span> with coupon <span className="bg-white/10 px-1.5 py-0.5 rounded text-white font-mono font-bold tracking-wider">UGCJRF25</span>
+            Target UGC NET &amp; CDP 2025/26 — All Complete Batches now at <span className="text-amber-300 font-bold">Flat ₹999 Only!</span> <span className="bg-amber-400/20 text-amber-200 px-2 py-0.5 rounded text-xs font-semibold">Special Admission Offer</span>
           </span>
         </div>
 
