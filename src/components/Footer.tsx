@@ -191,7 +191,20 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
           <div>
             © {currentYear} Dr. Ankita Bisht Academic Academy. All rights reserved.
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
+            <a
+              href="/panel"
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, '', '/panel');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-amber-400 text-slate-400 font-semibold transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <span>Faculty / Admin Portal</span>
+              <span>🔒</span>
+            </a>
+            <span>•</span>
             <button
               onClick={() => onOpenLegalModal('privacy')}
               className="hover:text-slate-300 transition-colors cursor-pointer"

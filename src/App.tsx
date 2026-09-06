@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TopAnnouncementBar } from './components/TopAnnouncementBar';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -11,6 +11,9 @@ import { FAQSection } from './components/FAQSection';
 import { LeadContactSection } from './components/LeadContactSection';
 import { Footer } from './components/Footer';
 import { FloatingWhatsAppCall } from './components/FloatingWhatsAppCall';
+
+// Admin Panel
+import { AdminPanel } from './components/admin/AdminPanel';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -25,6 +28,35 @@ import { coursesData } from './data/coursesData';
 import type { Course, Resource } from './types';
 
 export function App() {
+  // Panel Route Detection
+  const isPanelPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/panel' || p === '/panel/' || h === '#panel' || h === '#/panel' || h.startsWith('#panel') || h.startsWith('#/panel');
+  };
+
+  const [isPanel, setIsPanel] = useState(isPanelPath);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setIsPanel(isPanelPath());
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
+  }, []);
+
+  const handleBackToWebsite = () => {
+    window.history.pushState(null, '', '/');
+    setIsPanel(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Modal states
   const [demoModalOpen, setDemoModalOpen] = useState(false);
   const [selectedCourseForSyllabus, setSelectedCourseForSyllabus] = useState<Course | null>(null);
@@ -41,6 +73,10 @@ export function App() {
   });
 
   const [prefilledCourse, setPrefilledCourse] = useState<string>('');
+
+  if (isPanel) {
+    return <AdminPanel onBackToWebsite={handleBackToWebsite} />;
+  }
 
   const handleOpenDemoModal = (defaultCourseName?: string) => {
     if (defaultCourseName) {

@@ -14,6 +14,8 @@ import confetti from 'canvas-confetti';
 import type { Course } from '../../types';
 import { startRazorpayCheckout, type RazorpayVerifyResponse, type RazorpaySuccessPayload } from '../../services/razorpayService';
 
+import { AdminStorage } from '../../services/adminStorageService';
+
 interface RazorpayCheckoutModalProps {
   course: Course | null;
   isOpen: boolean;
@@ -78,6 +80,22 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
       onSuccess: (verifyResult, payload) => {
         setIsLoading(false);
         setSuccessData({ verify: verifyResult, payload });
+
+        // Save into Admin database
+        AdminStorage.addStudent({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: cleanPhone,
+          courseId: course.id,
+          courseTitle: course.title,
+          amount: course.price,
+          paymentId: payload.razorpay_payment_id,
+          orderId: payload.razorpay_order_id,
+          paymentMode: 'razorpay',
+          status: 'active',
+          notes: 'Enrolled via Online Razorpay Gateway'
+        });
+
         // Trigger celebratory confetti
         confetti({
           particleCount: 120,

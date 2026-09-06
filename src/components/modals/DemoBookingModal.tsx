@@ -11,6 +11,7 @@ import {
   BookOpen 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { AdminStorage } from '../../services/adminStorageService';
 
 interface DemoBookingModalProps {
   isOpen: boolean;
@@ -38,6 +39,18 @@ export const DemoBookingModal: React.FC<DemoBookingModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Push into Admin CRM pipeline
+    AdminStorage.addInquiry({
+      name: formData.name.trim(),
+      phone: formData.phone.trim(),
+      email: formData.email.trim(),
+      targetExam: `${formData.course} (${formData.slot})`,
+      source: 'demo_modal',
+      status: 'new',
+      notes: `Demo Day: ${formData.day} | Slot: ${formData.slot}`
+    });
+
     setIsSubmitted(true);
     try {
       confetti({

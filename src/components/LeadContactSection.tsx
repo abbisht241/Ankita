@@ -10,6 +10,7 @@ import {
   Headphones 
 } from 'lucide-react';
 import type { LeadFormData } from '../types';
+import { AdminStorage } from '../services/adminStorageService';
 
 interface LeadContactSectionProps {
   initialCourse?: string;
@@ -50,11 +51,22 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Save lead to Admin CRM database
+    AdminStorage.addInquiry({
+      name: formData.name.trim(),
+      phone: formData.phone.trim(),
+      email: formData.email.trim(),
+      targetExam: `${formData.course} (${formData.prepStage})`,
+      source: 'contact_form',
+      status: 'new',
+      notes: formData.message.trim() || `Stage: ${formData.prepStage}`
+    });
+
     // Simulate fast server response
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
-    }, 800);
+    }, 400);
   };
 
   const handleWhatsAppRedirect = () => {
