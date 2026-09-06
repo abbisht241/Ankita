@@ -1,6 +1,5 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
-import { cloudflare } from "@cloudflare/vite-plugin";
 import crypto from 'crypto';
 
 function razorpayDevApiPlugin(): Plugin {
@@ -110,5 +109,5 @@ function razorpayDevApiPlugin(): Plugin {
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), cloudflare(), razorpayDevApiPlugin()],
+  plugins: [react(), razorpayDevApiPlugin()],
 });
