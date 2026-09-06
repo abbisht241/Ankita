@@ -37,6 +37,7 @@ export const AdminPaymentsTab: React.FC<AdminPaymentsTabProps> = ({
   const [courseFilter, setCourseFilter] = useState<string>('all');
   const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [detailsModal, setDetailsModal] = useState<'none' | 'collected_revenue' | 'this_month_due' | 'all_pending'>('none');
 
   // Next Month Fee Collect Modal State
   const [selectedStudentForMonthlyFee, setSelectedStudentForMonthlyFee] = useState<StudentEnrollment | null>(null);
@@ -262,59 +263,95 @@ export const AdminPaymentsTab: React.FC<AdminPaymentsTabProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         
         {/* Card 1: Total Collected */}
-        <div className="bg-white p-5 rounded-3xl border border-emerald-200 shadow-subtle hover:shadow-premium transition-all">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected Revenue</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <IndianRupee className="w-4 h-4" />
+        <div 
+          onClick={() => {
+            setStatusFilter('paid');
+            setDetailsModal('collected_revenue');
+          }}
+          className="bg-white p-5 rounded-3xl border border-emerald-200 shadow-subtle hover:shadow-premium hover:border-emerald-400 transition-all cursor-pointer group flex flex-col justify-between"
+          title="Click to view verified revenue details"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected Revenue</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <IndianRupee className="w-4 h-4" />
+              </div>
             </div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
+              ₹{totalCollectedRevenue.toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>{paidStudents.length} Verified Paid Receipts</span>
+            </p>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-            ₹{totalCollectedRevenue.toLocaleString('en-IN')}
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
+            <span>View Receipt Details</span>
+            <span>→</span>
           </div>
-          <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>{paidStudents.length} Verified Paid Receipts</span>
-          </p>
         </div>
 
         {/* Card 2: THIS MONTH DUE (Highlighted) */}
         <div 
-          onClick={() => setStatusFilter('this_month_due')}
-          className="bg-gradient-to-br from-amber-50 to-orange-50/60 p-5 rounded-3xl border-2 border-amber-300 shadow-subtle hover:shadow-premium transition-all cursor-pointer group"
+          onClick={() => {
+            setStatusFilter('this_month_due');
+            setDetailsModal('this_month_due');
+          }}
+          className="bg-gradient-to-br from-amber-50 to-orange-50/60 p-5 rounded-3xl border-2 border-amber-300 shadow-subtle hover:shadow-premium hover:border-amber-400 transition-all cursor-pointer group flex flex-col justify-between"
+          title="Click to view this month due students"
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-amber-700" />
-              <span>This Month Due ({currentMonthYear.split(' ')[0]})</span>
-            </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shadow-xs">
-              <Clock className="w-4 h-4" />
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-extrabold text-amber-900 uppercase tracking-wider flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-amber-700" />
+                <span>This Month Due ({currentMonthYear.split(' ')[0]})</span>
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shadow-xs group-hover:scale-105 transition-transform">
+                <Clock className="w-4 h-4" />
+              </div>
             </div>
+            <div className="text-2xl sm:text-3xl font-black text-amber-900 font-display">
+              ₹{thisMonthDueTotal.toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-amber-800 font-bold mt-1 flex items-center gap-1">
+              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
+              <span>{thisMonthDueStudents.length} Students Pending ({currentMonthYear.split(' ')[0]})</span>
+            </p>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-amber-900 font-display">
-            ₹{thisMonthDueTotal.toLocaleString('en-IN')}
+          <div className="mt-3 pt-2 border-t border-amber-200/80 flex items-center justify-between text-xs font-bold text-amber-900 group-hover:text-amber-950">
+            <span>View Due Students List</span>
+            <span>→</span>
           </div>
-          <p className="text-xs text-amber-800 font-bold mt-1 flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-            <span>{thisMonthDueStudents.length} Students Pending ({currentMonthYear.split(' ')[0]})</span>
-          </p>
         </div>
 
         {/* Card 3: Total Pending Dues */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-subtle hover:shadow-premium transition-all">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">All Pending Fees</span>
-            <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
+        <div 
+          onClick={() => {
+            setStatusFilter('pending');
+            setDetailsModal('all_pending');
+          }}
+          className="bg-white p-5 rounded-3xl border border-slate-200 shadow-subtle hover:shadow-premium hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
+          title="Click to view all pending dues"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">All Pending Fees</span>
+              <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Clock className="w-4 h-4" />
+              </div>
             </div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
+              ₹{totalPendingDue.toLocaleString('en-IN')}
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              {pendingStudents.length} Total Outstanding Registrations
+            </p>
           </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-            ₹{totalPendingDue.toLocaleString('en-IN')}
+          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-700 group-hover:text-slate-900">
+            <span>View All Pending</span>
+            <span>→</span>
           </div>
-          <p className="text-xs text-slate-500 font-medium mt-1">
-            {pendingStudents.length} Total Outstanding Registrations
-          </p>
         </div>
 
         {/* Card 4: Razorpay Online & Direct UPI */}
@@ -781,6 +818,243 @@ export const AdminPaymentsTab: React.FC<AdminPaymentsTabProps> = ({
               </div>
 
             </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* 5. Interactive Details Modal for Collected Revenue & Dues */}
+      {detailsModal !== 'none' && (
+        <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-fadeIn">
+          {/* Backdrop click to close */}
+          <div 
+            className="absolute inset-0"
+            onClick={() => setDetailsModal('none')}
+          />
+          
+          <div className="relative z-10 bg-white rounded-3xl max-w-2xl w-full max-h-[88vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden animate-scaleUp">
+            
+            {/* Modal Header */}
+            <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
+              detailsModal === 'collected_revenue' 
+                ? 'bg-emerald-50/70 border-emerald-100' 
+                : detailsModal === 'this_month_due' 
+                  ? 'bg-amber-50/70 border-amber-200' 
+                  : 'bg-slate-50 border-slate-200'
+            }`}>
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xs ${
+                  detailsModal === 'collected_revenue'
+                    ? 'bg-emerald-600'
+                    : detailsModal === 'this_month_due'
+                      ? 'bg-amber-500 text-slate-950'
+                      : 'bg-slate-700'
+                }`}>
+                  {detailsModal === 'collected_revenue' ? (
+                    <IndianRupee className="w-5 h-5" />
+                  ) : (
+                    <Clock className="w-5 h-5" />
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base sm:text-lg text-slate-900 font-display">
+                    {detailsModal === 'collected_revenue' && 'Verified Collected Revenue Details'}
+                    {detailsModal === 'this_month_due' && `This Month Pending Dues (${currentMonthYear.split(' ')[0]})`}
+                    {detailsModal === 'all_pending' && 'All Outstanding Fee Dues'}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {detailsModal === 'collected_revenue' && (
+                      <span>Total <strong className="text-emerald-700 font-extrabold">₹{totalCollectedRevenue.toLocaleString('en-IN')}</strong> from {paidStudents.length} verified payment(s)</span>
+                    )}
+                    {detailsModal === 'this_month_due' && (
+                      <span>Total <strong className="text-amber-800 font-extrabold">₹{thisMonthDueTotal.toLocaleString('en-IN')}</strong> pending from {thisMonthDueStudents.length} student(s)</span>
+                    )}
+                    {detailsModal === 'all_pending' && (
+                      <span>Total <strong className="text-rose-700 font-extrabold">₹{totalPendingDue.toLocaleString('en-IN')}</strong> pending from {pendingStudents.length} student(s)</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setDetailsModal('none')}
+                className="w-8 h-8 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-slate-200 flex items-center justify-center transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Sub-header Breakdown for Collected Revenue */}
+            {detailsModal === 'collected_revenue' && (
+              <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 border-b border-slate-100 text-xs">
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Razorpay Web:</span>
+                  <span className="font-extrabold text-slate-900">₹{razorpayTotal.toLocaleString('en-IN')} ({razorpayPaid.length})</span>
+                </div>
+                <div className="bg-white p-2.5 rounded-xl border border-slate-200 flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Direct UPI / Cash:</span>
+                  <span className="font-extrabold text-slate-900">₹{directUpiTotal.toLocaleString('en-IN')} ({directUpiPaid.length})</span>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Body: Scrollable Student List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {/* COLLECTED REVENUE LIST */}
+              {detailsModal === 'collected_revenue' && (
+                paidStudents.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400 space-y-2">
+                    <IndianRupee className="w-8 h-8 mx-auto text-slate-300" />
+                    <p className="text-sm font-semibold">No verified paid transactions recorded yet.</p>
+                  </div>
+                ) : (
+                  paidStudents.map((s) => (
+                    <div key={s.id} className="bg-slate-50/80 hover:bg-slate-50 border border-slate-200/90 rounded-2xl p-3.5 space-y-2.5 transition-all">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="font-extrabold text-sm text-slate-900">{s.name}</div>
+                          <div className="text-[11px] text-slate-500 font-medium">{s.courseTitle.split('(')[0]}</div>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <div className="font-black text-emerald-700 text-base">₹{s.amount}</div>
+                          <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 uppercase">
+                            {s.paymentMode.replace('_', ' ')}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-slate-500 pt-1.5 border-t border-slate-200/60 flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                            {s.paymentId}
+                          </span>
+                          <button
+                            onClick={() => handleCopyPaymentId(s.paymentId)}
+                            className="text-slate-400 hover:text-slate-700 p-0.5 cursor-pointer"
+                            title="Copy Payment ID"
+                          >
+                            {copiedId === s.paymentId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                          </button>
+                          <span className="text-[11px] text-slate-400">
+                            {new Date(s.enrolledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5">
+                          <a
+                            href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(
+                              `Namaste ${s.name} ji,\n\nDr. Ankita Bisht Academic Academy me aapki admission payment (₹${s.amount}) verify ho chuki hai. Reference ID: ${s.paymentId}.\n\nAapka course access active hai. Dhanyawad!`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            <span>WhatsApp</span>
+                          </a>
+                          <a
+                            href={`tel:+91${s.phone}`}
+                            className="p-1 rounded-lg bg-white border border-slate-200 text-slate-600 hover:text-slate-900"
+                            title="Call Phone"
+                          >
+                            <PhoneCall className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )
+              )}
+
+              {/* THIS MONTH DUE OR ALL PENDING LIST */}
+              {(detailsModal === 'this_month_due' || detailsModal === 'all_pending') && (
+                (detailsModal === 'this_month_due' ? thisMonthDueStudents : pendingStudents).length === 0 ? (
+                  <div className="text-center py-12 space-y-2 text-slate-400">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
+                    <h4 className="text-sm font-bold text-slate-700">All Clear! No Pending Dues</h4>
+                    <p className="text-xs text-slate-500">Every student in this category has completed their fee payment.</p>
+                  </div>
+                ) : (
+                  (detailsModal === 'this_month_due' ? thisMonthDueStudents : pendingStudents).map((s) => {
+                    const dueAmt = s.feeDue !== undefined ? s.feeDue : 999;
+                    const bMonth = getStudentBillingMonth(s);
+
+                    return (
+                      <div key={s.id} className="bg-amber-50/40 hover:bg-amber-50/80 border border-amber-200/90 rounded-2xl p-3.5 space-y-2.5 transition-all">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="font-extrabold text-sm text-slate-900">{s.name}</div>
+                            <div className="text-[11px] text-slate-500 font-medium">
+                              {s.courseTitle.split('(')[0]} · <span className="text-amber-800 font-semibold">{bMonth}</span>
+                            </div>
+                            <div className="text-[11px] text-slate-600 font-mono mt-0.5">{s.phone}</div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="font-black text-rose-600 text-base">₹{dueAmt}</div>
+                            <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-900">
+                              Fee Due
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t border-amber-200/60">
+                          <button
+                            onClick={() => {
+                              if (confirm(`Confirm fee payment of ₹${dueAmt} received for ${s.name}?`)) {
+                                onMarkPaid(s.id);
+                              }
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Mark Paid</span>
+                          </button>
+
+                          <a
+                            href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(
+                              `Namaste ${s.name} ji,\n\nDr. Ankita Bisht Academic Academy me aapka admission registration mila hai.\n\n📚 Course: ${s.courseTitle}\n💰 Monthly Fee Due: ₹${dueAmt}\n\nBatch access activate rakhne ke liye kripya fee payment complete karein:\nUPI: 7417268651@okbizaxis\nGooglePay / PhonePe / Paytm: +91 7417268651\n\nPayment receipt isi WhatsApp par share karein.`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>WhatsApp Reminder</span>
+                          </a>
+
+                          <a
+                            href={`tel:+91${s.phone}`}
+                            className="p-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                            title="Call Phone"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })
+                )
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+              <button
+                onClick={handleExportPaymentsCSV}
+                className="text-xs font-bold text-slate-700 hover:text-slate-950 flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                onClick={() => setDetailsModal('none')}
+                className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-5 py-2 rounded-xl transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
 
           </div>
         </div>
