@@ -20,7 +20,7 @@ import {
 import confetti from 'canvas-confetti';
 import { useSiteContent } from '../../context/SiteContentContext';
 import type { SiteContentConfig } from '../../services/siteContentService';
-import type { FAQItem, Resource, Testimonial } from '../../types';
+import type { Course, FAQItem, Resource, Testimonial } from '../../types';
 
 export const AdminCmsTab: React.FC = () => {
   const { content, publishContent, resetToDefaults } = useSiteContent();
@@ -358,13 +358,70 @@ export const AdminCmsTab: React.FC = () => {
         {/* SUBTAB 3: COURSES & PRICING */}
         {activeSubTab === 'courses' && (
           <div className="space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-extrabold text-lg text-slate-900 font-display">
-                  Courses, Batches &amp; Pricing Manager
+                  Courses, Batches &amp; Pricing Manager ({formData.courses.courses.length} Batches)
                 </h3>
-                <p className="text-xs text-slate-500">Edit course details, original prices, special discounted fees, and batches.</p>
+                <p className="text-xs text-slate-500">Edit existing batches, add new courses, update discounted fees, or delete old offerings.</p>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const newId = `course-${Date.now()}`;
+                  const newCourse: Course = {
+                    id: newId,
+                    title: 'New UGC NET Masterclass Batch',
+                    slug: `batch-${newId}`,
+                    category: 'UGC NET Paper 1',
+                    badge: 'New Batch 🔥',
+                    isPopular: false,
+                    shortDesc: 'Complete syllabus coverage with live evening classes, high-yield bilingual PDF notes, and NTA CBT mock tests.',
+                    fullDesc: 'Comprehensive preparation batch designed and taught personally by Dr. Ankita Bisht.',
+                    duration: '3 Months (60+ Hours)',
+                    liveHours: '60+ Live Interactive Hours',
+                    validity: '1 Year Full Access',
+                    originalPrice: 2999,
+                    price: 999,
+                    rating: 4.95,
+                    reviewsCount: 150,
+                    studentCount: '500+ Enrolled',
+                    medium: 'Bilingual (Hindi + English)',
+                    targetExams: ['UGC NET JRF', 'SET Exams', 'Ph.D. Entrance PET'],
+                    highlights: [
+                      '100% Comprehensive Syllabus Coverage',
+                      'Daily Live Classes & 24/7 Unlimited Recorded Lectures',
+                      'High-Yield Unit-Wise PDF Notes in Hindi & English',
+                      'Full NTA CBT Pattern Mock Test Series with Solutions'
+                    ],
+                    syllabusModules: [
+                      {
+                        unitNumber: 'Unit 1',
+                        unitTitle: 'Teaching Aptitude & Core Concepts',
+                        hours: '12 Hours',
+                        topics: ['Levels of Teaching', 'Modern Evaluation Systems & ICT']
+                      }
+                    ],
+                    keyBenefits: [
+                      'Achieve top percentiles and JRF cut-off with ease',
+                      '1-on-1 strategy doubt session with Dr. Ankita Bisht'
+                    ]
+                  };
+
+                  setFormData({
+                    ...formData,
+                    courses: {
+                      ...formData.courses,
+                      courses: [newCourse, ...formData.courses.courses]
+                    }
+                  });
+                }}
+                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md hover:shadow-brand-700/20 transition-all shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>+ Add New Course</span>
+              </button>
             </div>
 
             <div className="space-y-4 text-xs">
@@ -398,26 +455,52 @@ export const AdminCmsTab: React.FC = () => {
               {/* Course Cards List */}
               <div className="space-y-4 pt-2">
                 {formData.courses.courses.map((course, idx) => (
-                  <div key={course.id} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="font-bold text-sm text-brand-900">
-                        Course #{idx + 1}: {course.title}
+                  <div key={course.id || idx} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3 relative group/card hover:border-brand-300 transition-colors">
+                    <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-full bg-brand-700 text-white font-bold text-xs flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <div className="font-bold text-sm text-brand-900 truncate max-w-sm sm:max-w-md">
+                          {course.title || `Course #${idx + 1}`}
+                        </div>
                       </div>
-                      <span className="font-mono text-[10px] text-slate-400">ID: {course.id}</span>
+
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-[10px] text-slate-400 hidden sm:inline">ID: {course.id}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${course.title}"? This cannot be undone.`)) {
+                              const updated = formData.courses.courses.filter((_, i) => i !== idx);
+                              setFormData({
+                                ...formData,
+                                courses: { ...formData.courses, courses: updated }
+                              });
+                            }
+                          }}
+                          className="text-rose-600 hover:text-rose-800 hover:bg-rose-50 p-1.5 rounded-lg transition-colors flex items-center gap-1 font-bold text-xs cursor-pointer border border-rose-200"
+                          title="Delete this Course"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Delete</span>
+                        </button>
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block font-semibold text-slate-700 mb-1">Course Title</label>
+                        <label className="block font-semibold text-slate-700 mb-1">Course Title *</label>
                         <input
                           type="text"
+                          required
                           value={course.title}
                           onChange={(e) => {
                             const updated = [...formData.courses.courses];
                             updated[idx] = { ...updated[idx], title: e.target.value };
                             setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
                           }}
-                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold text-slate-900"
                         />
                       </div>
 
@@ -425,6 +508,7 @@ export const AdminCmsTab: React.FC = () => {
                         <label className="block font-semibold text-slate-700 mb-1">Discounted Sale Fee (₹) *</label>
                         <input
                           type="number"
+                          required
                           value={course.price}
                           onChange={(e) => {
                             const updated = [...formData.courses.courses];
@@ -450,7 +534,27 @@ export const AdminCmsTab: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Category</label>
+                        <select
+                          value={course.category}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], category: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800"
+                        >
+                          <option value="UGC NET Paper 1">UGC NET Paper 1</option>
+                          <option value="Research">Research &amp; SPSS</option>
+                          <option value="Pedagogy & CDP">Pedagogy &amp; CDP</option>
+                          <option value="Nutrition & Health">Nutrition &amp; Health</option>
+                          <option value="Psychology">Psychology</option>
+                          <option value="Teaching Aptitude">Teaching Aptitude</option>
+                        </select>
+                      </div>
+
                       <div>
                         <label className="block font-semibold text-slate-700 mb-1">Badge (e.g. Best Seller 🔥)</label>
                         <input
@@ -494,6 +598,38 @@ export const AdminCmsTab: React.FC = () => {
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Teaching Medium</label>
+                        <input
+                          type="text"
+                          value={course.medium || 'Bilingual (Hindi + English)'}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], medium: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          placeholder="e.g. Bilingual (Hindi + English)"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-semibold text-slate-700 mb-1">Enrolled Count Badge</label>
+                        <input
+                          type="text"
+                          value={course.studentCount || '500+ Enrolled'}
+                          onChange={(e) => {
+                            const updated = [...formData.courses.courses];
+                            updated[idx] = { ...updated[idx], studentCount: e.target.value };
+                            setFormData({ ...formData, courses: { ...formData.courses, courses: updated } });
+                          }}
+                          placeholder="e.g. 1,500+ Enrolled"
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block font-semibold text-slate-700 mb-1">Short Description</label>
                       <textarea
@@ -509,6 +645,65 @@ export const AdminCmsTab: React.FC = () => {
                     </div>
                   </div>
                 ))}
+
+                {/* Bottom Add Course Action Card */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newId = `course-${Date.now()}`;
+                    const newCourse: Course = {
+                      id: newId,
+                      title: 'New UGC NET Masterclass Batch',
+                      slug: `batch-${newId}`,
+                      category: 'UGC NET Paper 1',
+                      badge: 'New Batch 🔥',
+                      isPopular: false,
+                      shortDesc: 'Complete syllabus coverage with live evening classes, high-yield bilingual PDF notes, and NTA CBT mock tests.',
+                      fullDesc: 'Comprehensive preparation batch designed and taught personally by Dr. Ankita Bisht.',
+                      duration: '3 Months (60+ Hours)',
+                      liveHours: '60+ Live Interactive Hours',
+                      validity: '1 Year Full Access',
+                      originalPrice: 2999,
+                      price: 999,
+                      rating: 4.95,
+                      reviewsCount: 150,
+                      studentCount: '500+ Enrolled',
+                      medium: 'Bilingual (Hindi + English)',
+                      targetExams: ['UGC NET JRF', 'SET Exams', 'Ph.D. Entrance PET'],
+                      highlights: [
+                        '100% Comprehensive Syllabus Coverage',
+                        'Daily Live Classes & 24/7 Unlimited Recorded Lectures',
+                        'High-Yield Unit-Wise PDF Notes in Hindi & English',
+                        'Full NTA CBT Pattern Mock Test Series with Solutions'
+                      ],
+                      syllabusModules: [
+                        {
+                          unitNumber: 'Unit 1',
+                          unitTitle: 'Teaching Aptitude & Core Concepts',
+                          hours: '12 Hours',
+                          topics: ['Levels of Teaching', 'Modern Evaluation Systems & ICT']
+                        }
+                      ],
+                      keyBenefits: [
+                        'Achieve top percentiles and JRF cut-off with ease',
+                        '1-on-1 strategy doubt session with Dr. Ankita Bisht'
+                      ]
+                    };
+
+                    setFormData({
+                      ...formData,
+                      courses: {
+                        ...formData.courses,
+                        courses: [...formData.courses.courses, newCourse]
+                      }
+                    });
+                  }}
+                  className="w-full py-4 border-2 border-dashed border-brand-300 hover:border-brand-500 bg-brand-50/50 hover:bg-brand-50 rounded-2xl text-brand-800 font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+                >
+                  <Plus className="w-5 h-5 text-brand-700" />
+                  <span>+ Add Another Course / Batch</span>
+                </button>
+
               </div>
             </div>
           </div>
