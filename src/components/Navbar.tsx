@@ -76,23 +76,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
         
-        {/* Brand Logo & Educator Title */}
+        {/* Brand Logo */}
         <a 
           href="#hero" 
           onClick={(e) => handleNavClick(e, '#hero')}
-          className="flex items-center gap-3 group focus:outline-none shrink-0"
+          className="flex items-center group focus:outline-none shrink-0 py-0.5"
         >
-          <div className="w-10 h-10 rounded-xl bg-brand-700 flex items-center justify-center text-white shadow-sm group-hover:bg-brand-800 transition-colors">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <span className="block font-extrabold text-lg sm:text-xl font-display tracking-tight text-slate-900 group-hover:text-brand-700 transition-colors">
-              Dr. Ankita Bisht
-            </span>
-            <p className="text-[11px] sm:text-xs text-slate-500 font-medium -mt-0.5">
-              UGC NET &amp; Pedagogy Academy
-            </p>
-          </div>
+          <img 
+            src="/images/logo.png" 
+            alt="Learn With Dr. Ankita" 
+            className="h-10 sm:h-12 md:h-13 w-auto object-contain transition-transform group-hover:scale-[1.02]" 
+          />
         </a>
 
         {/* Desktop Navigation Links */}

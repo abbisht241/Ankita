@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  GraduationCap, 
   PhoneCall, 
   Mail, 
   MapPin, 
@@ -36,16 +35,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
           {/* Brand & Educator Summary (2 cols) */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-400 flex items-center justify-center text-white shadow-md">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <div>
-                <span className="font-extrabold text-xl font-display text-white tracking-tight">
-                  Dr. Ankita Bisht
-                </span>
-                <p className="text-xs text-brand-300 font-medium">
-                  Ph.D. • M.A. Education • B.Ed. • Asst. Professor &amp; Gold Medalist
-                </p>
+              <div className="bg-white/95 p-2 rounded-2xl inline-block shadow-sm">
+                <img 
+                  src="/images/logo.png" 
+                  alt="Learn With Dr. Ankita" 
+                  className="h-12 w-auto object-contain" 
+                />
               </div>
             </div>
 
