@@ -37,7 +37,7 @@ interface AdminPanelProps {
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -75,6 +75,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   };
 
   useEffect(() => {
+    setIsAuthenticated(AdminStorage.isAuthenticated());
     refreshData();
 
     // Auto-sync live inquiries and students every 5 seconds
@@ -263,7 +264,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                   autoFocus
                   value={passcodeAttempt}
                   onChange={(e) => setPasscodeAttempt(e.target.value)}
-                  placeholder="e.g. ankita2026"
+                  placeholder="Enter passcode"
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all text-center tracking-widest"
                 />
               </div>
@@ -277,14 +278,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
             </button>
           </form>
 
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-center text-xs text-slate-500">
             <button
               onClick={onBackToWebsite}
               className="hover:text-brand-600 font-medium flex items-center gap-1 cursor-pointer"
             >
               ← Back to Main Website
             </button>
-            <span className="font-mono text-[11px] text-slate-400">Default: ankita2026</span>
           </div>
         </div>
       </div>
