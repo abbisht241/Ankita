@@ -15,6 +15,9 @@ export interface StudentEnrollment {
   enrolledAt: string;
   notes?: string;
   upiRefOrUtr?: string;
+  billingType?: 'monthly' | 'one_time';
+  billingMonth?: string;
+  nextDueMonth?: string;
 }
 
 export interface LeadInquiry {
