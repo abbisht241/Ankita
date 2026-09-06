@@ -119,6 +119,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     refreshData();
   };
 
+  const handleMarkStudentPaid = async (id: string) => {
+    await AdminStorage.markStudentPaid(id);
+    refreshData();
+  };
+
   const handleDeleteStudent = async (id: string) => {
     await AdminStorage.deleteStudent(id);
     refreshData();
@@ -422,6 +427,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
             <AdminStudentsTab
               students={students}
               onAddStudent={handleAddStudent}
+              onMarkPaid={handleMarkStudentPaid}
               onDeleteStudent={handleDeleteStudent}
               onExportCSV={handleExportCSV}
               isOpenAddModal={isOpenAddModal}

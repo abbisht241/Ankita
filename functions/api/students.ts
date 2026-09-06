@@ -9,13 +9,16 @@ export interface StudentEnrollment {
   phone: string;
   courseId: string;
   courseTitle: string;
-  amount: number;
+  amount: number; // Actual amount received (0 if unpaid)
+  feeDue: number; // Course fee / balance due (e.g. 999)
   paymentId: string;
   orderId?: string;
-  paymentMode: 'razorpay' | 'cash' | 'upi_direct' | 'scholarship';
-  status: 'active' | 'completed' | 'refunded';
+  paymentMode: 'razorpay' | 'cash' | 'upi_direct' | 'unpaid' | 'scholarship';
+  paymentStatus: 'paid' | 'pending' | 'partially_paid';
+  status: 'active' | 'pending_payment' | 'completed' | 'refunded';
   enrolledAt: string;
   notes?: string;
+  upiRefOrUtr?: string;
 }
 
 const INITIAL_STUDENTS: StudentEnrollment[] = [
@@ -27,41 +30,14 @@ const INITIAL_STUDENTS: StudentEnrollment[] = [
     courseId: 'ugc-net-paper-1',
     courseTitle: 'UGC NET Paper 1 Complete Masterclass (Target 85+ Marks)',
     amount: 999,
+    feeDue: 0,
     paymentId: 'pay_TYq9AWcoJG09hC',
     orderId: 'order_TYq9AWcoJG09hC',
     paymentMode: 'razorpay',
+    paymentStatus: 'paid',
     status: 'active',
     enrolledAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
     notes: 'Enrolled via Razorpay Gateway'
-  },
-  {
-    id: 'ENR-1002',
-    name: 'Pooja Rawat',
-    email: 'pooja.rawat92@gmail.com',
-    phone: '9876543210',
-    courseId: 'child-development-pedagogy',
-    courseTitle: 'Child Development & Pedagogy (CDP) Super Batch',
-    amount: 999,
-    paymentId: 'pay_TYp78a9x71629d',
-    orderId: 'order_TYp78a9x71629d',
-    paymentMode: 'razorpay',
-    status: 'active',
-    enrolledAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-    notes: 'Targeting CTET & State Assistant Professor'
-  },
-  {
-    id: 'ENR-1003',
-    name: 'Rohit Joshi',
-    email: 'rohit.joshi.hnb@gmail.com',
-    phone: '7417268651',
-    courseId: 'research-methodology-spss',
-    courseTitle: 'Research Methodology & SPSS Data Analysis Masterclass',
-    amount: 999,
-    paymentId: 'pay_UPI_DIR_8849',
-    paymentMode: 'upi_direct',
-    status: 'active',
-    enrolledAt: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
-    notes: 'Ph.D. Entrance PET Aspirant'
   }
 ];
 
@@ -72,10 +48,20 @@ async function getStudentsList(env: Env): Promise<StudentEnrollment[]> {
     const raw = await env.ADMIN_KV.get(KV_KEY);
     if (raw) {
       try {
-        return JSON.parse(raw);
-      } catch (e) {
-        // fallback
-      }
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map((s: any) => {
+            const isPending = s.paymentStatus === 'pending' || (s.paymentMode === 'upi_direct' && s.paymentId?.startsWith('pay_REG_')) || s.amount === 0;
+            return {
+              ...s,
+              amount: isPending ? 0 : (Number(s.amount) || 0),
+              feeDue: isPending ? (s.feeDue || 999) : 0,
+              paymentStatus: isPending ? 'pending' : (s.paymentStatus || 'paid'),
+              status: isPending ? 'pending_payment' : (s.status || 'active')
+            };
+          });
+        }
+      } catch (e) {}
     }
   }
   return INITIAL_STUDENTS;
@@ -110,6 +96,10 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       });
     }
 
+    const isPaid = body.paymentStatus === 'paid' || body.paymentMode === 'razorpay';
+    const amountPaid = isPaid ? (Number(body.amount) || 999) : 0;
+    const feeDue = isPaid ? 0 : 999;
+
     const currentList = await getStudentsList(context.env);
     
     const newStudent: StudentEnrollment = {
@@ -119,13 +109,16 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       phone: String(body.phone).trim(),
       courseId: String(body.courseId || 'custom').trim(),
       courseTitle: String(body.courseTitle).trim(),
-      amount: Number(body.amount) || 999,
+      amount: amountPaid,
+      feeDue: feeDue,
       paymentId: String(body.paymentId || `pay_MANUAL_${Date.now()}`),
       orderId: body.orderId ? String(body.orderId) : undefined,
-      paymentMode: (body.paymentMode as any) || 'razorpay',
-      status: (body.status as any) || 'active',
+      paymentMode: (body.paymentMode as any) || (isPaid ? 'razorpay' : 'upi_direct'),
+      paymentStatus: isPaid ? 'paid' : 'pending',
+      status: isPaid ? 'active' : 'pending_payment',
       enrolledAt: new Date().toISOString(),
-      notes: body.notes ? String(body.notes).trim() : 'Enrolled Online'
+      notes: body.notes ? String(body.notes).trim() : (isPaid ? 'Paid Online' : 'Fee Pending Verification'),
+      upiRefOrUtr: body.upiRefOrUtr ? String(body.upiRefOrUtr).trim() : undefined
     };
 
     const updatedList = [newStudent, ...currentList.filter(item => item.id !== newStudent.id)];
@@ -133,6 +126,59 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
 
     return new Response(JSON.stringify({ success: true, student: newStudent }), {
       status: 201,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+};
+
+export const onRequestPut = async (context: { request: Request; env: Env }) => {
+  try {
+    const body = await context.request.json().catch(() => ({})) as {
+      id: string;
+      amount?: number;
+      paymentStatus?: 'paid' | 'pending' | 'partially_paid';
+      status?: 'active' | 'pending_payment' | 'completed' | 'refunded';
+      paymentMode?: StudentEnrollment['paymentMode'];
+      notes?: string;
+    };
+
+    if (!body.id) {
+      return new Response(JSON.stringify({ success: false, error: 'Student ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    const currentList = await getStudentsList(context.env);
+    const updatedList = currentList.map(s => {
+      if (s.id === body.id) {
+        const newPaymentStatus = body.paymentStatus !== undefined ? body.paymentStatus : s.paymentStatus;
+        const newAmount = body.amount !== undefined ? body.amount : (newPaymentStatus === 'paid' ? 999 : s.amount);
+        const newFeeDue = newPaymentStatus === 'paid' ? 0 : 999;
+        const newStatus = body.status !== undefined ? body.status : (newPaymentStatus === 'paid' ? 'active' : s.status);
+
+        return {
+          ...s,
+          amount: newAmount,
+          feeDue: newFeeDue,
+          paymentStatus: newPaymentStatus,
+          status: newStatus,
+          paymentMode: body.paymentMode !== undefined ? body.paymentMode : s.paymentMode,
+          notes: body.notes !== undefined ? body.notes : s.notes
+        };
+      }
+      return s;
+    });
+
+    await saveStudentsList(context.env, updatedList);
+
+    return new Response(JSON.stringify({ success: true, students: updatedList }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   } catch (error: any) {
@@ -181,7 +227,7 @@ export const onRequestOptions = async () => {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     }
   });

@@ -77,11 +77,13 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
             courseId: selectedCourse.id,
             courseTitle: selectedCourse.title,
             amount: selectedCourse.price,
+            feeDue: 0,
             paymentId: payload.razorpay_payment_id,
             orderId: payload.razorpay_order_id,
             paymentMode: 'razorpay',
+            paymentStatus: 'paid',
             status: 'active',
-            notes: `Registered via /register | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
+            notes: `Paid Online via Razorpay | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
           });
           setEnrolledStudent(newStudent);
           try {
@@ -99,7 +101,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
       return;
     }
 
-    // Direct / UPI Registration
+    // Direct / UPI Registration (Unpaid / Pending Verification)
     setIsLoading(true);
     try {
       const newStudent = await AdminStorage.addStudent({
@@ -108,16 +110,18 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
         phone: cleanPhone,
         courseId: selectedCourse.id,
         courseTitle: selectedCourse.title,
-        amount: selectedCourse.price,
-        paymentId: `pay_REG_${Date.now()}`,
+        amount: 0, // Fee not paid yet!
+        feeDue: selectedCourse.price,
+        paymentId: `DIR_PENDING_${Date.now().toString().slice(-6)}`,
         paymentMode: 'upi_direct',
-        status: 'active',
-        notes: `Direct Registration via /register | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
+        paymentStatus: 'pending',
+        status: 'pending_payment',
+        notes: `Direct Registration - Fee Pending (₹${selectedCourse.price} Due) | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
       });
       setIsLoading(false);
       setEnrolledStudent(newStudent);
       try {
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.5 } });
+        confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
       } catch (err) {}
     } catch (e: any) {
       setIsLoading(false);
@@ -449,15 +453,25 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
               </div>
 
               <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 bg-amber-400/20 text-amber-300 text-xs font-bold px-3 py-1 rounded-full border border-amber-400/30">
+                <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${
+                  enrolledStudent.paymentStatus === 'paid'
+                    ? 'bg-emerald-400/20 text-emerald-300 border-emerald-400/30'
+                    : 'bg-amber-400/20 text-amber-300 border-amber-400/30'
+                }`}>
                   <Award className="w-3.5 h-3.5" />
-                  <span>Admission Confirmed</span>
+                  <span>
+                    {enrolledStudent.paymentStatus === 'paid'
+                      ? 'Admission Confirmed (Fee Paid)'
+                      : 'Admission Form Received (Fee Pending)'}
+                  </span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-white font-display">
                   Welcome to the Academy, {enrolledStudent.name}!
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-400">
-                  Your registration has been recorded successfully in the batch database.
+                  {enrolledStudent.paymentStatus === 'paid'
+                    ? 'Your registration and online payment have been verified successfully.'
+                    : 'Your seat application has been recorded. Please complete your fee payment to activate live class access.'}
                 </p>
               </div>
 
@@ -480,8 +494,16 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                 </div>
 
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                  <span className="text-slate-400 font-medium">Fee Paid / Mode:</span>
-                  <span className="font-semibold text-emerald-400">₹{enrolledStudent.amount} ({enrolledStudent.paymentMode.toUpperCase()})</span>
+                  <span className="text-slate-400 font-medium">Fee Status:</span>
+                  {enrolledStudent.paymentStatus === 'paid' ? (
+                    <span className="font-bold text-emerald-400 font-mono">
+                      ₹{enrolledStudent.amount} (PAID ONLINE)
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-400 font-mono">
+                      ₹0 Paid • ₹{enrolledStudent.feeDue || 999} Balance Due (UNPAID)
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
@@ -491,28 +513,66 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
 
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 font-medium">Admission Status:</span>
-                  <span className="font-bold text-emerald-400 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>ACTIVE</span>
-                  </span>
+                  {enrolledStudent.paymentStatus === 'paid' ? (
+                    <span className="font-bold text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>ACTIVE &amp; CONFIRMED</span>
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-400 flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>PENDING PAYMENT VERIFICATION</span>
+                    </span>
+                  )}
                 </div>
 
               </div>
 
+              {/* UPI Payment Instructions if Unpaid */}
+              {enrolledStudent.paymentStatus !== 'paid' && (
+                <div className="bg-amber-950/40 border border-amber-500/30 rounded-2xl p-4 text-left space-y-2 text-xs text-amber-200">
+                  <div className="font-bold text-amber-300 flex items-center gap-1.5">
+                    <CreditCard className="w-4 h-4" />
+                    <span>How to complete your ₹{enrolledStudent.feeDue || 999} payment:</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-amber-100/90">
+                    Send ₹{enrolledStudent.feeDue || 999} via Google Pay / PhonePe / Paytm to:
+                    <strong className="text-white block mt-0.5 font-mono text-xs">UPI ID / Mobile: +91 7417268651 (Dr. Ankita Bisht)</strong>
+                  </p>
+                  <p className="text-[11px] text-amber-300">
+                    After payment, click below to share payment screenshot on WhatsApp to instantly activate your batch link!
+                  </p>
+                </div>
+              )}
+
               {/* Action Buttons */}
               <div className="space-y-3 pt-2">
                 
-                <a
-                  href={`https://wa.me/917417268651?text=${encodeURIComponent(
-                    `Hello Dr. Ankita Bisht! I have completed my registration for ${enrolledStudent.courseTitle}. My Enrollment ID is ${enrolledStudent.id}. Please send me the official batch group link.`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Join Official WhatsApp Batch Group</span>
-                </a>
+                {enrolledStudent.paymentStatus === 'paid' ? (
+                  <a
+                    href={`https://wa.me/917417268651?text=${encodeURIComponent(
+                      `Hello Dr. Ankita Bisht! I have completed my online registration for ${enrolledStudent.courseTitle}. My Enrollment ID is ${enrolledStudent.id}. Please send me the official batch group link.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Join Official WhatsApp Batch Group</span>
+                  </a>
+                ) : (
+                  <a
+                    href={`https://wa.me/917417268651?text=${encodeURIComponent(
+                      `Hello Dr. Ankita Bisht! I submitted my admission form for ${enrolledStudent.courseTitle} (ID: ${enrolledStudent.id}). I am sharing my payment screenshot / inquiry for batch activation.`
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Share Payment Screenshot on WhatsApp (+91 7417268651)</span>
+                  </a>
+                )}
 
                 <div className="flex items-center justify-center gap-3">
                   <button

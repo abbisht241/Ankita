@@ -89,6 +89,8 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
           courseId: course.id,
           courseTitle: course.title,
           amount: course.price,
+          feeDue: 0,
+          paymentStatus: 'paid',
           paymentId: payload.razorpay_payment_id,
           orderId: payload.razorpay_order_id,
           paymentMode: 'razorpay',

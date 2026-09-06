@@ -5,13 +5,16 @@ export interface StudentEnrollment {
   phone: string;
   courseId: string;
   courseTitle: string;
-  amount: number;
+  amount: number; // Actual amount received (0 if unpaid)
+  feeDue: number; // Fee due / balance (e.g. 999)
   paymentId: string;
   orderId?: string;
-  paymentMode: 'razorpay' | 'cash' | 'upi_direct' | 'scholarship';
-  status: 'active' | 'completed' | 'refunded';
+  paymentMode: 'razorpay' | 'cash' | 'upi_direct' | 'unpaid' | 'scholarship';
+  paymentStatus: 'paid' | 'pending' | 'partially_paid';
+  status: 'active' | 'pending_payment' | 'completed' | 'refunded';
   enrolledAt: string;
   notes?: string;
+  upiRefOrUtr?: string;
 }
 
 export interface LeadInquiry {
@@ -56,41 +59,14 @@ const INITIAL_STUDENTS: StudentEnrollment[] = [
     courseId: 'ugc-net-paper-1',
     courseTitle: 'UGC NET Paper 1 Complete Masterclass (Target 85+ Marks)',
     amount: 999,
+    feeDue: 0,
     paymentId: 'pay_TYq9AWcoJG09hC',
     orderId: 'order_TYq9AWcoJG09hC',
     paymentMode: 'razorpay',
+    paymentStatus: 'paid',
     status: 'active',
     enrolledAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
     notes: 'Enrolled via Razorpay Gateway'
-  },
-  {
-    id: 'ENR-1002',
-    name: 'Pooja Rawat',
-    email: 'pooja.rawat92@gmail.com',
-    phone: '9876543210',
-    courseId: 'child-development-pedagogy',
-    courseTitle: 'Child Development & Pedagogy (CDP) Super Batch',
-    amount: 999,
-    paymentId: 'pay_TYp78a9x71629d',
-    orderId: 'order_TYp78a9x71629d',
-    paymentMode: 'razorpay',
-    status: 'active',
-    enrolledAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-    notes: 'Targeting CTET & State Assistant Professor'
-  },
-  {
-    id: 'ENR-1003',
-    name: 'Rohit Joshi',
-    email: 'rohit.joshi.hnb@gmail.com',
-    phone: '7417268651',
-    courseId: 'research-methodology-spss',
-    courseTitle: 'Research Methodology & SPSS Data Analysis Masterclass',
-    amount: 999,
-    paymentId: 'pay_UPI_DIR_8849',
-    paymentMode: 'upi_direct',
-    status: 'active',
-    enrolledAt: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
-    notes: 'Ph.D. Entrance PET Aspirant'
   }
 ];
 
@@ -227,7 +203,20 @@ export const AdminStorage = {
       return INITIAL_STUDENTS;
     }
     try {
-      return JSON.parse(data);
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) {
+        return parsed.map((s: any) => {
+          const isPending = s.paymentStatus === 'pending' || (s.paymentMode === 'upi_direct' && s.paymentId?.startsWith('pay_REG_')) || s.amount === 0;
+          return {
+            ...s,
+            amount: isPending ? 0 : (Number(s.amount) || 0),
+            feeDue: isPending ? (s.feeDue || 999) : 0,
+            paymentStatus: isPending ? 'pending' : (s.paymentStatus || 'paid'),
+            status: isPending ? 'pending_payment' : (s.status || 'active')
+          };
+        });
+      }
+      return INITIAL_STUDENTS;
     } catch {
       return INITIAL_STUDENTS;
     }
@@ -252,9 +241,17 @@ export const AdminStorage = {
 
   async addStudent(student: Omit<StudentEnrollment, 'id' | 'enrolledAt'>): Promise<StudentEnrollment> {
     const students = this.getStudents();
+    const isPaid = student.paymentStatus === 'paid' || student.paymentMode === 'razorpay';
+    const amountPaid = isPaid ? (Number(student.amount) || 999) : 0;
+    const feeDue = isPaid ? 0 : 999;
+
     const newStudent: StudentEnrollment = {
       ...student,
       id: `ENR-${Math.floor(1000 + Math.random() * 9000)}`,
+      amount: amountPaid,
+      feeDue: feeDue,
+      paymentStatus: isPaid ? 'paid' : 'pending',
+      status: isPaid ? 'active' : 'pending_payment',
       enrolledAt: new Date().toISOString()
     };
     students.unshift(newStudent);
@@ -272,6 +269,35 @@ export const AdminStorage = {
     }
 
     return newStudent;
+  },
+
+  async updateStudent(id: string, updates: Partial<StudentEnrollment>): Promise<void> {
+    const students = this.getStudents().map(s => {
+      if (s.id === id) {
+        return { ...s, ...updates };
+      }
+      return s;
+    });
+    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+
+    try {
+      await fetch('/api/students', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, ...updates })
+      });
+    } catch (e) {}
+  },
+
+  async markStudentPaid(id: string, amount: number = 999, paymentMode: StudentEnrollment['paymentMode'] = 'upi_direct'): Promise<void> {
+    await this.updateStudent(id, {
+      amount,
+      feeDue: 0,
+      paymentStatus: 'paid',
+      status: 'active',
+      paymentMode,
+      notes: 'Payment verified and confirmed by Admin'
+    });
   },
 
   async deleteStudent(id: string): Promise<void> {
@@ -418,14 +444,16 @@ export const AdminStorage = {
   // Export to CSV
   exportStudentsCSV(): void {
     const students = this.getStudents();
-    const headers = ['Enrollment ID', 'Student Name', 'Email', 'WhatsApp Phone', 'Course', 'Amount (INR)', 'Payment ID', 'Payment Mode', 'Status', 'Date'];
+    const headers = ['Enrollment ID', 'Student Name', 'Email', 'WhatsApp Phone', 'Course', 'Amount Paid (INR)', 'Fee Due (INR)', 'Payment Status', 'Payment ID', 'Payment Mode', 'Status', 'Date'];
     const rows = students.map(s => [
       `"${s.id}"`,
       `"${s.name}"`,
       `"${s.email}"`,
       `"${s.phone}"`,
       `"${s.courseTitle.replace(/"/g, '""')}"`,
-      `"${s.amount}"`,
+      `"${s.amount || 0}"`,
+      `"${s.feeDue || 0}"`,
+      `"${s.paymentStatus || (s.amount > 0 ? 'paid' : 'pending')}"`,
       `"${s.paymentId}"`,
       `"${s.paymentMode}"`,
       `"${s.status}"`,

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { 
   Users, 
   IndianRupee, 
-  BookOpen, 
   UserPlus, 
   Download, 
   TrendingUp, 
@@ -32,10 +31,17 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
   onExportCSV
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const totalRevenue = students.reduce((sum, s) => sum + s.amount, 0);
-  const paidStudentsCount = students.length;
+
+  // Compute verified paid vs pending unpaid
+  const paidStudents = students.filter(s => s.paymentStatus === 'paid' || (s.amount > 0 && s.status === 'active'));
+  const pendingStudents = students.filter(s => s.paymentStatus === 'pending' || s.amount === 0 || s.status === 'pending_payment');
+
+  const totalPaidRevenue = paidStudents.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+  const pendingRevenue = pendingStudents.reduce((sum, s) => sum + (Number(s.feeDue) || 999), 0);
+
+  const paidStudentsCount = paidStudents.length;
+  const pendingStudentsCount = pendingStudents.length;
   const newInquiriesCount = inquiries.filter(i => i.status === 'new').length;
-  const activeBatchesCount = 6;
 
   const recentStudents = students.slice(0, 5);
   const recentInquiries = inquiries.slice(0, 5);
@@ -92,7 +98,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
 
           <button
             onClick={onExportCSV}
-            className="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold px-3 py-2.5 rounded-xl border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl border border-white/20 transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Export CSV</span>
@@ -105,68 +111,77 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       {/* KPI Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         
-        {/* Total Revenue */}
+        {/* Verified Paid Revenue */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all">
           <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Revenue</span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected Revenue</span>
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <IndianRupee className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-            ₹{totalRevenue.toLocaleString('en-IN')}
+            ₹{totalPaidRevenue.toLocaleString('en-IN')}
           </div>
           <p className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
             <TrendingUp className="w-3.5 h-3.5" />
-            <span>100% Flat ₹999 Fee Standard</span>
+            <span>Verified Paid Receipts ({paidStudentsCount} Students)</span>
           </p>
         </div>
 
-        {/* Paid Students */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all">
+        {/* Pending Unpaid Fees */}
+        <div 
+          onClick={() => onNavigateTab('students')}
+          className="bg-white p-6 rounded-3xl border border-amber-200/90 shadow-subtle hover:shadow-premium transition-all cursor-pointer hover:border-amber-400 group"
+        >
           <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Paid Students</span>
+            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">Pending Fees Due</span>
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Clock className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="text-2xl sm:text-3xl font-extrabold text-amber-600 font-display">
+            ₹{pendingRevenue.toLocaleString('en-IN')}
+          </div>
+          <p className="text-xs text-amber-700 font-semibold mt-1">
+            {pendingStudentsCount} Unpaid Registrations (Follow-up) →
+          </p>
+        </div>
+
+        {/* Paid Students Count */}
+        <div 
+          onClick={() => onNavigateTab('students')}
+          className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all cursor-pointer"
+        >
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Learners</span>
             <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-            {paidStudentsCount}
+            {paidStudentsCount} <span className="text-xs font-normal text-slate-400">/ {students.length} reg.</span>
           </div>
           <p className="text-xs text-slate-500 font-medium mt-1">
-            Active enrolled batch learners
+            Confirmed batch access
           </p>
         </div>
 
         {/* Demo Inquiries */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all">
+        <div 
+          onClick={() => onNavigateTab('inquiries')}
+          className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all cursor-pointer"
+        >
           <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">New Inquiries</span>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Demo Leads</span>
+            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
               <PhoneCall className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
             {newInquiriesCount} <span className="text-xs font-normal text-slate-400">/ {inquiries.length} total</span>
           </div>
-          <p className="text-xs text-amber-600 font-semibold mt-1">
-            Requires counselor follow-up
-          </p>
-        </div>
-
-        {/* Active Batches */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-subtle hover:shadow-premium transition-all">
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Batches</span>
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <BookOpen className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display">
-            {activeBatchesCount}
-          </div>
-          <p className="text-xs text-indigo-600 font-semibold mt-1">
-            UGC NET, CDP, Research &amp; SPSS
+          <p className="text-xs text-sky-600 font-semibold mt-1">
+            Trial bookings pipeline →
           </p>
         </div>
 
@@ -199,9 +214,15 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm text-slate-900 truncate">{student.name}</span>
-                    <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                      ₹{student.amount}
-                    </span>
+                    {student.paymentStatus === 'pending' || student.amount === 0 ? (
+                      <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-300">
+                        ₹{student.feeDue || 999} Due ⏳
+                      </span>
+                    ) : (
+                      <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
+                        ₹{student.amount} Paid ✓
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-500 truncate">{student.courseTitle.split('(')[0]}</p>
                   <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
