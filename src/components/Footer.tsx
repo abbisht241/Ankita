@@ -44,7 +44,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                   Dr. Ankita Bisht
                 </span>
                 <p className="text-xs text-brand-300 font-medium">
-                  Assistant Professor &amp; Gold Medalist (Ph.D., UGC-NET)
+                  Ph.D. • M.A. Education • B.Ed. • Asst. Professor &amp; Gold Medalist
                 </p>
               </div>
             </div>

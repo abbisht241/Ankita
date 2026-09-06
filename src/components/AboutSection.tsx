@@ -19,11 +19,11 @@ interface AboutSectionProps {
 export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) => {
   const credentials = [
     { label: 'Current Faculty Role', value: 'Assistant Professor (Guest Faculty), HNB Garhwal Central University (2023-2026)' },
-    { label: 'Academic Distinction', value: 'Rank 1 - Gold Medalist (M.A. Home Science 2018, 8.4 CGPA)' },
     { label: 'Doctoral Qualification', value: 'Ph.D. in Home Science (2024), H.N.B. Garhwal University' },
+    { label: 'Education Degrees', value: 'M.A. Education (2026) & B.Ed. (2015)' },
+    { label: 'Academic Distinction', value: 'Rank 1 - Gold Medalist (M.A. Home Science 2018, 8.4 CGPA)' },
     { label: 'National Milestone', value: 'UGC-NET Qualified (NTA) in Home Science (2020)' },
-    { label: 'Published Book', value: 'Author of "समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में SHG की भूमिका"' },
-    { label: 'Research Publications', value: '8+ Papers in UGC-CARE (Madhya Bharti Grp-1) & Refereed Journals (IJAHS)' },
+    { label: 'Published Author', value: 'Book: "समृद्ध स्त्रियां, समृद्ध समाज" & 8+ UGC-CARE Papers' },
   ];
 
   const researchSpecializations = [
@@ -75,7 +75,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
                 Hello and welcome! I am <strong className="text-slate-900 font-bold">Dr. Ankita Bisht</strong>. I serve as an <span className="text-brand-700 font-semibold">Assistant Professor (Guest Faculty) at H.N.B. Garhwal University (A Central University)</span>, Srinagar Garhwal, Uttarakhand.
               </p>
               <p className="text-base">
-                Having earned my <strong className="text-slate-900 font-semibold">Ph.D. in Home Science (2024)</strong> with research focused on the socio-economic empowerment of women through Self-Help Groups, and having achieved <strong className="text-slate-900 font-semibold">Rank 1 Gold Medalist</strong> honours in M.A. Home Science along with <strong className="text-slate-900 font-semibold">UGC-NET qualification</strong>, I understand exactly what it takes to master complex subjects and crack competitive academic exams.
+                Having earned my <strong className="text-slate-900 font-semibold">Ph.D. in Home Science (2024)</strong>, <strong className="text-slate-900 font-semibold">M.A. in Education (2026)</strong>, and <strong className="text-slate-900 font-semibold">B.Ed. (2015)</strong>, along with achieving <strong className="text-slate-900 font-semibold">Rank 1 Gold Medalist</strong> honours in M.A. Home Science and <strong className="text-slate-900 font-semibold">UGC-NET qualification</strong>, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams.
               </p>
               <p className="text-base">
                 I am also the author of the published academic book <em className="text-brand-800 font-medium">“समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका”</em> and have published 8+ research papers in the <strong>UGC CARE List</strong> and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.
@@ -111,7 +111,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
                   <img src="/images/educator.jpg" alt="Dr. Ankita Bisht" className="w-11 h-11 rounded-full object-cover ring-2 ring-brand-400/50" />
                   <div>
                     <div className="font-bold text-white text-sm">Dr. Ankita Bisht</div>
-                    <div className="text-xs text-brand-300">Ph.D. Home Science • Rank 1 Gold Medalist • UGC-NET</div>
+                    <div className="text-xs text-brand-300">Ph.D. • M.A. Edu • B.Ed. • Rank 1 Gold Medalist • UGC-NET</div>
                   </div>
                 </div>
                 <div className="font-serif italic text-amber-300 text-sm hidden sm:block">~ Assistant Professor, HNBGU</div>

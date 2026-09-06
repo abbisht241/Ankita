@@ -154,7 +154,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
                 <div className="absolute bottom-0 inset-x-0 p-3.5 sm:p-4 text-white z-10">
                   <div className="flex flex-wrap items-center gap-1.5 mb-1">
                     <span className="bg-brand-600 text-white text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-xs">
-                      <GraduationCap className="w-3.5 h-3.5" /> Ph.D. Home Science (2024)
+                      <GraduationCap className="w-3.5 h-3.5" /> Ph.D. • M.A. Edu • B.Ed.
                     </span>
                     <span className="bg-amber-500 text-slate-950 text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
                       Rank 1 Gold Medalist
@@ -162,7 +162,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal, onOpe
                   </div>
                   <h3 className="text-lg sm:text-xl font-bold font-display text-white drop-shadow-sm">Dr. Ankita Bisht</h3>
                   <p className="text-[11px] sm:text-xs text-brand-200 font-medium">
-                    Assistant Professor (Guest Faculty), H.N.B. Garhwal Central University • UGC-NET Qualified
+                    Assistant Professor (Guest Faculty), H.N.B. Garhwal Central University • UGC-NET
                   </p>
                 </div>
               </div>
