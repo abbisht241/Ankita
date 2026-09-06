@@ -301,6 +301,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const navItems: NavItem[] = [
     { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
     { id: 'students', label: 'Students & Enrollments', icon: Users, badge: students.length },
+    { id: 'inquiries', label: 'Demo Leads & Inquiries 📞', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
     { 
       id: 'payments', 
       label: 'Payments & Fee Ledger 💳', 
@@ -314,7 +315,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       icon: FileText 
     },
     { id: 'share-link', label: 'Share Registration Link 🔗', icon: Share2 },
-    { id: 'inquiries', label: 'Demo Leads & Inquiries', icon: PhoneCall, badge: inquiries.filter(i => i.status === 'new').length },
     { id: 'batches', label: 'Batch & Class Links', icon: BookOpen },
     { id: 'settings', label: 'Settings & Security', icon: Settings },
   ];
