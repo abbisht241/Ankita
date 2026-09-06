@@ -816,6 +816,16 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                 <span>Share on WhatsApp</span>
               </a>
 
+              <a
+                href={`/results?test=${encodeURIComponent(activeTest.id)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs py-2.5 px-4 rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>🏆</span>
+                <span>View Live Ranklist</span>
+              </a>
+
               <button
                 onClick={() => {
                   setStage('register');

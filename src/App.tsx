@@ -17,6 +17,7 @@ import { AdminPanel } from './components/admin/AdminPanel';
 import { StudentRegistrationPage } from './components/StudentRegistrationPage';
 import { PublicInvoicePage } from './components/PublicInvoicePage';
 import { CbtTestPortal } from './components/CbtTestPortal';
+import { PublicLeaderboardPage } from './components/PublicLeaderboardPage';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -56,10 +57,17 @@ export function App() {
     return p === '/test' || p === '/test/' || h === '#test' || h === '#/test' || h.startsWith('#test');
   };
 
+  const isResultsPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/results' || p === '/results/' || p === '/leaderboard' || p === '/leaderboard/' || h === '#results' || h === '#/results' || h === '#leaderboard';
+  };
+
   const [isPanel, setIsPanel] = useState(isPanelPath);
   const [isRegister, setIsRegister] = useState(isRegisterPath);
   const [isInvoice, setIsInvoice] = useState(isInvoicePath);
   const [isTest, setIsTest] = useState(isTestPath);
+  const [isResults, setIsResults] = useState(isResultsPath);
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -67,6 +75,7 @@ export function App() {
       setIsRegister(isRegisterPath());
       setIsInvoice(isInvoicePath());
       setIsTest(isTestPath());
+      setIsResults(isResultsPath());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -84,8 +93,10 @@ export function App() {
     setIsRegister(false);
     setIsInvoice(false);
     setIsTest(false);
+    setIsResults(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
 
   // Modal states
   const [demoModalOpen, setDemoModalOpen] = useState(false);
@@ -118,6 +129,10 @@ export function App() {
 
   if (isTest) {
     return <CbtTestPortal onBackToWebsite={handleBackToWebsite} />;
+  }
+
+  if (isResults) {
+    return <PublicLeaderboardPage onBackToWebsite={handleBackToWebsite} />;
   }
 
   const handleOpenDemoModal = (defaultCourseName?: string) => {

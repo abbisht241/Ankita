@@ -189,6 +189,16 @@ export const AdminMockTestsTab: React.FC = () => {
             <Eye className="w-3.5 h-3.5" />
             <span>Open CBT Portal ↗</span>
           </a>
+
+          <a
+            href="/results"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-amber-400/30 transition-all flex items-center gap-1.5 cursor-pointer"
+          >
+            <Award className="w-3.5 h-3.5" />
+            <span>View Live Ranklist 🏆</span>
+          </a>
         </div>
 
         <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
