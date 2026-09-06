@@ -32,6 +32,30 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
     ? activeResources.filter(r => r.type === 'PYQ Solved')
     : activeResources;
 
+  const handleResourceClick = (res: Resource) => {
+    const action = res.downloadAction || 'modal';
+
+    if (action === 'direct' && res.downloadUrl) {
+      window.open(res.downloadUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (action === 'whatsapp') {
+      const msg = encodeURIComponent(`Hello Dr. Ankita! I would like to receive the free PDF: "${res.title}". Please share the download link.`);
+      window.open(`https://wa.me/917417268651?text=${msg}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    if (action === 'telegram') {
+      const tgUrl = res.downloadUrl || 'https://t.me/drankitaeducator';
+      window.open(tgUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Default: Open modal with lead capture and instant download link
+    onOpenResourceModal(res);
+  };
+
   return (
     <section id="free-resources" className="py-16 sm:py-24 bg-white relative overflow-hidden border-t border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -155,11 +179,11 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
                     </span>
 
                     <button
-                      onClick={() => onOpenResourceModal(res)}
+                      onClick={() => handleResourceClick(res)}
                       className="bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs py-2 px-3.5 rounded-xl shadow-xs transition-all flex items-center gap-1.5 group-hover:shadow-md cursor-pointer"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>Download PDF</span>
+                      <span>{res.downloadBtnText || 'Download PDF'}</span>
                     </button>
                   </div>
 

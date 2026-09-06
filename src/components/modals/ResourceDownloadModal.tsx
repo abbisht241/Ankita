@@ -4,10 +4,13 @@ import {
   Download, 
   FileText, 
   CheckCircle2, 
-  ShieldCheck 
+  ShieldCheck,
+  ExternalLink,
+  MessageSquare
 } from 'lucide-react';
 import type { Resource } from '../../types';
 import confetti from 'canvas-confetti';
+import { AdminStorage } from '../../services/adminStorageService';
 
 interface ResourceDownloadModalProps {
   resource: Resource | null;
@@ -21,12 +24,32 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [isDownloaded, setIsDownloaded] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!resource) return null;
 
-  const handleDownload = (e: React.FormEvent) => {
+  const handleDownload = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+
+    // Save student lead to Admin Panel -> Demo Leads & Inquiries
+    try {
+      await AdminStorage.addInquiry({
+        name: 'Study Material Lead',
+        email: email.trim(),
+        phone: whatsapp.trim(),
+        targetExam: resource.title,
+        source: 'resource_download',
+        status: 'new',
+        notes: `Downloaded: ${resource.title} (${resource.type} - ${resource.fileSize})`
+      });
+    } catch (err) {
+      console.warn('Could not record lead:', err);
+    }
+
+    setIsSubmitting(false);
     setIsDownloaded(true);
+
     try {
       confetti({
         particleCount: 50,
@@ -34,6 +57,13 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
         origin: { y: 0.6 }
       });
     } catch (e) {}
+
+    // Automatically trigger download URL if present
+    if (resource.downloadUrl && resource.downloadUrl.startsWith('http')) {
+      setTimeout(() => {
+        window.open(resource.downloadUrl, '_blank', 'noopener,noreferrer');
+      }, 600);
+    }
   };
 
   const handleResetAndClose = () => {
@@ -42,6 +72,8 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
     setWhatsapp('');
     onClose();
   };
+
+  const targetPdfUrl = resource.downloadUrl || 'https://t.me/drankitaeducator';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-fadeIn">
@@ -130,10 +162,11 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
 
               <button
                 type="submit"
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md hover:shadow-brand-600/30 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer"
+                disabled={isSubmitting}
+                className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md hover:shadow-brand-600/30 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer"
               >
                 <Download className="w-4 h-4" />
-                <span>Instant Download PDF (Free)</span>
+                <span>{isSubmitting ? 'Preparing PDF Link...' : 'Instant Download PDF (Free)'}</span>
               </button>
 
               <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 text-center">
@@ -145,7 +178,7 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
         ) : (
           /* Download Success Screen */
           <div className="text-center py-6 space-y-4 animate-fadeIn">
-            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
@@ -154,22 +187,48 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
             </h4>
 
             <p className="text-xs sm:text-sm text-slate-600">
-              <strong className="text-slate-900">{resource.title}</strong> has been sent to your WhatsApp ({whatsapp}) and email ({email}).
+              <strong className="text-slate-900">{resource.title}</strong> has been linked for instant access.
             </p>
 
-            <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-xs text-emerald-900 text-left">
-              <div className="font-bold mb-1">📥 Direct Download Started:</div>
-              <p>
-                A copy has been saved to your downloads folder. For mobile users, you can also view it instantly in our student app.
+            <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-xs text-emerald-900 text-left space-y-2">
+              <div className="font-bold flex items-center gap-1.5 text-emerald-800">
+                <Download className="w-4 h-4 text-emerald-600" />
+                <span>Direct PDF Link Access:</span>
+              </div>
+              <p className="text-slate-600 leading-relaxed">
+                If the download did not start automatically, click the button below to view and download your study notes file directly.
               </p>
             </div>
 
-            <button
-              onClick={handleResetAndClose}
-              className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm py-3 rounded-xl shadow transition-colors cursor-pointer"
-            >
-              Continue Exploring Resources
-            </button>
+            {/* Direct Action Link Button */}
+            <div className="space-y-2.5 pt-2">
+              <a
+                href={targetPdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-3.5 rounded-xl shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>📥 Open &amp; Download PDF Now</span>
+              </a>
+
+              <a
+                href={`https://wa.me/917417268651?text=${encodeURIComponent(`Hello Dr. Ankita! I registered to download: ${resource.title}. Please share the direct notes link.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs sm:text-sm py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <MessageSquare className="w-4 h-4 text-emerald-600" />
+                <span>Receive on WhatsApp Chat</span>
+              </a>
+
+              <button
+                onClick={handleResetAndClose}
+                className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs py-2.5 rounded-xl transition-colors cursor-pointer"
+              >
+                Continue Exploring Other Notes
+              </button>
+            </div>
           </div>
         )}
 

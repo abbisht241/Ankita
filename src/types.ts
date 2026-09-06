@@ -58,6 +58,9 @@ export interface Resource {
   topicsCovered: string[];
   previewSnippet: string;
   isPopular?: boolean;
+  downloadUrl?: string;
+  downloadAction?: 'modal' | 'direct' | 'whatsapp' | 'telegram';
+  downloadBtnText?: string;
 }
 
 export interface QuizQuestion {

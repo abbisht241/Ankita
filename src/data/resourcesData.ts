@@ -10,6 +10,9 @@ export const resourcesData: Resource[] = [
     pageCount: 24,
     downloadCount: '21,400+ Downloads',
     isPopular: true,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'High-yield revision capsule covering Levels of Teaching, Bloom’s action verbs, Micro-teaching 36-min cycle & SWAYAM/MOOCs evaluation models.',
     topicsCovered: [
       'Bloom\'s Revised Taxonomy (Remember, Understand, Apply, Analyze, Evaluate, Create)',
@@ -28,6 +31,9 @@ export const resourcesData: Resource[] = [
     pageCount: 34,
     downloadCount: '19,800+ Downloads',
     isPopular: true,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'Visual step-by-step flowchart to choose between t-test, ANOVA, Chi-Square, Pearson r, Mann-Whitney U, and Regression in SPSS with APA 7th reporting.',
     topicsCovered: [
       'Parametric vs Non-Parametric Test Selection Matrix',
@@ -46,6 +52,9 @@ export const resourcesData: Resource[] = [
     pageCount: 30,
     downloadCount: '26,500+ Downloads',
     isPopular: true,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'Visual color-coded mindmaps for Piaget’s 4 stages, Vygotsky’s ZPD & Scaffolding, Kohlberg’s moral stages, Erikson’s psychosocial crises, and RPWD Act 2016.',
     topicsCovered: [
       'Piagetian concepts: Assimilation, Accommodation, Schema, Conservation',
@@ -64,6 +73,9 @@ export const resourcesData: Resource[] = [
     pageCount: 140,
     downloadCount: '28,200+ Downloads',
     isPopular: true,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'Unit-wise sorted Previous Year Questions with step-by-step detailed explanations, option elimination rationale, and trend analysis for upcoming NTA CBT exams.',
     topicsCovered: [
       'Unit 1 Teaching Aptitude (120+ Solved PYQs)',
@@ -82,6 +94,9 @@ export const resourcesData: Resource[] = [
     pageCount: 48,
     downloadCount: '14,300+ Downloads',
     isPopular: false,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'In-depth nutritional manual covering Dietary Management of Diabetes, Hypertension, Renal diseases, Maternal Nutrition programs & POSHAN 2.0 metrics.',
     topicsCovered: [
       'Glycemic Index & Glycemic Load of Indian Foods Table',
@@ -100,6 +115,9 @@ export const resourcesData: Resource[] = [
     pageCount: 64,
     downloadCount: '12,900+ Downloads',
     isPopular: false,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download PDF',
     description: 'In-depth study handbook covering Thorndike’s Laws of Learning, Skinner’s Operant Conditioning schedules, Maslow’s hierarchy, and memory processing models.',
     topicsCovered: [
       'Thorndike Primary Laws: Readiness, Exercise, and Effect',

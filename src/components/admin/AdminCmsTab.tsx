@@ -15,7 +15,9 @@ import {
   Check, 
   Plus, 
   Trash2, 
-  Eye
+  Eye,
+  Link as LinkIcon,
+  ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSiteContent } from '../../context/SiteContentContext';
@@ -970,29 +972,34 @@ export const AdminCmsTab: React.FC = () => {
 
         {/* SUBTAB 6: FREE RESOURCES */}
         {activeSubTab === 'resources' && (
-          <div className="space-y-5 animate-fadeIn">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="space-y-6 animate-fadeIn">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <div>
                 <h3 className="font-extrabold text-lg text-slate-900 font-display">
-                  Free Study Material &amp; Downloadable PDFs
+                  Free Study Material &amp; PDF Download Links
                 </h3>
-                <p className="text-xs text-slate-500">Manage free PDF notes, formula sheets, and past year question papers.</p>
+                <p className="text-xs text-slate-500">
+                  Manage free revision PDFs, Google Drive download links, Telegram links, and student click behaviors.
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => {
                   const newRes: Resource = {
                     id: `res-${Date.now().toString().slice(-4)}`,
-                    title: 'New High-Yield Study PDF Notes',
+                    title: 'New High-Yield Study PDF Notes 2026',
                     category: 'UGC NET Paper 1',
                     type: 'PDF Notes',
-                    fileSize: '4.2 MB',
-                    pageCount: 25,
-                    downloadCount: '5,000+ Downloads',
+                    fileSize: '4.5 MB',
+                    pageCount: 28,
+                    downloadCount: '10,000+ Downloads',
                     isPopular: true,
-                    description: 'Comprehensive revision formula sheet and key concept points.',
-                    topicsCovered: ['Unit 1 High-Yield Points', 'PYQ Solved Questions'],
-                    previewSnippet: 'Key revision summary points.'
+                    downloadUrl: 'https://t.me/drankitaeducator',
+                    downloadAction: 'modal',
+                    downloadBtnText: 'Download PDF',
+                    description: 'Comprehensive high-yield revision notes covering core examination concepts.',
+                    topicsCovered: ['Core Exam Concepts & Mindmap', 'Solved Previous Year Questions (PYQs)'],
+                    previewSnippet: 'Key revision summary points & formula shortcuts curated by Dr. Ankita Bisht.'
                   };
                   setFormData({
                     ...formData,
@@ -1002,85 +1009,309 @@ export const AdminCmsTab: React.FC = () => {
                     }
                   });
                 }}
-                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
+                className="bg-brand-700 hover:bg-brand-600 text-white font-bold text-xs px-4 py-2.5 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-all"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Add Free PDF</span>
+                <Plus className="w-4 h-4" />
+                <span>+ Add New PDF Resource</span>
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
+            {/* Resources List */}
+            <div className="space-y-5 text-xs">
               {formData.resources.resources.map((res, idx) => (
-                <div key={res.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <input
-                      type="text"
-                      value={res.title}
-                      onChange={(e) => {
-                        const updated = [...formData.resources.resources];
-                        updated[idx] = { ...updated[idx], title: e.target.value };
-                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                      }}
-                      className="flex-1 px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-bold text-slate-900"
-                    />
+                <div key={res.id || idx} className="bg-slate-50 p-5 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+                  
+                  {/* Top Bar: Title & Delete */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-bold bg-brand-100 text-brand-800 px-2 py-0.5 rounded">
+                          #{idx + 1} • {res.type || 'PDF Notes'}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">{res.id}</span>
+                      </div>
+                      <input
+                        type="text"
+                        value={res.title}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], title: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="Resource Title (e.g. Teaching Aptitude Formula Cheat Sheet)"
+                        className="w-full px-3.5 py-2 border border-slate-300 rounded-xl bg-white font-bold text-slate-900 text-sm focus:border-brand-500 outline-none"
+                      />
+                    </div>
+
                     <button
+                      type="button"
                       onClick={() => {
-                        const updated = formData.resources.resources.filter((_, i) => i !== idx);
-                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        if (confirm(`Are you sure you want to delete "${res.title}"?`)) {
+                          const updated = formData.resources.resources.filter((_, i) => i !== idx);
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }
                       }}
-                      className="ml-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg cursor-pointer"
+                      className="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-2 rounded-xl border border-rose-100 cursor-pointer transition-colors mt-5 shrink-0"
+                      title="Delete PDF Resource"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input
-                      type="text"
-                      value={res.category}
+                  {/* Metadata Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div>
+                      <label className="block font-semibold text-slate-600 mb-1">Type</label>
+                      <select
+                        value={res.type || 'PDF Notes'}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], type: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-medium"
+                      >
+                        <option value="PDF Notes">PDF Notes</option>
+                        <option value="Formula Sheet">Formula Sheet</option>
+                        <option value="Mindmap">Mindmap</option>
+                        <option value="PYQ Solved">PYQ Solved</option>
+                        <option value="E-Book">E-Book</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-600 mb-1">Category</label>
+                      <input
+                        type="text"
+                        value={res.category}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], category: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="e.g. Teaching Aptitude"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-600 mb-1">File Size</label>
+                      <input
+                        type="text"
+                        value={res.fileSize}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], fileSize: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="e.g. 4.2 MB"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-600 mb-1">Pages Count</label>
+                      <input
+                        type="number"
+                        value={res.pageCount || 20}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], pageCount: parseInt(e.target.value, 10) || 1 };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="e.g. 24"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold text-slate-600 mb-1">Downloads Badge</label>
+                      <input
+                        type="text"
+                        value={res.downloadCount || '15,000+ Downloads'}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], downloadCount: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="e.g. 21,400+ Downloads"
+                        className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* 🔥 HIGHLIGHTED: PDF LINK & CLICK ACTION CONFIGURATION */}
+                  <div className="bg-white p-4 rounded-xl border-2 border-brand-200 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                        <LinkIcon className="w-4 h-4 text-brand-600" />
+                        <span>PDF Download Link &amp; Click Action Settings</span>
+                      </div>
+                      <span className="text-[10px] bg-brand-50 text-brand-700 font-bold px-2 py-0.5 rounded">
+                        Live Configured
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Download URL Input */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          📄 PDF Download URL / Link (Google Drive / Telegram / Direct PDF / Dropbox)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="url"
+                            value={res.downloadUrl || ''}
+                            onChange={(e) => {
+                              const updated = [...formData.resources.resources];
+                              updated[idx] = { ...updated[idx], downloadUrl: e.target.value };
+                              setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                            }}
+                            placeholder="https://drive.google.com/file/d/... or https://t.me/..."
+                            className="flex-1 px-3 py-2 border border-slate-300 rounded-xl font-mono text-xs text-slate-800 bg-slate-50 focus:bg-white focus:border-brand-500 outline-none"
+                          />
+                          {res.downloadUrl && (
+                            <a
+                              href={res.downloadUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2.5 py-2 bg-slate-100 hover:bg-brand-50 text-brand-700 rounded-xl border border-slate-200 flex items-center gap-1 font-bold text-[11px] shrink-0"
+                              title="Test link in new tab"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                              <span>Test Link</span>
+                            </a>
+                          )}
+                        </div>
+                        
+                        {/* Quick Preset Buttons */}
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[10px]">
+                          <span className="text-slate-400 font-medium">Quick Presets:</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...formData.resources.resources];
+                              updated[idx] = { ...updated[idx], downloadUrl: 'https://t.me/drankitaeducator', downloadAction: 'telegram' };
+                              setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                            }}
+                            className="text-brand-700 hover:underline font-bold cursor-pointer"
+                          >
+                            ⚡ Set Official Telegram
+                          </button>
+                          <span className="text-slate-300">•</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = [...formData.resources.resources];
+                              updated[idx] = { ...updated[idx], downloadUrl: 'https://drive.google.com/drive/folders/1exampleDriveLink', downloadAction: 'modal' };
+                              setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                            }}
+                            className="text-emerald-700 hover:underline font-bold cursor-pointer"
+                          >
+                            ⚡ Google Drive Folder
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Click Action Selector */}
+                      <div>
+                        <label className="block font-bold text-slate-700 mb-1">
+                          ⚡ What happens when student clicks "Download PDF"?
+                        </label>
+                        <select
+                          value={res.downloadAction || 'modal'}
+                          onChange={(e) => {
+                            const updated = [...formData.resources.resources];
+                            updated[idx] = { ...updated[idx], downloadAction: e.target.value as Resource['downloadAction'] };
+                            setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-bold text-slate-800 focus:border-brand-500 outline-none cursor-pointer"
+                        >
+                          <option value="modal">📋 Lead Form First + Direct Download Link (Recommended)</option>
+                          <option value="direct">🚀 Direct Link Open (Opens URL in New Tab instantly)</option>
+                          <option value="whatsapp">💬 WhatsApp Chat with Dr. Ankita</option>
+                          <option value="telegram">📢 Open Telegram Channel</option>
+                        </select>
+                        <p className="text-[11px] text-slate-500 mt-1">
+                          {res.downloadAction === 'direct'
+                            ? '⚡ Clicking the button will directly open your provided PDF / Google Drive URL in a new tab without showing a form.'
+                            : res.downloadAction === 'whatsapp'
+                            ? '💬 Clicking the button will open WhatsApp with prefilled message asking for this PDF.'
+                            : res.downloadAction === 'telegram'
+                            ? '📢 Clicking the button will redirect student to your Telegram study channel.'
+                            : '📋 Student will enter WhatsApp & Email (saved into Admin Leads), then get the direct PDF download link.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Button Text */}
+                    <div className="pt-1">
+                      <label className="block font-semibold text-slate-600 mb-1">Card Button Label</label>
+                      <input
+                        type="text"
+                        value={res.downloadBtnText || 'Download PDF'}
+                        onChange={(e) => {
+                          const updated = [...formData.resources.resources];
+                          updated[idx] = { ...updated[idx], downloadBtnText: e.target.value };
+                          setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                        }}
+                        placeholder="e.g. Download PDF, Get Free Notes, View Mindmap"
+                        className="w-full sm:w-1/2 px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block font-semibold text-slate-600 mb-1">Short Description</label>
+                    <textarea
+                      rows={2}
+                      value={res.description}
                       onChange={(e) => {
                         const updated = [...formData.resources.resources];
-                        updated[idx] = { ...updated[idx], category: e.target.value };
+                        updated[idx] = { ...updated[idx], description: e.target.value };
                         setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
                       }}
-                      placeholder="Category"
-                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
-                    />
-                    <input
-                      type="text"
-                      value={res.fileSize}
-                      onChange={(e) => {
-                        const updated = [...formData.resources.resources];
-                        updated[idx] = { ...updated[idx], fileSize: e.target.value };
-                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                      }}
-                      placeholder="File Size (e.g. 4.5 MB)"
-                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
-                    />
-                    <input
-                      type="text"
-                      value={res.downloadCount}
-                      onChange={(e) => {
-                        const updated = [...formData.resources.resources];
-                        updated[idx] = { ...updated[idx], downloadCount: e.target.value };
-                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                      }}
-                      placeholder="Downloads (e.g. 15,000+)"
-                      className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
+                      placeholder="High-yield revision capsule description..."
                     />
                   </div>
 
-                  <textarea
-                    rows={2}
-                    value={res.description}
-                    onChange={(e) => {
-                      const updated = [...formData.resources.resources];
-                      updated[idx] = { ...updated[idx], description: e.target.value };
-                      setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                    }}
-                    className="w-full px-3 py-1.5 border border-slate-300 rounded-xl bg-white text-xs"
-                    placeholder="Short description"
-                  />
+                  {/* Topics Covered (Snapshot) */}
+                  <div>
+                    <label className="block font-semibold text-slate-600 mb-1">
+                      Contents Snapshot (Topics List - comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={res.topicsCovered ? res.topicsCovered.join(', ') : ''}
+                      onChange={(e) => {
+                        const topics = e.target.value.split(',').map(t => t.trim()).filter(Boolean);
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], topicsCovered: topics };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      placeholder="e.g. Bloom's Taxonomy, Levels of Teaching Matrix, Evaluation Systems"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white"
+                    />
+                  </div>
+
+                  {/* Excerpt Preview Snippet */}
+                  <div>
+                    <label className="block font-semibold text-slate-600 mb-1">Document Excerpt Preview Snippet</label>
+                    <textarea
+                      rows={2}
+                      value={res.previewSnippet || ''}
+                      onChange={(e) => {
+                        const updated = [...formData.resources.resources];
+                        updated[idx] = { ...updated[idx], previewSnippet: e.target.value };
+                        setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
+                      }}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs font-serif italic text-slate-700"
+                      placeholder="Micro-Teaching Time Breakdown: Teach (6m) -> Feedback (6m)..."
+                    />
+                  </div>
+
                 </div>
               ))}
             </div>
