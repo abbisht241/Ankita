@@ -16,6 +16,7 @@ import { FloatingWhatsAppCall } from './components/FloatingWhatsAppCall';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { StudentRegistrationPage } from './components/StudentRegistrationPage';
 import { PublicInvoicePage } from './components/PublicInvoicePage';
+import { CbtTestPortal } from './components/CbtTestPortal';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -49,15 +50,23 @@ export function App() {
     return p === '/invoice' || p === '/invoice/' || p.startsWith('/invoice') || h === '#invoice' || h.startsWith('#invoice') || h.startsWith('#/invoice');
   };
 
+  const isTestPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/test' || p === '/test/' || h === '#test' || h === '#/test' || h.startsWith('#test');
+  };
+
   const [isPanel, setIsPanel] = useState(isPanelPath);
   const [isRegister, setIsRegister] = useState(isRegisterPath);
   const [isInvoice, setIsInvoice] = useState(isInvoicePath);
+  const [isTest, setIsTest] = useState(isTestPath);
 
   useEffect(() => {
     const handleLocationChange = () => {
       setIsPanel(isPanelPath());
       setIsRegister(isRegisterPath());
       setIsInvoice(isInvoicePath());
+      setIsTest(isTestPath());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -74,6 +83,7 @@ export function App() {
     setIsPanel(false);
     setIsRegister(false);
     setIsInvoice(false);
+    setIsTest(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -104,6 +114,10 @@ export function App() {
 
   if (isInvoice) {
     return <PublicInvoicePage onBackToWebsite={handleBackToWebsite} />;
+  }
+
+  if (isTest) {
+    return <CbtTestPortal onBackToWebsite={handleBackToWebsite} />;
   }
 
   const handleOpenDemoModal = (defaultCourseName?: string) => {

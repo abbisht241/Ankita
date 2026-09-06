@@ -120,6 +120,17 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
             <HelpCircle className="w-4 h-4 text-emerald-500" />
             <span>Interactive Diagnostic Quiz</span>
           </button>
+
+          {/* CBT Mock Test CTA */}
+          <a
+            href="/test"
+            target="_blank"
+            rel="noreferrer"
+            className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer bg-indigo-700 hover:bg-indigo-800 text-white shadow-md"
+          >
+            <span>🚀</span>
+            <span>NTA CBT Mock Test</span>
+          </a>
         </div>
 
         {/* Dynamic Content: Either Quiz or Resources Grid */}

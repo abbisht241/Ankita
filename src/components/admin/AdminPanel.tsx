@@ -17,6 +17,7 @@ import {
   Share2,
   CreditCard,
   FileText,
+  FileCheck,
   Globe
 } from 'lucide-react';
 import { AdminStorage, type StudentEnrollment, type LeadInquiry, type BatchConfig } from '../../services/adminStorageService';
@@ -24,6 +25,7 @@ import { AdminDashboardTab } from './AdminDashboardTab';
 import { AdminStudentsTab } from './AdminStudentsTab';
 import { AdminPaymentsTab } from './AdminPaymentsTab';
 import { AdminInvoicesTab } from './AdminInvoicesTab';
+import { AdminMockTestsTab } from './AdminMockTestsTab';
 import { AdminShareLinkTab } from './AdminShareLinkTab';
 import { AdminInquiriesTab } from './AdminInquiriesTab';
 import { AdminBatchesTab } from './AdminBatchesTab';
@@ -39,7 +41,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'mock-tests' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
@@ -292,7 +294,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
 
   // 2. Full Admin Dashboard Layout
   interface NavItem {
-    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'share-link' | 'inquiries' | 'batches' | 'cms' | 'settings';
+    id: 'dashboard' | 'students' | 'payments' | 'invoices' | 'mock-tests' | 'share-link' | 'inquiries' | 'batches' | 'cms' | 'settings';
     label: string;
     icon: React.ComponentType<{ className?: string }>;
     badge?: number | string;
@@ -317,6 +319,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
       id: 'invoices', 
       label: 'Invoices & Billing 🧾', 
       icon: FileText 
+    },
+    { 
+      id: 'mock-tests', 
+      label: 'CBT Mock Tests 📝', 
+      icon: FileCheck,
+      badge: 'NTA CBT',
+      badgeStyle: 'bg-indigo-100 text-indigo-800 font-bold'
     },
     { 
       id: 'share-link', 
@@ -566,6 +575,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               students={students}
               onRefreshData={refreshData}
             />
+          )}
+
+          {activeTab === 'mock-tests' && (
+            <AdminMockTestsTab />
           )}
 
           {activeTab === 'cms' && (
