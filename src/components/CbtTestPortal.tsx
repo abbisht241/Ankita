@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Clock, 
   CheckCircle2, 
@@ -20,7 +20,8 @@ import {
 import confetti from 'canvas-confetti';
 import { 
   MockTestStorage, 
-  type TestSubmission 
+  type TestSubmission,
+  type MockTest
 } from '../services/mockTestService';
 
 
@@ -33,20 +34,23 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   onBackToWebsite,
   initialTestId
 }) => {
-  const tests = MockTestStorage.getTests();
+  // Test Selection & Registration (Memoized to prevent render-loop timer freeze)
+  const [tests] = useState<MockTest[]>(() => MockTestStorage.getTests());
 
-  // Test Selection & Registration
   const [selectedTestId, setSelectedTestId] = useState<string>(() => {
     if (initialTestId) return initialTestId;
     const urlParams = new URLSearchParams(window.location.search);
     const idFromUrl = urlParams.get('id');
-    if (idFromUrl && tests.some(t => t.id === idFromUrl)) {
+    const initialTests = MockTestStorage.getTests();
+    if (idFromUrl && initialTests.some(t => t.id === idFromUrl)) {
       return idFromUrl;
     }
-    return tests[0]?.id || 'test-ugc-net-paper1-cbt';
+    return initialTests[0]?.id || 'test-ugc-net-paper1-cbt';
   });
 
-  const activeTest = tests.find(t => t.id === selectedTestId) || tests[0];
+  const activeTest = useMemo(() => {
+    return tests.find(t => t.id === selectedTestId) || tests[0];
+  }, [tests, selectedTestId]);
 
   // Test Stages: 'register' | 'testing' | 'result'
   const [stage, setStage] = useState<'register' | 'testing' | 'result'>('register');
@@ -69,12 +73,30 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   // Result State
   const [finalSubmission, setFinalSubmission] = useState<TestSubmission | null>(null);
 
-  // Mark first question visited on start
-  useEffect(() => {
-    if (stage === 'testing' && activeTest?.questions[0]) {
-      setVisitedQuestions(prev => ({ ...prev, [activeTest.questions[0].id]: true }));
-    }
-  }, [stage, activeTest]);
+  // Synchronize Refs to prevent timer closure stalls
+  const currentQIndexRef = useRef(currentQIndex);
+  currentQIndexRef.current = currentQIndex;
+
+  const activeTestRef = useRef(activeTest);
+  activeTestRef.current = activeTest;
+
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
+
+  const markedForReviewRef = useRef(markedForReview);
+  markedForReviewRef.current = markedForReview;
+
+  const studentNameRef = useRef(studentName);
+  studentNameRef.current = studentName;
+
+  const studentPhoneRef = useRef(studentPhone);
+  studentPhoneRef.current = studentPhone;
+
+  const studentEmailRef = useRef(studentEmail);
+  studentEmailRef.current = studentEmail;
+
+  const secondsRemainingRef = useRef(secondsRemaining);
+  secondsRemainingRef.current = secondsRemaining;
 
   // Live 35-Second Per-Question Countdown Timer (Anti-Cheating Speed Mode)
   useEffect(() => {
@@ -83,9 +105,21 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
     const timer = setInterval(() => {
       setQuestionSecondsLeft(prev => {
         if (prev <= 1) {
-          // Time expired for this question: Auto advance or submit
-          handleTimeUpAutoNext();
-          return QUESTION_TIME_LIMIT;
+          // 35s expired for current question: Advance or submit!
+          const curIdx = currentQIndexRef.current;
+          const currentTest = activeTestRef.current;
+          if (currentTest && curIdx < currentTest.questions.length - 1) {
+            const nextIdx = curIdx + 1;
+            setCurrentQIndex(nextIdx);
+            const nextQ = currentTest.questions[nextIdx];
+            if (nextQ) {
+              setVisitedQuestions(v => ({ ...v, [nextQ.id]: true }));
+            }
+            return QUESTION_TIME_LIMIT;
+          } else {
+            performFinalSubmission();
+            return 0;
+          }
         }
         return prev - 1;
       });
@@ -94,23 +128,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [stage, currentQIndex, activeTest]);
-
-  const handleTimeUpAutoNext = () => {
-    if (!activeTest) return;
-    if (currentQIndex < activeTest.questions.length - 1) {
-      const nextIdx = currentQIndex + 1;
-      setCurrentQIndex(nextIdx);
-      setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
-      const nextQ = activeTest.questions[nextIdx];
-      if (nextQ) {
-        setVisitedQuestions(prev => ({ ...prev, [nextQ.id]: true }));
-      }
-    } else {
-      // Last question expired: Auto-submit test
-      performFinalSubmission();
-    }
-  };
+  }, [stage]);
 
   const handleStartTest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,40 +239,49 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
 
 
   const performFinalSubmission = async () => {
-    if (!activeTest) return;
+    const currentTest = activeTestRef.current;
+    if (!currentTest) return;
+
+    const currentAnswers = answersRef.current;
+    const currentReview = markedForReviewRef.current;
+    const sName = studentNameRef.current;
+    const sPhone = studentPhoneRef.current;
+    const sEmail = studentEmailRef.current;
+    const sRemaining = secondsRemainingRef.current;
 
     let score = 0;
     let correctCount = 0;
     let incorrectCount = 0;
     let unattemptedCount = 0;
 
-    activeTest.questions.forEach(q => {
-      const chosen = answers[q.id];
+    currentTest.questions.forEach(q => {
+      const chosen = currentAnswers[q.id];
       if (chosen === undefined || chosen === -1) {
         unattemptedCount++;
       } else if (chosen === q.correctIndex) {
         correctCount++;
-        score += activeTest.positiveMarks;
+        score += currentTest.positiveMarks;
       } else {
         incorrectCount++;
-        score -= activeTest.negativeMarks;
+        score -= currentTest.negativeMarks;
       }
     });
 
-    const totalPossibleMarks = activeTest.questions.length * activeTest.positiveMarks;
+    const totalPossibleMarks = currentTest.questions.length * currentTest.positiveMarks;
     const finalScore = Math.max(0, Math.round(score * 10) / 10);
     const percentage = totalPossibleMarks > 0 
       ? Math.round((finalScore / totalPossibleMarks) * 100) 
       : 0;
-    const isPassed = percentage >= activeTest.passingPercentage;
-    const timeSpent = (activeTest.durationMinutes * 60) - secondsRemaining;
+    const isPassed = percentage >= currentTest.passingPercentage;
+    const totalAllocatedSecs = currentTest.questions.length * QUESTION_TIME_LIMIT;
+    const timeSpent = Math.max(10, totalAllocatedSecs - sRemaining);
 
     const submissionData = {
-      testId: activeTest.id,
-      testTitle: activeTest.title,
-      studentName: studentName.trim(),
-      studentPhone: studentPhone.trim(),
-      studentEmail: studentEmail.trim() || `${studentPhone}@student.com`,
+      testId: currentTest.id,
+      testTitle: currentTest.title,
+      studentName: sName.trim(),
+      studentPhone: sPhone.trim(),
+      studentEmail: sEmail.trim() || `${sPhone}@student.com`,
       score: finalScore,
       totalMarks: totalPossibleMarks,
       percentage,
@@ -262,9 +289,9 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
       correctCount,
       incorrectCount,
       unattemptedCount,
-      timeSpentSeconds: Math.max(10, timeSpent),
-      answers,
-      reviewStatus: markedForReview
+      timeSpentSeconds: timeSpent,
+      answers: currentAnswers,
+      reviewStatus: currentReview
     };
 
     const saved = await MockTestStorage.saveSubmission(submissionData);
