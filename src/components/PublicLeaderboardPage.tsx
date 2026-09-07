@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Award,
   ArrowLeft,
@@ -14,41 +14,118 @@ import {
   GraduationCap,
   Sparkles,
   Filter,
-  MessageSquare
+  MessageSquare,
+  RefreshCw,
+  Search
 } from 'lucide-react';
-import { MockTestStorage } from '../services/mockTestService';
+import { MockTestStorage, type TestSubmission } from '../services/mockTestService';
 
 interface PublicLeaderboardPageProps {
   onBackToWebsite: () => void;
 }
 
 export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ onBackToWebsite }) => {
-  const allSubmissions = MockTestStorage.getSubmissions();
-  const allTests = MockTestStorage.getTests();
+  const allTests = useMemo(() => MockTestStorage.getTests(), []);
+  const [submissions, setSubmissions] = useState<TestSubmission[]>(() => MockTestStorage.getSubmissions());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const [selectedTestId, setSelectedTestId] = useState<string>('all');
+  // Initialize selectedTestId from URL query parameter (?test=id)
+  const [selectedTestId, setSelectedTestId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const testParam = params.get('test');
+      if (testParam) return testParam;
+    }
+    return 'all';
+  });
+
   const [copied, setCopied] = useState(false);
 
-  // Build unique test list from submissions
+  // Sync latest submissions across all students' devices from Cloudflare KV backend
+  const fetchRankings = async (showLoading = false) => {
+    if (showLoading) setIsRefreshing(true);
+    try {
+      const cloudSubs = await MockTestStorage.fetchSubmissionsFromCloud();
+      setSubmissions(cloudSubs);
+    } catch (err) {
+      console.error('Failed to sync live rankings', err);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRankings(false);
+    // Real-time live update poll every 15 seconds
+    const interval = setInterval(() => {
+      fetchRankings(false);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Format time spent accurately (e.g. 1m 20s or 35s)
+  const formatTimeSpent = (secs: number) => {
+    if (!secs || secs <= 0) return '0s';
+    const mins = Math.floor(secs / 60);
+    const remSecs = secs % 60;
+    if (mins === 0) return `${remSecs}s`;
+    if (remSecs === 0) return `${mins}m`;
+    return `${mins}m ${remSecs}s`;
+  };
+
+  // Mask phone for privacy in public leaderboard (e.g. 8171••••253)
+  const maskPhone = (phone: string) => {
+    const clean = phone.replace(/\D/g, '');
+    if (clean.length < 6) return phone;
+    return `${clean.slice(0, 4)}••••${clean.slice(-3)}`;
+  };
+
+  // Build unique test list from tests + submissions
   const testOptions = useMemo(() => {
     const map: Record<string, string> = { all: '🏆 All Tests Combined' };
-    allSubmissions.forEach(s => {
-      map[s.testId] = s.testTitle;
+    allTests.forEach(t => {
+      map[t.id] = t.title;
+    });
+    submissions.forEach(s => {
+      if (!map[s.testId]) {
+        map[s.testId] = s.testTitle;
+      }
     });
     return Object.entries(map);
-  }, [allSubmissions]);
+  }, [allTests, submissions]);
 
-  // Filter + rank submissions
+  // Filter + rank submissions rank-wise
   const rankedSubmissions = useMemo(() => {
-    const filtered = selectedTestId === 'all'
-      ? allSubmissions
-      : allSubmissions.filter(s => s.testId === selectedTestId);
+    let list = selectedTestId === 'all'
+      ? submissions
+      : submissions.filter(s => s.testId === selectedTestId);
 
-    // Sort: highest percentage first, then faster time
-    return [...filtered].sort(
-      (a, b) => b.percentage - a.percentage || a.timeSpentSeconds - b.timeSpentSeconds
-    );
-  }, [allSubmissions, selectedTestId]);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(s => 
+        s.studentName.toLowerCase().includes(q) ||
+        s.studentPhone.includes(q)
+      );
+    }
+
+    // Strict competition ranking:
+    // 1. Percentage / score descending
+    // 2. Faster time (lower seconds) ascending
+    // 3. Earlier submission timestamp
+    return [...list].sort((a, b) => {
+      if (b.percentage !== a.percentage) {
+        return b.percentage - a.percentage;
+      }
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      if (a.timeSpentSeconds !== b.timeSpentSeconds) {
+        return a.timeSpentSeconds - b.timeSpentSeconds;
+      }
+      return new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime();
+    });
+  }, [submissions, selectedTestId, searchQuery]);
 
   const topThree = rankedSubmissions.slice(0, 3);
 
@@ -80,9 +157,9 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
   };
 
   const medalColors: Record<number, { ring: string; badge: string; crown: string; text: string }> = {
-    0: { ring: 'ring-4 ring-amber-400 shadow-amber-300/60 shadow-xl', badge: 'from-amber-400 to-yellow-500', crown: '👑', text: 'text-amber-700' },
-    1: { ring: 'ring-4 ring-slate-400 shadow-slate-300/60 shadow-xl', badge: 'from-slate-400 to-slate-500', crown: '🥈', text: 'text-slate-600' },
-    2: { ring: 'ring-4 ring-amber-700 shadow-amber-700/30 shadow-xl', badge: 'from-amber-600 to-amber-700', crown: '🥉', text: 'text-amber-800' },
+    0: { ring: 'ring-4 ring-amber-400 shadow-amber-300/60 shadow-xl', badge: 'from-amber-400 to-yellow-500', crown: '👑', text: 'text-amber-400' },
+    1: { ring: 'ring-4 ring-slate-400 shadow-slate-300/60 shadow-xl', badge: 'from-slate-400 to-slate-500', crown: '🥈', text: 'text-slate-300' },
+    2: { ring: 'ring-4 ring-amber-700 shadow-amber-700/30 shadow-xl', badge: 'from-amber-600 to-amber-700', crown: '🥉', text: 'text-amber-500' },
   };
 
   return (
@@ -109,8 +186,17 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
             </div>
           </div>
 
-          {/* Share Actions */}
+          {/* Share & Refresh Actions */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => fetchRankings(true)}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+              title="Refresh ranklist from cloud database"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
+            </button>
             <button
               onClick={handleCopyLink}
               className="flex items-center gap-1.5 text-xs font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
@@ -136,7 +222,7 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
 
         <div className="relative z-10 space-y-3 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 text-xs font-bold px-4 py-1.5 rounded-full border border-amber-500/30">
-            <Trophy className="w-4 h-4" />
+            <Trophy className="w-4 h-4 text-amber-400" />
             <span>Live All India Ranklist</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-display leading-tight">
@@ -146,8 +232,16 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
             </span>
           </h1>
           <p className="text-slate-400 text-sm">
-            Dr. Ankita Bisht Academy · NTA CBT Series · Real-time student rankings
+            Dr. Ankita Bisht Academy · NTA CBT Series · Real-time student rankings across all devices
           </p>
+
+          {/* Real-time sync badge */}
+          <div className="pt-1">
+            <span className="inline-flex items-center gap-2 text-[11px] text-emerald-400 font-bold bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-1 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Cloud KV Real-Time Active • Auto-Syncing</span>
+            </span>
+          </div>
         </div>
 
         {/* Stats Strip */}
@@ -166,14 +260,14 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-6">
-        <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/10 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Filter by Test:</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      {/* Filter & Search Bar */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 mb-6 space-y-3">
+        <div className="bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/10 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 mr-1">
+              <Filter className="w-3.5 h-3.5" />
+              <span>Test:</span>
+            </div>
             {testOptions.map(([id, title]) => (
               <button
                 key={id}
@@ -184,9 +278,21 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
                     : 'bg-white/10 text-slate-300 hover:bg-white/20'
                 }`}
               >
-                {title.length > 40 ? title.slice(0, 40) + '...' : title}
+                {title.length > 35 ? title.slice(0, 35) + '...' : title}
               </button>
             ))}
+          </div>
+
+          {/* Search Box */}
+          <div className="relative min-w-[180px] sm:w-64">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search student name..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full bg-white/10 border border-white/15 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
         </div>
       </div>
@@ -197,7 +303,7 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
         {rankedSubmissions.length === 0 && (
           <div className="text-center py-20 space-y-4">
             <div className="text-6xl">🎯</div>
-            <h3 className="text-xl font-bold text-white">No attempts yet for this test</h3>
+            <h3 className="text-xl font-bold text-white">No attempts found for this test</h3>
             <p className="text-slate-400 text-sm">Be the first to attempt and claim Rank #1!</p>
             <a
               href="/test"
@@ -213,42 +319,59 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
         {topThree.length > 0 && (
           <div>
             <div className="text-center mb-8">
-              <h2 className="text-xl font-extrabold text-white font-display">🏆 Top Performers Podium</h2>
-              <p className="text-slate-400 text-xs mt-1">Highest scorers • fastest solvers</p>
+              <h2 className="text-xl font-extrabold text-white font-display flex items-center justify-center gap-2">
+                <span>🏆</span>
+                <span>Top Performers Podium</span>
+              </h2>
+              <p className="text-slate-400 text-xs mt-1">Highest percentage • fastest solving time</p>
             </div>
 
             {/* Podium Flex (2nd | 1st | 3rd) */}
-            <div className="flex items-end justify-center gap-3 sm:gap-5">
+            <div className="flex items-end justify-center gap-2 sm:gap-5">
+              
               {/* 2nd Place */}
-              {topThree[1] && (
-                <div className="flex flex-col items-center gap-3 flex-1 max-w-[180px]">
+              {topThree[1] ? (
+                <div className="flex flex-col items-center gap-3 flex-1 max-w-[170px]">
                   <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl font-black bg-gradient-to-br ${medalColors[1].badge} ${medalColors[1].ring}`}>
                     {topThree[1].studentName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-center">
-                    <div className="font-bold text-white text-sm truncate max-w-[140px]">{topThree[1].studentName}</div>
-                    <div className="text-xs text-slate-400 truncate max-w-[140px]">{topThree[1].testTitle.split('-')[0].trim()}</div>
-                    <div className="text-sm font-black text-slate-200 mt-1">{topThree[1].score}/{topThree[1].totalMarks}</div>
-                    <div className={`font-black text-lg ${medalColors[1].text.replace('text-', 'text-')}`}>{topThree[1].percentage}%</div>
+                    <div className="font-bold text-white text-xs sm:text-sm truncate max-w-[140px]">{topThree[1].studentName}</div>
+                    <div className="text-[11px] text-slate-400 truncate max-w-[140px]">{topThree[1].testTitle.split('-')[0].trim()}</div>
+                    <div className="text-xs font-bold text-slate-300 mt-0.5">{topThree[1].score}/{topThree[1].totalMarks} marks</div>
+                    <div className={`font-black text-base sm:text-lg ${medalColors[1].text}`}>{topThree[1].percentage}%</div>
                   </div>
-                  <div className={`w-full bg-gradient-to-t from-slate-400/40 to-slate-400/20 rounded-t-2xl border border-white/10 flex items-center justify-center py-4`} style={{ height: '80px' }}>
+                  <div className="w-full bg-gradient-to-t from-slate-400/40 to-slate-400/20 rounded-t-2xl border border-white/10 flex items-center justify-center py-4" style={{ height: '85px' }}>
                     <span className="text-3xl">🥈</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden sm:flex flex-col items-center gap-3 flex-1 max-w-[160px] opacity-35">
+                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-slate-400 flex items-center justify-center text-sm font-bold text-slate-400">
+                    #2
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-300 font-bold">Rank #2 Open</div>
+                    <div className="text-[10px] text-slate-400">Attempt to Claim</div>
+                  </div>
+                  <div className="w-full bg-slate-800/40 rounded-t-2xl border border-white/5 flex items-center justify-center py-4" style={{ height: '85px' }}>
+                    <span className="text-2xl opacity-40">🥈</span>
                   </div>
                 </div>
               )}
 
               {/* 1st Place — tallest */}
               {topThree[0] && (
-                <div className="flex flex-col items-center gap-3 flex-1 max-w-[200px]">
+                <div className="flex flex-col items-center gap-3 flex-1 max-w-[190px]">
                   <div className="text-2xl animate-bounce">👑</div>
                   <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-3xl font-black bg-gradient-to-br ${medalColors[0].badge} ${medalColors[0].ring}`}>
                     {topThree[0].studentName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-center">
                     <div className="font-bold text-white text-sm sm:text-base truncate max-w-[160px]">{topThree[0].studentName}</div>
-                    <div className="text-xs text-slate-400 truncate max-w-[160px]">{topThree[0].testTitle.split('-')[0].trim()}</div>
-                    <div className="text-base font-black text-white mt-1">{topThree[0].score}/{topThree[0].totalMarks}</div>
-                    <div className="font-black text-2xl text-amber-400">{topThree[0].percentage}%</div>
+                    <div className="text-[11px] text-slate-400 truncate max-w-[160px]">{topThree[0].testTitle.split('-')[0].trim()}</div>
+                    <div className="text-xs font-bold text-slate-200 mt-0.5">{topThree[0].score}/{topThree[0].totalMarks} marks</div>
+                    <div className="font-black text-xl sm:text-2xl text-amber-400">{topThree[0].percentage}%</div>
                   </div>
                   <div className="w-full bg-gradient-to-t from-amber-500/40 to-amber-500/20 rounded-t-2xl border border-amber-500/20 flex items-center justify-center py-4" style={{ height: '120px' }}>
                     <span className="text-4xl">🥇</span>
@@ -257,19 +380,32 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
               )}
 
               {/* 3rd Place */}
-              {topThree[2] && (
-                <div className="flex flex-col items-center gap-3 flex-1 max-w-[180px]">
+              {topThree[2] ? (
+                <div className="flex flex-col items-center gap-3 flex-1 max-w-[170px]">
                   <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center text-2xl font-black bg-gradient-to-br ${medalColors[2].badge} ${medalColors[2].ring}`}>
                     {topThree[2].studentName.charAt(0).toUpperCase()}
                   </div>
                   <div className="text-center">
                     <div className="font-bold text-white text-sm truncate max-w-[140px]">{topThree[2].studentName}</div>
-                    <div className="text-xs text-slate-400 truncate max-w-[140px]">{topThree[2].testTitle.split('-')[0].trim()}</div>
-                    <div className="text-sm font-black text-slate-200 mt-1">{topThree[2].score}/{topThree[2].totalMarks}</div>
-                    <div className="font-black text-lg text-amber-700">{topThree[2].percentage}%</div>
+                    <div className="text-[11px] text-slate-400 truncate max-w-[140px]">{topThree[2].testTitle.split('-')[0].trim()}</div>
+                    <div className="text-xs font-bold text-slate-300 mt-0.5">{topThree[2].score}/{topThree[2].totalMarks} marks</div>
+                    <div className={`font-black text-base sm:text-lg ${medalColors[2].text}`}>{topThree[2].percentage}%</div>
                   </div>
-                  <div className="w-full bg-gradient-to-t from-amber-800/40 to-amber-800/20 rounded-t-2xl border border-white/10 flex items-center justify-center py-4" style={{ height: '60px' }}>
+                  <div className="w-full bg-gradient-to-t from-amber-800/40 to-amber-800/20 rounded-t-2xl border border-white/10 flex items-center justify-center py-4" style={{ height: '65px' }}>
                     <span className="text-3xl">🥉</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden sm:flex flex-col items-center gap-3 flex-1 max-w-[160px] opacity-35">
+                  <div className="w-14 h-14 rounded-full border-2 border-dashed border-slate-400 flex items-center justify-center text-sm font-bold text-slate-400">
+                    #3
+                  </div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-300 font-bold">Rank #3 Open</div>
+                    <div className="text-[10px] text-slate-400">Attempt to Claim</div>
+                  </div>
+                  <div className="w-full bg-slate-800/40 rounded-t-2xl border border-white/5 flex items-center justify-center py-4" style={{ height: '65px' }}>
+                    <span className="text-2xl opacity-40">🥉</span>
                   </div>
                 </div>
               )}
@@ -280,30 +416,47 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
         {/* Full Rank Table */}
         {rankedSubmissions.length > 0 && (
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-base sm:text-lg font-extrabold text-white font-display flex items-center gap-2">
                 <Award className="w-5 h-5 text-indigo-400" />
-                Complete Ranklist ({rankedSubmissions.length} Students)
+                <span>Complete Ranklist ({rankedSubmissions.length} Students)</span>
+                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-md hidden sm:inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live Sync
+                </span>
               </h2>
-              <button
-                onClick={handleWhatsAppShare}
-                className="flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
-              >
-                <Share2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Share Ranklist</span>
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => fetchRankings(true)}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-1 text-xs font-bold bg-white/10 hover:bg-white/20 text-slate-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                  title="Refresh rankings"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-indigo-400 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  <span className="hidden sm:inline">{isRefreshing ? 'Updating...' : 'Refresh'}</span>
+                </button>
+
+                <button
+                  onClick={handleWhatsAppShare}
+                  className="flex items-center gap-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Share Ranklist</span>
+                </button>
+              </div>
             </div>
 
             {/* Table */}
-            <div className="bg-white/5 backdrop-blur rounded-3xl border border-white/10 overflow-hidden">
+            <div className="bg-white/5 backdrop-blur rounded-3xl border border-white/10 overflow-hidden shadow-xl">
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-2 px-4 sm:px-6 py-3 bg-white/10 text-[11px] font-bold text-slate-400 uppercase tracking-wider border-b border-white/10">
-                <div className="col-span-1">Rank</div>
+                <div className="col-span-2 sm:col-span-1 text-center">Rank</div>
                 <div className="col-span-4 sm:col-span-3">Student</div>
-                <div className="col-span-4 sm:col-span-3 hidden sm:block">Test</div>
+                <div className="col-span-3 hidden sm:block">Test</div>
                 <div className="col-span-3 sm:col-span-2 text-right sm:text-center">Score</div>
                 <div className="col-span-2 text-right sm:text-center hidden sm:block">Time</div>
-                <div className="col-span-3 sm:col-span-2 text-right">Result</div>
+                <div className="col-span-3 sm:col-span-1 text-right">Result</div>
               </div>
 
               {/* Rows */}
@@ -322,59 +475,62 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
                           : 'hover:bg-white/5'
                       }`}
                     >
-                      {/* Rank */}
-                      <div className="col-span-1 flex items-center justify-center">
+                      {/* Rank Column */}
+                      <div className="col-span-2 sm:col-span-1 flex items-center justify-center">
                         {rankEmoji ? (
-                          <span className="text-xl">{rankEmoji}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="text-lg sm:text-xl">{rankEmoji}</span>
+                            <span className="text-[10px] font-black text-amber-400 hidden sm:inline">#{rankNum}</span>
+                          </div>
                         ) : (
-                          <span className="w-7 h-7 rounded-lg bg-white/10 text-slate-300 font-bold text-xs flex items-center justify-center">
-                            {rankNum}
+                          <span className="w-7 h-7 rounded-lg bg-white/10 text-slate-300 font-black text-xs flex items-center justify-center border border-white/10">
+                            #{rankNum}
                           </span>
                         )}
                       </div>
 
                       {/* Student Name */}
                       <div className="col-span-4 sm:col-span-3 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-brand-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-brand-600 text-white font-black text-xs flex items-center justify-center shrink-0 shadow">
                             {sub.studentName.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <div className="font-bold text-white text-xs sm:text-sm truncate">{sub.studentName}</div>
-                            <div className="text-[10px] text-slate-500 truncate">{sub.studentPhone}</div>
+                            <div className="text-[10px] text-slate-400 font-mono truncate">{maskPhone(sub.studentPhone)}</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Test Name */}
                       <div className="col-span-3 min-w-0 hidden sm:block">
-                        <div className="text-xs text-slate-400 truncate">{sub.testTitle.split('(')[0].trim()}</div>
-                        <div className="text-[10px] text-slate-600">{new Date(sub.submittedAt).toLocaleDateString()}</div>
+                        <div className="text-xs text-slate-300 truncate">{sub.testTitle.split('(')[0].trim()}</div>
+                        <div className="text-[10px] text-slate-500">{new Date(sub.submittedAt).toLocaleDateString()}</div>
                       </div>
 
                       {/* Score */}
                       <div className="col-span-3 sm:col-span-2 text-right sm:text-center">
                         <div className="font-black text-white text-sm sm:text-base">{sub.percentage}%</div>
-                        <div className="text-[11px] text-slate-400">{sub.score}/{sub.totalMarks} marks</div>
+                        <div className="text-[11px] text-slate-400 font-medium">{sub.score}/{sub.totalMarks} marks</div>
                       </div>
 
                       {/* Time */}
-                      <div className="col-span-2 text-center hidden sm:flex items-center justify-center gap-1 text-xs text-slate-400">
-                        <Clock className="w-3 h-3" />
-                        <span>{Math.round(sub.timeSpentSeconds / 60)}m</span>
+                      <div className="col-span-2 text-center hidden sm:flex items-center justify-center gap-1 text-xs text-slate-400 font-medium">
+                        <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                        <span>{formatTimeSpent(sub.timeSpentSeconds)}</span>
                       </div>
 
                       {/* Result Badge */}
-                      <div className="col-span-3 sm:col-span-2 text-right">
+                      <div className="col-span-3 sm:col-span-1 text-right">
                         {sub.isPassed ? (
-                          <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-emerald-500/30">
+                          <span className="inline-flex items-center gap-1 bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-emerald-500/30">
                             <CheckCircle2 className="w-3 h-3" />
-                            Passed
+                            Pass
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-1 rounded-lg border border-amber-500/30">
+                          <span className="inline-flex items-center gap-1 bg-amber-500/20 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-lg border border-amber-500/30">
                             <XCircle className="w-3 h-3" />
-                            Practice
+                            Prac
                           </span>
                         )}
                       </div>

@@ -63,8 +63,27 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       } else if (body.action === 'save_submission' && body.submission) {
         const raw = await context.env.ADMIN_KV.get(SUBS_KV_KEY);
         let list: any[] = raw ? JSON.parse(raw) : [];
-        list.unshift(body.submission);
+        const cleanPhone = (body.submission.studentPhone || '').replace(/\D/g, '');
+        const existingIdx = list.findIndex((s: any) => 
+          s.id === body.submission.id || 
+          (cleanPhone && (s.studentPhone || '').replace(/\D/g, '') === cleanPhone && s.testId === body.submission.testId)
+        );
+        if (existingIdx >= 0) {
+          list[existingIdx] = body.submission;
+        } else {
+          list.unshift(body.submission);
+        }
         await context.env.ADMIN_KV.put(SUBS_KV_KEY, JSON.stringify(list.slice(0, 1000)));
+      } else if (body.action === 'delete_submission' && body.id) {
+        const raw = await context.env.ADMIN_KV.get(SUBS_KV_KEY);
+        let list: any[] = raw ? JSON.parse(raw) : [];
+        list = list.filter((s: any) => s.id !== body.id);
+        await context.env.ADMIN_KV.put(SUBS_KV_KEY, JSON.stringify(list));
+      } else if (body.action === 'delete_test' && body.id) {
+        const raw = await context.env.ADMIN_KV.get(TESTS_KV_KEY);
+        let list: any[] = raw ? JSON.parse(raw) : [];
+        list = list.filter((t: any) => t.id !== body.id);
+        await context.env.ADMIN_KV.put(TESTS_KV_KEY, JSON.stringify(list));
       }
     }
 
@@ -72,6 +91,38 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
       success: true, 
       message: 'Mock test data synced successfully' 
     }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
+  }
+};
+
+export const onRequestDelete = async (context: { request: Request; env: Env }) => {
+  try {
+    const url = new URL(context.request.url);
+    const action = url.searchParams.get('action');
+    const id = url.searchParams.get('id');
+
+    if (context.env.ADMIN_KV && id) {
+      if (action === 'delete_submission') {
+        const raw = await context.env.ADMIN_KV.get(SUBS_KV_KEY);
+        let list: any[] = raw ? JSON.parse(raw) : [];
+        list = list.filter((s: any) => s.id !== id);
+        await context.env.ADMIN_KV.put(SUBS_KV_KEY, JSON.stringify(list));
+      } else if (action === 'delete_test') {
+        const raw = await context.env.ADMIN_KV.get(TESTS_KV_KEY);
+        let list: any[] = raw ? JSON.parse(raw) : [];
+        list = list.filter((t: any) => t.id !== id);
+        await context.env.ADMIN_KV.put(TESTS_KV_KEY, JSON.stringify(list));
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, message: 'Deleted successfully' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });

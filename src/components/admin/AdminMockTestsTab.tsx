@@ -13,7 +13,8 @@ import {
   MessageSquare, 
   Download, 
   Eye,
-  BookOpen
+  BookOpen,
+  RefreshCw
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { 
@@ -27,6 +28,7 @@ export const AdminMockTestsTab: React.FC = () => {
   const [tests, setTests] = useState<MockTest[]>(() => MockTestStorage.getTests());
   const [submissions, setSubmissions] = useState<TestSubmission[]>(() => MockTestStorage.getSubmissions());
   const [activeSubTab, setActiveSubTab] = useState<'tests' | 'submissions' | 'leaderboard'>('tests');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Test Modal State (Create / Edit)
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
@@ -41,9 +43,21 @@ export const AdminMockTestsTab: React.FC = () => {
   // Copy Feedback
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const loadAllData = async (showLoading = false) => {
+    if (showLoading) setIsRefreshing(true);
+    try {
+      setTests(MockTestStorage.getTests());
+      const cloudSubs = await MockTestStorage.fetchSubmissionsFromCloud();
+      setSubmissions(cloudSubs);
+    } catch (e) {
+      console.warn('Could not sync cloud submissions', e);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    setTests(MockTestStorage.getTests());
-    setSubmissions(MockTestStorage.getSubmissions());
+    loadAllData(false);
   }, []);
 
   const handleCopyTestLink = (testId: string) => {
@@ -436,11 +450,26 @@ export const AdminMockTestsTab: React.FC = () => {
       {/* 5. SUBTAB 2: STUDENT SUBMISSIONS TABLE */}
       {activeSubTab === 'submissions' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-            <h4 className="font-bold text-slate-800 text-sm">
-              Live Candidate Scorecards ({submissions.length})
-            </h4>
-            <span className="text-xs text-slate-500">Auto-recorded upon test completion</span>
+          <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <h4 className="font-bold text-slate-800 text-sm">
+                Live Candidate Scorecards ({submissions.length})
+              </h4>
+              <span className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                Cloud KV Synced
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => loadAllData(true)}
+                disabled={isRefreshing}
+                className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-xl cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
+              </button>
+              <span className="text-xs text-slate-500 hidden sm:inline">Auto-recorded upon test completion</span>
+            </div>
           </div>
 
           <div className="overflow-x-auto">

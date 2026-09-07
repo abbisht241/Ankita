@@ -98,6 +98,11 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   const secondsRemainingRef = useRef(secondsRemaining);
   secondsRemainingRef.current = secondsRemaining;
 
+  // Sync past attempts from Cloudflare KV on mount
+  useEffect(() => {
+    MockTestStorage.fetchSubmissionsFromCloud().catch(() => {});
+  }, []);
+
   // Live 35-Second Per-Question Countdown Timer (Anti-Cheating Speed Mode)
   useEffect(() => {
     if (stage !== 'testing') return;

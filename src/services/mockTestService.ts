@@ -477,10 +477,57 @@ export const MockTestStorage = {
       }
     }
 
-    if (testId) {
+    if (testId && testId !== 'all') {
       return subs.filter(s => s.testId === testId);
     }
     return subs;
+  },
+
+  async fetchSubmissionsFromCloud(testId?: string): Promise<TestSubmission[]> {
+    try {
+      const res = await fetch('/api/mock-tests?type=submissions', {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          const cloudSubs: TestSubmission[] = json.data;
+          
+          // Merge local submissions with cloud submissions
+          const localSubs = this.getSubmissions();
+          const mergedMap = new Map<string, TestSubmission>();
+          
+          // Add local submissions first
+          localSubs.forEach(s => {
+            // Remove dummy placeholders if real cloud submissions exist
+            if (cloudSubs.length > 0 && (s.id === 'SUB-101' || s.id === 'SUB-102')) {
+              return;
+            }
+            mergedMap.set(s.id, s);
+          });
+
+          // Overlay cloud submissions (authoritative across all students' devices)
+          cloudSubs.forEach(s => {
+            if (s && s.id) {
+              mergedMap.set(s.id, s);
+            }
+          });
+
+          const mergedList = Array.from(mergedMap.values());
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(mergedList));
+          }
+
+          if (testId && testId !== 'all') {
+            return mergedList.filter(s => s.testId === testId);
+          }
+          return mergedList;
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch submissions from cloud, using local cache', e);
+    }
+    return this.getSubmissions(testId);
   },
 
   async saveSubmission(submission: Omit<TestSubmission, 'id' | 'submittedAt'>): Promise<TestSubmission> {
@@ -490,17 +537,30 @@ export const MockTestStorage = {
       id: `SUB-${Math.floor(1000 + Math.random() * 9000)}`,
       submittedAt: new Date().toISOString()
     };
-    subs.unshift(newSub);
+
+    // Deduplicate local submissions by ID or phone + testId
+    const cleanPhone = (newSub.studentPhone || '').replace(/\D/g, '');
+    const existingIdx = subs.findIndex(s => 
+      s.id === newSub.id || 
+      (cleanPhone && (s.studentPhone || '').replace(/\D/g, '') === cleanPhone && s.testId === newSub.testId)
+    );
+    if (existingIdx >= 0) {
+      subs[existingIdx] = newSub;
+    } else {
+      subs.unshift(newSub);
+    }
     localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(subs));
 
-    // Cloud sync in background
+    // Cloud sync to Cloudflare KV database
     try {
       await fetch('/api/mock-tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'save_submission', submission: newSub })
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed to sync submission to cloud KV', e);
+    }
 
     return newSub;
   },
@@ -508,6 +568,17 @@ export const MockTestStorage = {
   async deleteSubmission(id: string): Promise<void> {
     const subs = this.getSubmissions().filter(s => s.id !== id);
     localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(subs));
+
+    try {
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_submission', id })
+      });
+      await fetch(`/api/mock-tests?action=delete_submission&id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {}
   },
 
   resetToDefaults(): MockTest[] {
