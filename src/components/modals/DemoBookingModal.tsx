@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Sparkles, 
@@ -24,14 +24,21 @@ export const DemoBookingModal: React.FC<DemoBookingModalProps> = ({
   onClose,
   defaultCourse 
 }) => {
+  const [batchTimings, setBatchTimings] = useState<string[]>(() => AdminStorage.getBatchTimings());
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
     course: defaultCourse || 'UGC NET Paper 1 Complete Masterclass',
-    slot: 'Evening Batch (7:00 PM - 8:30 PM)',
+    slot: AdminStorage.getBatchTimings()[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
     day: 'Tomorrow (Live Interactive Session)'
   });
+
+  useEffect(() => {
+    if (isOpen) {
+      setBatchTimings(AdminStorage.getBatchTimings());
+    }
+  }, [isOpen]);
 
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -187,9 +194,9 @@ export const DemoBookingModal: React.FC<DemoBookingModalProps> = ({
                     onChange={(e) => setFormData({ ...formData, slot: e.target.value })}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 outline-none"
                   >
-                    <option value="Evening (7:00 PM - 8:30 PM)">Evening (7:00 PM - 8:30 PM)</option>
-                    <option value="Night (8:45 PM - 10:00 PM)">Night (8:45 PM - 10:00 PM)</option>
-                    <option value="Morning (10:00 AM - 11:30 AM)">Morning (10:00 AM - 11:30 AM)</option>
+                    {batchTimings.map((timing, idx) => (
+                      <option key={idx} value={timing}>{timing}</option>
+                    ))}
                   </select>
                 </div>
 

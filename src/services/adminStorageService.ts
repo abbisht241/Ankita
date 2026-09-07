@@ -96,11 +96,19 @@ const STORAGE_KEYS = {
   STUDENTS: 'dr_ankita_admin_students',
   INQUIRIES: 'dr_ankita_admin_inquiries',
   BATCHES: 'dr_ankita_admin_batches',
+  BATCH_TIMINGS: 'dr_ankita_admin_batch_timings',
   INVOICES: 'dr_ankita_admin_invoices',
   BANK_DETAILS: 'dr_ankita_admin_bank_details',
   PASSCODE: 'dr_ankita_admin_passcode',
   AUTH_SESSION: 'dr_ankita_admin_session'
 };
+
+export const DEFAULT_BATCH_TIMINGS: string[] = [
+  'Evening Batch (7:00 PM - 8:30 PM)',
+  'Night Batch (8:45 PM - 10:00 PM)',
+  'Morning Batch (10:00 AM - 11:30 AM)',
+  'Weekend Special (Sat & Sun)'
+];
 
 const DEFAULT_PASSCODE = 'ankita2026';
 
@@ -520,6 +528,57 @@ export const AdminStorage = {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, updates })
+      });
+    } catch (e) {}
+  },
+
+  // Preferred Batch Timings (For Student Registration Dropdown)
+  getBatchTimings(): string[] {
+    if (typeof window === 'undefined') return DEFAULT_BATCH_TIMINGS;
+    const data = localStorage.getItem(STORAGE_KEYS.BATCH_TIMINGS);
+    if (!data) {
+      localStorage.setItem(STORAGE_KEYS.BATCH_TIMINGS, JSON.stringify(DEFAULT_BATCH_TIMINGS));
+      return DEFAULT_BATCH_TIMINGS;
+    }
+    try {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+      return DEFAULT_BATCH_TIMINGS;
+    } catch {
+      return DEFAULT_BATCH_TIMINGS;
+    }
+  },
+
+  async fetchRemoteBatchTimings(): Promise<string[]> {
+    try {
+      const res = await fetch('/api/batches');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.timings) && data.timings.length > 0) {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEYS.BATCH_TIMINGS, JSON.stringify(data.timings));
+          }
+          return data.timings;
+        }
+      }
+    } catch (err) {}
+    return this.getBatchTimings();
+  },
+
+  async saveBatchTimings(timings: string[]): Promise<void> {
+    const clean = timings.map(t => t.trim()).filter(Boolean);
+    const finalList = clean.length > 0 ? clean : DEFAULT_BATCH_TIMINGS;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.BATCH_TIMINGS, JSON.stringify(finalList));
+    }
+
+    try {
+      await fetch('/api/batches', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update_timings', timings: finalList })
       });
     } catch (e) {}
   },

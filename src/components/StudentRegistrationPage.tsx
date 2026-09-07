@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, 
   CheckCircle2, 
@@ -28,16 +28,29 @@ interface StudentRegistrationPageProps {
 
 export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = ({ onBackToWebsite }) => {
   const [selectedCourseId, setSelectedCourseId] = useState<string>(coursesData[0]?.id || 'ugc-net-paper-1');
+  const [batchTimings, setBatchTimings] = useState<string[]>(() => AdminStorage.getBatchTimings());
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     email: '',
-    timing: 'Evening Batch (7:00 PM - 8:30 PM)',
+    timing: AdminStorage.getBatchTimings()[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
     targetExam: 'UGC NET June/Dec 2025-2026',
     cityState: '',
     paymentChoice: 'razorpay' as 'razorpay' | 'upi_direct',
     notes: ''
   });
+
+  useEffect(() => {
+    AdminStorage.fetchRemoteBatchTimings().then(timings => {
+      if (Array.isArray(timings) && timings.length > 0) {
+        setBatchTimings(timings);
+        setFormData(prev => ({
+          ...prev,
+          timing: prev.timing && timings.includes(prev.timing) ? prev.timing : timings[0]
+        }));
+      }
+    });
+  }, []);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -315,10 +328,9 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                         onChange={(e) => setFormData({ ...formData, timing: e.target.value })}
                         className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
                       >
-                        <option value="Evening Batch (7:00 PM - 8:30 PM)">Evening Batch (7:00 PM - 8:30 PM)</option>
-                        <option value="Night Batch (8:45 PM - 10:00 PM)">Night Batch (8:45 PM - 10:00 PM)</option>
-                        <option value="Morning Batch (10:00 AM - 11:30 AM)">Morning Batch (10:00 AM - 11:30 AM)</option>
-                        <option value="Weekend Special (Sat & Sun)">Weekend Special (Sat &amp; Sun)</option>
+                        {batchTimings.map((timing, idx) => (
+                          <option key={idx} value={timing}>{timing}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

@@ -334,8 +334,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
         },
         { 
           id: 'batches', 
-          label: 'Batches & Class Links', 
-          icon: BookOpen 
+          label: 'Batches & Preferred Timings', 
+          icon: BookOpen,
+          badge: 'Timings',
+          badgeStyle: 'bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200'
         }
       ]
     },

@@ -77,6 +77,14 @@ const INITIAL_BATCHES: BatchConfig[] = [
 ];
 
 const KV_KEY = 'global_batches_db';
+const KV_TIMINGS_KEY = 'global_batch_timings_db';
+
+export const DEFAULT_BATCH_TIMINGS: string[] = [
+  'Evening Batch (7:00 PM - 8:30 PM)',
+  'Night Batch (8:45 PM - 10:00 PM)',
+  'Morning Batch (10:00 AM - 11:30 AM)',
+  'Weekend Special (Sat & Sun)'
+];
 
 async function getBatchesList(env: Env): Promise<BatchConfig[]> {
   if (env.ADMIN_KV) {
@@ -90,9 +98,27 @@ async function getBatchesList(env: Env): Promise<BatchConfig[]> {
   return INITIAL_BATCHES;
 }
 
+async function getBatchTimingsList(env: Env): Promise<string[]> {
+  if (env.ADMIN_KV) {
+    const raw = await env.ADMIN_KV.get(KV_TIMINGS_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+  }
+  return DEFAULT_BATCH_TIMINGS;
+}
+
 export const onRequestGet = async (context: { request: Request; env: Env }) => {
-  const batches = await getBatchesList(context.env);
-  return new Response(JSON.stringify({ success: true, batches }), {
+  const [batches, timings] = await Promise.all([
+    getBatchesList(context.env),
+    getBatchTimingsList(context.env)
+  ]);
+  return new Response(JSON.stringify({ success: true, batches, timings }), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
@@ -104,13 +130,32 @@ export const onRequestGet = async (context: { request: Request; env: Env }) => {
 
 export const onRequestPut = async (context: { request: Request; env: Env }) => {
   try {
-    const body = await context.request.json().catch(() => ({})) as {
-      id: string;
-      updates: Partial<BatchConfig>;
-    };
+    const body = await context.request.json().catch(() => ({})) as any;
 
+    // 1. Handle updating registration form preferred batch timings
+    if (body.action === 'update_timings' || Array.isArray(body.timings)) {
+      const cleanTimings = (body.timings || [])
+        .map((t: any) => (typeof t === 'string' ? t.trim() : ''))
+        .filter(Boolean);
+      const finalList = cleanTimings.length > 0 ? cleanTimings : DEFAULT_BATCH_TIMINGS;
+
+      if (context.env.ADMIN_KV) {
+        await context.env.ADMIN_KV.put(KV_TIMINGS_KEY, JSON.stringify(finalList));
+      }
+
+      return new Response(JSON.stringify({ 
+        success: true, 
+        message: 'Preferred batch timings updated successfully',
+        timings: finalList 
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    // 2. Handle updating single batch schedule / class link
     if (!body.id) {
-      return new Response(JSON.stringify({ success: false, error: 'Batch ID is required' }), {
+      return new Response(JSON.stringify({ success: false, error: 'Batch ID or timings is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -135,12 +180,14 @@ export const onRequestPut = async (context: { request: Request; env: Env }) => {
   }
 };
 
+export const onRequestPost = onRequestPut;
+
 export const onRequestOptions = async () => {
   return new Response(null, {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, PUT, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     }
   });
