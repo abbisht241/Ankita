@@ -84,16 +84,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           <img 
             src="/images/logo.png" 
             alt="Learn With Dr. Ankita" 
-            className="h-12 sm:h-14 md:h-16 lg:h-17 w-auto max-w-[220px] sm:max-w-[280px] md:max-w-[320px] object-contain transition-transform group-hover:scale-[1.02]" 
+            className="h-11 sm:h-12 md:h-14 lg:h-14 xl:h-15 w-auto max-w-[180px] sm:max-w-[210px] md:max-w-[240px] xl:max-w-[270px] object-contain transition-transform group-hover:scale-[1.02]" 
           />
         </a>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+        <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5">
           <a
             href="#hero"
             onClick={(e) => handleNavClick(e, '#hero')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
           >
             Home
           </a>
@@ -107,12 +107,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           >
             <button
               onClick={() => setCoursesDropdownOpen(!coursesDropdownOpen)}
-              className="flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors focus:outline-none"
+              className="flex items-center gap-1.5 px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors focus:outline-none whitespace-nowrap cursor-pointer"
             >
               <span>Courses</span>
-              <span className="text-[10px] font-bold bg-brand-50 text-brand-700 px-1.5 py-0.5 rounded-full border border-brand-200">
-                6 Batches
-              </span>
               <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${coursesDropdownOpen ? 'rotate-180 text-brand-600' : ''}`} />
             </button>
 
@@ -134,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
                     <button
                       key={c.id}
                       onClick={() => handleCourseClick(c.id)}
-                      className="w-full text-left p-2 rounded-xl hover:bg-brand-50/70 transition-colors group flex items-start gap-2.5"
+                      className="w-full text-left p-2 rounded-xl hover:bg-brand-50/70 transition-colors group flex items-start gap-2.5 cursor-pointer"
                     >
                       <div className="w-2 h-2 rounded-full bg-brand-600 mt-1.5 shrink-0 group-hover:scale-125 transition-transform" />
                       <div className="flex-1 min-w-0">
@@ -158,7 +155,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           <a
             href="#about"
             onClick={(e) => handleNavClick(e, '#about')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
           >
             About Mentor
           </a>
@@ -166,7 +163,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           <a
             href="#why-us"
             onClick={(e) => handleNavClick(e, '#why-us')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
           >
             Why Us
           </a>
@@ -174,16 +171,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           <a
             href="#free-resources"
             onClick={(e) => handleNavClick(e, '#free-resources')}
-            className="px-3 py-2 rounded-lg text-sm font-semibold text-brand-700 hover:bg-brand-50 transition-colors flex items-center gap-1"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-semibold text-brand-700 hover:bg-brand-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3.5 h-3.5 shrink-0" />
             <span>Free Study Material</span>
           </a>
 
           <a
             href="#faqs"
             onClick={(e) => handleNavClick(e, '#faqs')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
           >
             FAQs
           </a>
@@ -191,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           <a
             href="#contact"
             onClick={(e) => handleNavClick(e, '#contact')}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors"
+            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
           >
             Contact
           </a>
