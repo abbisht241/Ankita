@@ -7,7 +7,8 @@ import {
   HelpCircle, 
   ArrowLeft, 
   ArrowRight, 
-  RotateCcw, 
+  Lock, 
+  Zap, 
   Award, 
   ShieldCheck, 
   Sparkles, 
@@ -60,6 +61,8 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   const [answers, setAnswers] = useState<{ [qId: string]: number }>({});
   const [markedForReview, setMarkedForReview] = useState<{ [qId: string]: boolean }>({});
   const [visitedQuestions, setVisitedQuestions] = useState<{ [qId: string]: boolean }>({});
+  const QUESTION_TIME_LIMIT = 35; // Strict 35 seconds per question
+  const [questionSecondsLeft, setQuestionSecondsLeft] = useState(QUESTION_TIME_LIMIT);
   const [secondsRemaining, setSecondsRemaining] = useState(30 * 60);
   const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
 
@@ -73,23 +76,41 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
     }
   }, [stage, activeTest]);
 
-  // Live Countdown Timer
+  // Live 35-Second Per-Question Countdown Timer (Anti-Cheating Speed Mode)
   useEffect(() => {
     if (stage !== 'testing') return;
 
     const timer = setInterval(() => {
-      setSecondsRemaining(prev => {
+      setQuestionSecondsLeft(prev => {
         if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmitTestAuto();
-          return 0;
+          // Time expired for this question: Auto advance or submit
+          handleTimeUpAutoNext();
+          return QUESTION_TIME_LIMIT;
         }
         return prev - 1;
       });
+
+      setSecondsRemaining(prev => Math.max(0, prev - 1));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [stage]);
+  }, [stage, currentQIndex, activeTest]);
+
+  const handleTimeUpAutoNext = () => {
+    if (!activeTest) return;
+    if (currentQIndex < activeTest.questions.length - 1) {
+      const nextIdx = currentQIndex + 1;
+      setCurrentQIndex(nextIdx);
+      setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
+      const nextQ = activeTest.questions[nextIdx];
+      if (nextQ) {
+        setVisitedQuestions(prev => ({ ...prev, [nextQ.id]: true }));
+      }
+    } else {
+      // Last question expired: Auto-submit test
+      performFinalSubmission();
+    }
+  };
 
   const handleStartTest = (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +124,20 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
       return;
     }
 
-    setSecondsRemaining(activeTest.durationMinutes * 60);
+    // Strict Anti-Cheating: Single Attempt restriction
+    const cleanPhone = studentPhone.replace(/\D/g, '');
+    const pastSubmissions = MockTestStorage.getSubmissions();
+    const alreadyTaken = pastSubmissions.some(
+      s => s.testId === activeTest.id && s.studentPhone.replace(/\D/g, '') === cleanPhone
+    );
+    if (alreadyTaken) {
+      alert(`⚠️ Attempt Restricted: Aapne yeh test (${activeTest.title}) pehle hi submit kar diya hai.\n\nLeaderboard par fair ranking aur nakal rokne ke liye ek student sirf 1 baar exam de sakta hai. Restart ki anumati nahi hai.`);
+      window.location.href = `/results?test=${encodeURIComponent(activeTest.id)}`;
+      return;
+    }
+
+    setSecondsRemaining(activeTest.questions.length * QUESTION_TIME_LIMIT);
+    setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
     setAnswers({});
     setMarkedForReview({});
     setVisitedQuestions({ [activeTest.questions[0].id]: true });
@@ -158,30 +192,33 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
     if (currentQIndex < activeTest.questions.length - 1) {
       const nextIdx = currentQIndex + 1;
       setCurrentQIndex(nextIdx);
+      setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
       const nextQ = activeTest.questions[nextIdx];
       if (nextQ) {
         setVisitedQuestions(prev => ({ ...prev, [nextQ.id]: true }));
       }
-    }
-  };
-
-  const handlePrevQuestion = () => {
-    if (currentQIndex > 0) {
-      setCurrentQIndex(prev => prev - 1);
+    } else {
+      setIsSubmitConfirmOpen(true);
     }
   };
 
   const handleJumpToQuestion = (index: number) => {
+    if (index < currentQIndex) {
+      alert('🔒 Anti-Cheating Protocol: Past questions cannot be re-opened once time has passed or you have moved forward.');
+      return;
+    }
+    if (index > currentQIndex + 1) {
+      alert('🔒 Anti-Cheating Mode: Questions must be attempted in sequence.');
+      return;
+    }
     setCurrentQIndex(index);
+    setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
     const targetQ = activeTest.questions[index];
     if (targetQ) {
       setVisitedQuestions(prev => ({ ...prev, [targetQ.id]: true }));
     }
   };
 
-  const handleSubmitTestAuto = async () => {
-    await performFinalSubmission();
-  };
 
   const performFinalSubmission = async () => {
     if (!activeTest) return;
@@ -300,20 +337,28 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
           {/* Right Header Status */}
           <div className="flex items-center gap-3">
             {stage === 'testing' && (
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-xs sm:text-sm font-black border ${
-                secondsRemaining < 300 
-                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse' 
-                  : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-              }`}>
-                <Clock className="w-4 h-4" />
-                <span>Time Left: {formatTimer(secondsRemaining)}</span>
+              <div className="flex items-center gap-2">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs sm:text-sm font-black border transition-all ${
+                  questionSecondsLeft <= 10 
+                    ? 'bg-rose-500 text-white border-rose-600 animate-pulse shadow-md shadow-rose-500/30 ring-2 ring-rose-400' 
+                    : questionSecondsLeft <= 20 
+                      ? 'bg-amber-400 text-slate-950 border-amber-500' 
+                      : 'bg-emerald-600 text-white border-emerald-500'
+                }`}>
+                  <Zap className="w-4 h-4" />
+                  <span>Q-Timer: {questionSecondsLeft}s</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-mono">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Total: {formatTimer(secondsRemaining)}</span>
+                </div>
               </div>
             )}
 
             {stage === 'register' && (
               <div className="text-xs text-emerald-400 font-bold hidden sm:flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>NTA 2026 Engine Active</span>
+                <span>NTA Anti-Cheating Speed Engine Active</span>
               </div>
             )}
           </div>
@@ -366,7 +411,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
                       <span>{t.questions.length} Qs</span>
-                      <span>⏱️ {t.durationMinutes} Mins</span>
+                      <span className="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">⚡ 35s / Q</span>
                     </div>
                   </button>
                 ))}
@@ -385,9 +430,34 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                     <span className="bg-indigo-100 text-indigo-900 px-2.5 py-1 rounded-lg">
                       {activeTest.questions.length} Questions
                     </span>
+                    <span className="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg">
+                      ⚡ 35s / Q
+                    </span>
                     <span className="bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-lg">
                       +{activeTest.positiveMarks} Marks
                     </span>
+                  </div>
+                </div>
+
+                {/* Anti-Cheating Speed & Single Attempt Protocol */}
+                <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center gap-2 text-amber-950 font-extrabold text-xs uppercase tracking-wider">
+                    <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>⚡ Anti-Cheating Speed Test Protocol (35 Seconds/Question)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-amber-950 font-medium">
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-amber-700 font-bold">•</span>
+                      <span><strong>35s / Question:</strong> Har question ke liye 35 seconds ka live timer hai. Time khatam hote hi agla question automatically load hoga.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5">
+                      <span className="text-amber-700 font-bold">•</span>
+                      <span><strong>No Nakal / Past Qs Locked:</strong> Ek baar aage badhne ke baad pichhle questions reopen nahi honge.</span>
+                    </div>
+                    <div className="flex items-start gap-1.5 sm:col-span-2">
+                      <span className="text-amber-700 font-bold">•</span>
+                      <span><strong>🚫 Single Attempt Only:</strong> Exam ko restart ya dobara attempt karne ki anumati nahi hai. Har student ka score seedhe Live Leaderboard par submit hoga.</span>
+                    </div>
                   </div>
                 </div>
 
@@ -508,6 +578,48 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                 </div>
               </div>
 
+              {/* Question 35s Live Speed Countdown Bar */}
+              <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      questionSecondsLeft <= 10 ? 'bg-rose-500 animate-ping' : questionSecondsLeft <= 20 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'
+                    }`} />
+                    <span className="font-extrabold text-slate-800">
+                      35s Question Timer:
+                    </span>
+                    <span className={`font-mono text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                      questionSecondsLeft <= 10 
+                        ? 'bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50' 
+                        : questionSecondsLeft <= 20 
+                          ? 'bg-amber-400 text-slate-950 font-black' 
+                          : 'bg-emerald-100 text-emerald-800 font-black'
+                    }`}>
+                      {questionSecondsLeft}s remaining
+                    </span>
+                  </div>
+
+                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                    <Zap className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Auto-advances at 0s</span>
+                  </span>
+                </div>
+
+                {/* Visual Animated Countdown Bar */}
+                <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden border border-slate-300/60">
+                  <div 
+                    className={`h-full transition-all duration-1000 ease-linear rounded-full ${
+                      questionSecondsLeft <= 10 
+                        ? 'bg-rose-500' 
+                        : questionSecondsLeft <= 20 
+                          ? 'bg-amber-500' 
+                          : 'bg-emerald-500'
+                    }`}
+                    style={{ width: `${(questionSecondsLeft / 35) * 100}%` }}
+                  />
+                </div>
+              </div>
+
               {/* Question Text */}
               <div className="text-sm sm:text-base font-bold text-slate-900 leading-relaxed font-display">
                 {activeTest.questions[currentQIndex]?.question}
@@ -563,21 +675,17 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handlePrevQuestion}
-                  disabled={currentQIndex === 0}
-                  className="px-3.5 py-2 border border-slate-300 text-slate-700 font-bold text-xs rounded-xl disabled:opacity-40 cursor-pointer"
-                >
-                  ⬅ Prev
-                </button>
+                <div className="text-[11px] font-bold text-slate-400 bg-slate-100 px-3 py-2 rounded-xl flex items-center gap-1.5 border border-slate-200">
+                  <Lock className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="hidden sm:inline">Past Qs Locked (No Nakal)</span>
+                </div>
 
                 <button
                   type="button"
                   onClick={handleSaveAndNext}
-                  className="px-5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer flex items-center gap-1.5"
+                  className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl shadow cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>Save &amp; Next</span>
+                  <span>{currentQIndex === activeTest.questions.length - 1 ? 'Finish & Submit Test' : 'Save & Next'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -827,15 +935,16 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
               </a>
 
               <button
-                onClick={() => {
-                  setStage('register');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="bg-indigo-900 hover:bg-indigo-800 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
+                onClick={onBackToWebsite}
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
               >
-                <RotateCcw className="w-4 h-4" />
-                <span>Retake / Choose Another Test</span>
+                <span>← Back to Website</span>
               </button>
+            </div>
+
+            {/* Single Attempt Anti-Cheating Banner */}
+            <div className="text-center text-[11px] text-amber-800 bg-amber-50 border border-amber-200 py-2 px-3 rounded-xl font-bold">
+              🔒 Official Attempt Recorded: In accordance with Anti-Cheating Speed Protocol, exam restart/retake is strictly disabled.
             </div>
 
           </div>
