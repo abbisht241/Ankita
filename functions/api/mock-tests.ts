@@ -53,7 +53,9 @@ export const onRequestPost = async (context: { request: Request; env: Env }) => 
     }
 
     if (context.env.ADMIN_KV) {
-      if (body.action === 'save_test' && body.test) {
+      if (body.action === 'save_all_tests' && Array.isArray(body.tests)) {
+        await context.env.ADMIN_KV.put(TESTS_KV_KEY, JSON.stringify(body.tests));
+      } else if (body.action === 'save_test' && body.test) {
         const raw = await context.env.ADMIN_KV.get(TESTS_KV_KEY);
         let list: any[] = raw ? JSON.parse(raw) : [];
         const idx = list.findIndex(t => t.id === body.test.id);

@@ -18,14 +18,14 @@ import {
   RefreshCw,
   Search
 } from 'lucide-react';
-import { MockTestStorage, type TestSubmission } from '../services/mockTestService';
+import { MockTestStorage, type TestSubmission, type MockTest } from '../services/mockTestService';
 
 interface PublicLeaderboardPageProps {
   onBackToWebsite: () => void;
 }
 
 export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ onBackToWebsite }) => {
-  const allTests = useMemo(() => MockTestStorage.getTests(), []);
+  const [allTests, setAllTests] = useState<MockTest[]>(() => MockTestStorage.getTests());
   const [submissions, setSubmissions] = useState<TestSubmission[]>(() => MockTestStorage.getSubmissions());
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,12 +42,18 @@ export const PublicLeaderboardPage: React.FC<PublicLeaderboardPageProps> = ({ on
 
   const [copied, setCopied] = useState(false);
 
-  // Sync latest submissions across all students' devices from Cloudflare KV backend
+  // Sync latest submissions & tests across all devices from Cloudflare KV backend
   const fetchRankings = async (showLoading = false) => {
     if (showLoading) setIsRefreshing(true);
     try {
-      const cloudSubs = await MockTestStorage.fetchSubmissionsFromCloud();
+      const [cloudSubs, cloudTests] = await Promise.all([
+        MockTestStorage.fetchSubmissionsFromCloud(),
+        MockTestStorage.fetchTestsFromCloud()
+      ]);
       setSubmissions(cloudSubs);
+      if (cloudTests && cloudTests.length > 0) {
+        setAllTests(cloudTests);
+      }
     } catch (err) {
       console.error('Failed to sync live rankings', err);
     } finally {

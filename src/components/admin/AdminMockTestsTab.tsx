@@ -46,11 +46,12 @@ export const AdminMockTestsTab: React.FC = () => {
   const loadAllData = async (showLoading = false) => {
     if (showLoading) setIsRefreshing(true);
     try {
-      setTests(MockTestStorage.getTests());
+      const cloudTests = await MockTestStorage.fetchTestsFromCloud();
+      setTests(cloudTests);
       const cloudSubs = await MockTestStorage.fetchSubmissionsFromCloud();
       setSubmissions(cloudSubs);
     } catch (e) {
-      console.warn('Could not sync cloud submissions', e);
+      console.warn('Could not sync cloud data', e);
     } finally {
       setIsRefreshing(false);
     }
@@ -83,7 +84,8 @@ export const AdminMockTestsTab: React.FC = () => {
   const handleDeleteTest = async (testId: string) => {
     if (confirm('Are you sure you want to delete this Mock Test?')) {
       await MockTestStorage.deleteTest(testId);
-      setTests(MockTestStorage.getTests());
+      const cloudTests = await MockTestStorage.fetchTestsFromCloud();
+      setTests(cloudTests);
     }
   };
 

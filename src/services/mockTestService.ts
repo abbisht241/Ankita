@@ -215,156 +215,6 @@ export const INITIAL_MOCK_TESTS: MockTest[] = [
         marks: 2
       }
     ]
-  },
-  {
-    id: 'test-cdp-pedagogy-speed',
-    title: 'Child Development & Pedagogy (CDP 30/30) Diagnostic Test',
-    category: 'CDP & Pedagogy',
-    description: 'Master constructivist learning theories, cognitive stages, social development, and inclusive educational adaptations.',
-    durationMinutes: 20,
-    totalMarks: 10,
-    positiveMarks: 2,
-    negativeMarks: 0,
-    passingPercentage: 60,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    questions: [
-      {
-        id: 'cdp-1',
-        question: 'A child is able to reverse mental operations and understands that water poured from a tall thin glass to a wide bowl retains the same volume (Conservation). According to Piaget, which stage is the child in?',
-        options: [
-          'Sensorimotor Stage (0-2 years)',
-          'Pre-Operational Stage (2-7 years)',
-          'Concrete Operational Stage (7-11 years)',
-          'Formal Operational Stage (11+ years)'
-        ],
-        correctIndex: 2,
-        explanation: 'Decentration, Reversibility, and Conservation of mass, volume, and number are the hallmark milestones achieved during Piaget’s Concrete Operational Stage (7-11 years).',
-        subject: 'CDP & Pedagogy',
-        topic: 'Piaget Cognitive Stages',
-        marks: 2
-      },
-      {
-        id: 'cdp-2',
-        question: 'In Vygotsky’s Socio-Cultural Theory, temporary support provided by an adult or competent peer to help a learner bridge the gap in understanding is known as:',
-        options: [
-          'Schema Adaptation',
-          'Scaffolding (सहारा देना)',
-          'Ego-centric Private Speech',
-          'Classical Conditioning'
-        ],
-        correctIndex: 1,
-        explanation: 'Scaffolding (term coined by Jerome Bruner in collaboration with Vygotskian principles) refers to temporary, calibrated assistance given within the Zone of Proximal Development (ZPD).',
-        subject: 'CDP & Pedagogy',
-        topic: 'Vygotsky ZPD & Scaffolding',
-        marks: 2
-      },
-      {
-        id: 'cdp-3',
-        question: 'According to Lawrence Kohlberg’s stages of Moral Development, a person who argues "Rules and laws are rigid and must be obeyed unconditionally to maintain social order" is in:',
-        options: [
-          'Stage 1: Punishment and Obedience',
-          'Stage 2: Individualism and Exchange',
-          'Stage 4: Law and Order Morality (Conventional Level)',
-          'Stage 6: Universal Ethical Principles'
-        ],
-        correctIndex: 2,
-        explanation: 'Stage 4 (Conventional Level) focuses on maintaining social harmony, respecting authority, and performing social duties by strictly upholding laws without individual exceptions.',
-        subject: 'CDP & Pedagogy',
-        topic: 'Kohlberg Moral Development',
-        marks: 2
-      },
-      {
-        id: 'cdp-4',
-        question: 'Which of the following Multiple Intelligences proposed by Howard Gardner is characterized by sensitivity to rhythm, pitch, melody, and timbre?',
-        options: [
-          'Spatial Intelligence',
-          'Bodily-Kinesthetic Intelligence',
-          'Musical-Rhythmic Intelligence',
-          'Interpersonal Intelligence'
-        ],
-        correctIndex: 2,
-        explanation: 'Musical-Rhythmic Intelligence involves the capacity to recognize, create, reproduce, and reflect on music, pitch, rhythm, and tone structures.',
-        subject: 'CDP & Pedagogy',
-        topic: 'Gardner Multiple Intelligences',
-        marks: 2
-      },
-      {
-        id: 'cdp-5',
-        question: 'Under the Rights of Persons with Disabilities (RPWD) Act 2016, how many benchmark disability categories are officially recognized in India?',
-        options: [
-          '7 Disabilities',
-          '14 Disabilities',
-          '21 Disabilities',
-          '28 Disabilities'
-        ],
-        correctIndex: 2,
-        explanation: 'The RPWD Act 2016 expanded the recognized disabilities from 7 (under the 1995 Act) to 21 categories, including Acid Attack Victims, Dwarfism, Autism Spectrum, and Specific Learning Disabilities.',
-        subject: 'CDP & Pedagogy',
-        topic: 'Inclusive Education & RPWD Act',
-        marks: 2
-      }
-    ]
-  },
-  {
-    id: 'test-research-methodology-spss',
-    title: 'Research Methodology & SPSS Statistics Ph.D. Entrance Test',
-    category: 'Research Methodology',
-    description: 'Empirical research designs, hypothesis formulation, sampling methods, and parametric/non-parametric statistical decision trees.',
-    durationMinutes: 25,
-    totalMarks: 6,
-    positiveMarks: 2,
-    negativeMarks: 0,
-    passingPercentage: 50,
-    status: 'active',
-    createdAt: new Date().toISOString(),
-    questions: [
-      {
-        id: 'res-1',
-        question: 'A researcher wants to compare the mean test scores of two independent groups (e.g. Male vs Female). When data is normally distributed, which statistical test is most appropriate?',
-        options: [
-          'Chi-Square Test of Independence',
-          'Independent Samples t-Test',
-          'Mann-Whitney U Test',
-          'Wilcoxon Signed-Rank Test'
-        ],
-        correctIndex: 1,
-        explanation: 'Independent Samples t-Test is a parametric test used to compare the means between two mutually exclusive independent groups with normally distributed continuous data.',
-        subject: 'Research Methodology',
-        topic: 'Parametric Tests',
-        marks: 2
-      },
-      {
-        id: 'res-2',
-        question: 'When sampling a diverse population across geographical zones with heterogeneous clusters, which probability sampling method ensures proportional representation?',
-        options: [
-          'Convenience Sampling',
-          'Stratified Random Sampling',
-          'Snowball Sampling',
-          'Purposive Quota Sampling'
-        ],
-        correctIndex: 1,
-        explanation: 'Stratified Random Sampling divides the population into homogeneous strata (e.g. based on gender, region, or socio-economic status) and samples randomly from each stratum.',
-        subject: 'Research Methodology',
-        topic: 'Sampling Designs',
-        marks: 2
-      },
-      {
-        id: 'res-3',
-        question: 'What type of error is committed when a researcher rejects a Null Hypothesis (H0) that is actually TRUE in the population?',
-        options: [
-          'Type I Error (Alpha α Error)',
-          'Type II Error (Beta β Error)',
-          'Standard Error of Mean',
-          'Measurement Variance Error'
-        ],
-        correctIndex: 0,
-        explanation: 'Type I Error (False Positive) occurs when the researcher falsely detects an effect and rejects a true Null Hypothesis (probability denoted by alpha α level, usually 0.05).',
-        subject: 'Research Methodology',
-        topic: 'Hypothesis Errors',
-        marks: 2
-      }
-    ]
   }
 ];
 
@@ -410,19 +260,55 @@ export const INITIAL_SUBMISSIONS: TestSubmission[] = [
 ];
 
 export const MockTestStorage = {
+  // Known deleted test IDs that must never resurrect
+  DELETED_TEST_IDS: new Set(['test-cdp-pedagogy-speed', 'test-research-methodology-spss', 'test-3964']),
+
   // Tests
   getTests(): MockTest[] {
     if (typeof window === 'undefined') return INITIAL_MOCK_TESTS;
     const data = localStorage.getItem(STORAGE_KEYS.TESTS);
-    if (!data) {
-      localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(INITIAL_MOCK_TESTS));
-      return INITIAL_MOCK_TESTS;
+    let tests: MockTest[] = INITIAL_MOCK_TESTS;
+    if (data) {
+      try {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          tests = parsed;
+        }
+      } catch {
+        tests = INITIAL_MOCK_TESTS;
+      }
     }
+
+    // Filter out deleted test IDs from local cache
+    const filtered = tests.filter(t => !MockTestStorage.DELETED_TEST_IDS.has(t.id));
+    if (filtered.length !== tests.length && typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(filtered));
+    }
+    return filtered.length > 0 ? filtered : INITIAL_MOCK_TESTS;
+  },
+
+  async fetchTestsFromCloud(): Promise<MockTest[]> {
     try {
-      return JSON.parse(data);
-    } catch {
-      return INITIAL_MOCK_TESTS;
+      const res = await fetch('/api/mock-tests?type=tests', {
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          // Filter out deleted tests
+          const cleanTests: MockTest[] = json.data.filter((t: MockTest) => !MockTestStorage.DELETED_TEST_IDS.has(t.id));
+          if (cleanTests.length > 0) {
+            if (typeof window !== 'undefined') {
+              localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(cleanTests));
+            }
+            return cleanTests;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to fetch tests from cloud, using local', e);
     }
+    return this.getTests();
   },
 
   getTestById(id: string): MockTest | null {
@@ -440,21 +326,34 @@ export const MockTestStorage = {
     }
     localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(tests));
 
-    // Cloud sync
+    // Cloud sync full list to Cloudflare KV
     try {
       await fetch('/api/mock-tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_test', test })
+        body: JSON.stringify({ action: 'save_all_tests', tests })
       });
     } catch (e) {}
   },
 
   async deleteTest(id: string): Promise<void> {
+    this.DELETED_TEST_IDS.add(id);
     const tests = this.getTests().filter(t => t.id !== id);
     localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(tests));
 
     try {
+      // 1. Sync full updated list to Cloudflare KV
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_all_tests', tests })
+      });
+      // 2. Also send delete action
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_test', id })
+      });
       await fetch(`/api/mock-tests?action=delete_test&id=${encodeURIComponent(id)}`, {
         method: 'DELETE'
       });

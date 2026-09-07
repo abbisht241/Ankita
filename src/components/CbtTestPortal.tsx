@@ -35,7 +35,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   initialTestId
 }) => {
   // Test Selection & Registration (Memoized to prevent render-loop timer freeze)
-  const [tests] = useState<MockTest[]>(() => MockTestStorage.getTests());
+  const [tests, setTests] = useState<MockTest[]>(() => MockTestStorage.getTests());
 
   const [selectedTestId, setSelectedTestId] = useState<string>(() => {
     if (initialTestId) return initialTestId;
@@ -98,8 +98,13 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   const secondsRemainingRef = useRef(secondsRemaining);
   secondsRemainingRef.current = secondsRemaining;
 
-  // Sync past attempts from Cloudflare KV on mount
+  // Sync tests and past attempts from Cloudflare KV on mount
   useEffect(() => {
+    MockTestStorage.fetchTestsFromCloud().then(cloudTests => {
+      if (cloudTests && cloudTests.length > 0) {
+        setTests(cloudTests);
+      }
+    }).catch(() => {});
     MockTestStorage.fetchSubmissionsFromCloud().catch(() => {});
   }, []);
 
