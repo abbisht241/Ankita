@@ -14,14 +14,17 @@ import {
   Download, 
   Eye,
   BookOpen,
-  RefreshCw
+  RefreshCw,
+  Clock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { 
   MockTestStorage, 
   type MockTest, 
   type MockQuestion, 
-  type TestSubmission
+  type TestSubmission,
+  formatTestDuration,
+  calculateTestDurationMinutes
 } from '../../services/mockTestService';
 
 export const AdminMockTestsTab: React.FC = () => {
@@ -69,8 +72,10 @@ export const AdminMockTestsTab: React.FC = () => {
   };
 
   const handleShareWhatsAppInvite = (test: MockTest) => {
+    const qCount = test.questions?.length || 0;
+    const durStr = formatTestDuration(qCount);
     const url = `https://learnwithdrankita.com/test?id=${encodeURIComponent(test.id)}`;
-    const text = `🎯 *Online NTA CBT Mock Test - Dr. Ankita Bisht Academy*\n\n📝 *Test Name:* ${test.title}\n⏱️ *Duration:* ${test.durationMinutes} Minutes | *Total Marks:* ${test.totalMarks}\n📊 *Subject:* ${test.category}\n\n👉 *Click to Attempt CBT Mock Test Now:* \n${url}\n\n_Instant Answer Evaluation with Step-by-Step Logic Breakdown by Dr. Ankita Bisht._`;
+    const text = `🎯 *Online NTA CBT Mock Test - Dr. Ankita Bisht Academy*\n\n📝 *Test Name:* ${test.title}\n⏱️ *Duration:* ${durStr} (${qCount} Questions × 35s) | *Total Marks:* ${test.totalMarks}\n📊 *Subject:* ${test.category}\n\n👉 *Click to Attempt CBT Mock Test Now:* \n${url}\n\n_Instant Answer Evaluation with Step-by-Step Logic Breakdown by Dr. Ankita Bisht._`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -100,7 +105,9 @@ export const AdminMockTestsTab: React.FC = () => {
     e.preventDefault();
     if (!editingTest) return;
 
-    await MockTestStorage.saveTest(editingTest);
+    const autoDuration = calculateTestDurationMinutes(editingTest.questions?.length || 0);
+    const updatedTest = { ...editingTest, durationMinutes: autoDuration };
+    await MockTestStorage.saveTest(updatedTest);
     setTests(MockTestStorage.getTests());
     setIsTestModalOpen(false);
     setEditingTest(null);
@@ -174,7 +181,7 @@ export const AdminMockTestsTab: React.FC = () => {
                 title: 'New UGC NET Paper 1 Mock Test 2026',
                 category: 'UGC NET Paper 1',
                 description: 'Authentic 2026 NTA CBT speed test with bilingual explanations.',
-                durationMinutes: 30,
+                durationMinutes: calculateTestDurationMinutes(1),
                 totalMarks: 20,
                 positiveMarks: 2,
                 negativeMarks: 0,
@@ -358,8 +365,8 @@ export const AdminMockTestsTab: React.FC = () => {
                   </div>
                   <div className="h-6 w-px bg-slate-200" />
                   <div className="text-center px-2">
-                    <div className="font-bold text-slate-800">{test.durationMinutes}m</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Timer</div>
+                    <div className="font-bold text-brand-700 font-mono">{formatTestDuration(test.questions?.length || 0)}</div>
+                    <div className="text-[10px] text-slate-400 uppercase">Timer (35s/Q)</div>
                   </div>
                   <div className="h-6 w-px bg-slate-200" />
                   <div className="text-center px-2">
@@ -600,7 +607,7 @@ export const AdminMockTestsTab: React.FC = () => {
                   Question Bank Editor
                 </span>
                 <h3 className="text-lg font-bold font-display text-slate-900 mt-1">
-                  {selectedTestForQuestions.title} ({selectedTestForQuestions.questions.length} Questions)
+                  {selectedTestForQuestions.title} ({selectedTestForQuestions.questions.length} Questions • {formatTestDuration(selectedTestForQuestions.questions.length)})
                 </h3>
               </div>
               <button
@@ -819,15 +826,18 @@ export const AdminMockTestsTab: React.FC = () => {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Timer (Minutes)</label>
-                  <input
-                    type="number"
-                    required
-                    min={5}
-                    value={editingTest.durationMinutes}
-                    onChange={(e) => setEditingTest({ ...editingTest, durationMinutes: parseInt(e.target.value, 10) || 30 })}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold"
-                  />
+                  <label className="block font-bold text-slate-700 mb-1">
+                    Exam Timer <span className="text-[10px] text-emerald-600 font-semibold">(Auto: 35s/Q)</span>
+                  </label>
+                  <div className="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 font-bold text-slate-900 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-mono text-brand-700">
+                      <Clock className="w-3.5 h-3.5 text-brand-600" />
+                      <span>{formatTestDuration(editingTest.questions?.length || 0)}</span>
+                    </div>
+                    <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                      {editingTest.questions?.length || 0} Qs × 35s
+                    </span>
+                  </div>
                 </div>
 
                 <div>

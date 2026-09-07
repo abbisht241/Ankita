@@ -21,7 +21,8 @@ import confetti from 'canvas-confetti';
 import { 
   MockTestStorage, 
   type TestSubmission,
-  type MockTest
+  type MockTest,
+  formatTestDuration
 } from '../services/mockTestService';
 
 
@@ -447,7 +448,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                       {t.title}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{t.questions.length} Qs</span>
+                      <span>{t.questions.length} Qs • {formatTestDuration(t.questions.length)}</span>
                       <span className="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">⚡ 35s / Q</span>
                     </div>
                   </button>
@@ -463,9 +464,12 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                     <h3 className="font-bold text-slate-900 text-base">{activeTest.title}</h3>
                     <p className="text-xs text-slate-500">{activeTest.description}</p>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold shrink-0">
+                  <div className="flex items-center gap-2 text-xs font-bold shrink-0 flex-wrap">
                     <span className="bg-indigo-100 text-indigo-900 px-2.5 py-1 rounded-lg">
                       {activeTest.questions.length} Questions
+                    </span>
+                    <span className="bg-blue-100 text-blue-900 px-2.5 py-1 rounded-lg">
+                      ⏱️ {formatTestDuration(activeTest.questions.length)}
                     </span>
                     <span className="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg">
                       ⚡ 35s / Q
@@ -485,7 +489,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-amber-950 font-medium">
                     <div className="flex items-start gap-1.5">
                       <span className="text-amber-700 font-bold">•</span>
-                      <span><strong>35s / Question:</strong> Har question ke liye 35 seconds ka live timer hai. Time khatam hote hi agla question automatically load hoga.</span>
+                      <span><strong>35s / Question:</strong> Har question ke liye 35 seconds ka live timer hai (Kul Samay: {formatTestDuration(activeTest.questions.length)}). Time khatam hote hi agla question automatically load hoga.</span>
                     </div>
                     <div className="flex items-start gap-1.5">
                       <span className="text-amber-700 font-bold">•</span>
