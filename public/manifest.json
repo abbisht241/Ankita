@@ -1,0 +1,22 @@
+{
+  "short_name": "Dr. Ankita",
+  "name": "Dr. Ankita Bisht Academy",
+  "description": "UGC NET, CDP & Research Methodology Online Learning & CBT Portal",
+  "icons": [
+    {
+      "src": "/images/logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/images/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone",
+  "orientation": "portrait"
+}
