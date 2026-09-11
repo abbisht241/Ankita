@@ -13,6 +13,8 @@ export interface BatchConfig {
   status: 'active' | 'upcoming' | 'completed';
 }
 
+const OFFICIAL_BATCH_WHATSAPP_LINK = 'https://chat.whatsapp.com/JQ111W25D9q7PeCmBVWcbd?s=cl&p=i&mlu=4&ilr=4';
+
 const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-1',
@@ -21,7 +23,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Mon to Fri 7:00 PM - 8:30 PM',
     startDate: '10th Sept 2026',
     liveClassLink: 'https://meet.google.com/ugc-net-paper1-live',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaPaper1Batch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'active'
   },
   {
@@ -31,7 +33,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Sat & Sun 8:00 PM - 9:30 PM',
     startDate: '12th Sept 2026',
     liveClassLink: 'https://meet.google.com/res-mthd-spss',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaResearchBatch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'active'
   },
   {
@@ -41,7 +43,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Tue, Thu, Sat 6:00 PM - 7:30 PM',
     startDate: '15th Sept 2026',
     liveClassLink: 'https://meet.google.com/cdp-pedagogy-live',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaCDPBatch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'active'
   },
   {
@@ -51,7 +53,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Mon, Wed 4:00 PM - 5:30 PM',
     startDate: '18th Sept 2026',
     liveClassLink: 'https://meet.google.com/food-nutrition-live',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaNutritionBatch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'upcoming'
   },
   {
@@ -61,7 +63,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Tue, Thu 4:00 PM - 5:30 PM',
     startDate: '20th Sept 2026',
     liveClassLink: 'https://meet.google.com/edu-psychology-live',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaPsychologyBatch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'upcoming'
   },
   {
@@ -71,7 +73,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     timing: 'Weekend Special (Sat & Sun 10:00 AM)',
     startDate: '14th Sept 2026',
     liveClassLink: 'https://meet.google.com/teaching-aptitude-live',
-    whatsappGroupLink: 'https://chat.whatsapp.com/DrAnkitaTeachingBatch',
+    whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
     status: 'active'
   }
 ];
@@ -91,7 +93,13 @@ async function getBatchesList(env: Env): Promise<BatchConfig[]> {
     const raw = await env.ADMIN_KV.get(KV_KEY);
     if (raw) {
       try {
-        return JSON.parse(raw);
+        const list: BatchConfig[] = JSON.parse(raw);
+        return list.map(b => {
+          if (!b.whatsappGroupLink || b.whatsappGroupLink.includes('DrAnkita')) {
+            return { ...b, whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK };
+          }
+          return b;
+        });
       } catch (e) {}
     }
   }

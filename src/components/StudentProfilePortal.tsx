@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { 
   AdminStorage, 
+  OFFICIAL_BATCH_WHATSAPP_LINK,
   type StudentEnrollment, 
   type BatchConfig 
 } from '../services/adminStorageService';
@@ -193,6 +194,14 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
       batches[0]
     );
   }, [currentStudent, batches]);
+
+  // Official Batch Community WhatsApp Group Link
+  const activeBatchGroupLink = useMemo(() => {
+    if (matchedBatch?.whatsappGroupLink && !matchedBatch.whatsappGroupLink.includes('DrAnkita')) {
+      return matchedBatch.whatsappGroupLink;
+    }
+    return OFFICIAL_BATCH_WHATSAPP_LINK;
+  }, [matchedBatch]);
 
   // Fee Details
   const isFeePaid = useMemo(() => {
@@ -612,14 +621,26 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </div>
 
             {/* Quick Helper Notice: Classes are sent on WhatsApp */}
-            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="block font-bold">📢 Live Class Reminder / लाइव क्लास सूचना:</strong>
-                <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
-                  सभी लाइव क्लास के लिंक और दैनिक नोट्स डॉ. अंकिता बिष्ट द्वारा सीधे आपके <strong>Official WhatsApp Batch Group</strong> में क्लास शुरू होने से 10 मिनट पहले भेजे जाते हैं।
-                </p>
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="block font-bold">📢 Live Class Reminder / लाइव क्लास सूचना:</strong>
+                  <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
+                    सभी लाइव क्लास के लिंक और दैनिक नोट्स डॉ. अंकिता बिष्ट द्वारा सीधे आपके <strong>Official WhatsApp Batch Group</strong> में क्लास शुरू होने से 10 मिनट पहले भेजे जाते हैं।
+                  </p>
+                </div>
               </div>
+              <a
+                href={activeBatchGroupLink}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
+              >
+                <MessageCircle className="w-3.5 h-3.5" />
+                <span>ग्रुप खोलें</span>
+                <ExternalLink className="w-3 h-3 text-emerald-200" />
+              </a>
             </div>
 
           </div>
@@ -736,28 +757,16 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
           </div>
 
           <div className="shrink-0">
-            {matchedBatch?.whatsappGroupLink ? (
-              <a
-                href={matchedBatch.whatsappGroupLink}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer"
-              >
-                <MessageCircle className="w-5 h-5 text-emerald-600" />
-                <span>Open Batch WhatsApp Group</span>
-                <ExternalLink className="w-3.5 h-3.5 text-emerald-500" />
-              </a>
-            ) : (
-              <a
-                href="https://wa.me/917417268651?text=Hello%20Dr.%20Ankita,%20please%20add%20me%20to%20my%20enrolled%20batch%20group."
-                target="_blank"
-                rel="noreferrer"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg cursor-pointer"
-              >
-                <MessageCircle className="w-4 h-4 text-emerald-600" />
-                <span>Join Batch Group on WhatsApp</span>
-              </a>
-            )}
+            <a
+              href={activeBatchGroupLink}
+              target="_blank"
+              rel="noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer"
+            >
+              <MessageCircle className="w-5 h-5 text-emerald-600" />
+              <span>Open Batch WhatsApp Group</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-500" />
+            </a>
           </div>
         </div>
 

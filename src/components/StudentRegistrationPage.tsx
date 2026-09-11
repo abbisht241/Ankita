@@ -570,9 +570,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                 
                 {enrolledStudent.paymentStatus === 'paid' ? (
                   <a
-                    href={`https://wa.me/917417268651?text=${encodeURIComponent(
-                      `Hello Dr. Ankita Bisht! I have completed my online registration for ${enrolledStudent.courseTitle}. My Enrollment ID is ${enrolledStudent.id}. Please send me the official batch group link.`
-                    )}`}
+                    href="https://chat.whatsapp.com/JQ111W25D9q7PeCmBVWcbd?s=cl&p=i&mlu=4&ilr=4"
                     target="_blank"
                     rel="noreferrer"
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-2 cursor-pointer"
