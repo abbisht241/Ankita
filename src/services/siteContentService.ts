@@ -97,7 +97,7 @@ export interface SiteContentConfig {
 }
 
 export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
-  version: 2,
+  version: 3,
   lastUpdated: new Date().toISOString(),
   announcement: {
     enabled: true,
@@ -215,6 +215,50 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
 
 const STORAGE_KEY = 'dr_ankita_site_content_config';
 
+function removeSpssFromText(text: string): string {
+  if (typeof text !== 'string') return text;
+  return text
+    .replace(/Research Methodology\s*&\s*SPSS\s*Data Analysis/gi, 'Research Methodology & Data Analysis')
+    .replace(/Research Methodology\s*&\s*SPSS/gi, 'Research Methodology & Data Analysis')
+    .replace(/&\s*SPSS\s*(\(?Ph\.D\.\s*PET\)?)?/gi, '')
+    .replace(/SPSS statistical tests/gi, 'advanced statistical tests')
+    .replace(/SPSS statistical insights/gi, 'scientific research insights')
+    .replace(/SPSS data analysis/gi, 'statistical data analysis')
+    .replace(/SPSS Software/gi, 'Statistical Software')
+    .replace(/SPSS practice datasets/gi, 'research practice datasets')
+    .replace(/SPSS Output Interpretation/gi, 'Statistical Output Interpretation')
+    .replace(/SPSS Decision Rule/gi, 'Statistical Decision Rule')
+    .replace(/SPSS outputs/gi, 'analytical outputs')
+    .replace(/on SPSS/gi, 'with practical data analysis')
+    .replace(/in SPSS/gi, 'in statistical data analysis')
+    .replace(/Research Statistics on SPSS/gi, 'Research Statistics')
+    .replace(/\bSPSS\b/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+export function deepCleanSpss(obj: any): any {
+  if (!obj) return obj;
+  if (typeof obj === 'string') {
+    return removeSpssFromText(obj);
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(deepCleanSpss);
+  }
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const [key, val] of Object.entries(obj)) {
+      if (key === 'id' && typeof val === 'string' && val.includes('spss')) {
+        cleaned[key] = val;
+      } else {
+        cleaned[key] = deepCleanSpss(val);
+      }
+    }
+    return cleaned;
+  }
+  return obj;
+}
+
 export const SiteContentService = {
   getSiteContent(): SiteContentConfig {
     if (typeof window === 'undefined') return DEFAULT_SITE_CONTENT;
@@ -225,13 +269,22 @@ export const SiteContentService = {
     }
     try {
       const parsed = JSON.parse(local);
-      // Auto-migrate if older version or empty
-      if (!parsed.version || parsed.version < 2) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_SITE_CONTENT));
-        return DEFAULT_SITE_CONTENT;
+      // Auto-migrate if older version or contains legacy SPSS
+      if (!parsed.version || parsed.version < 3 || local.includes('SPSS')) {
+        const cleaned = deepCleanSpss({
+          ...DEFAULT_SITE_CONTENT,
+          ...parsed,
+          version: 3,
+          about: { ...DEFAULT_SITE_CONTENT.about, ...(parsed.about || {}) },
+          resources: { ...DEFAULT_SITE_CONTENT.resources, ...(parsed.resources || {}) },
+          courses: { ...DEFAULT_SITE_CONTENT.courses, ...(parsed.courses || {}) }
+        });
+        cleaned.version = 3;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+        return cleaned;
       }
       // Merge with defaults to ensure all keys exist
-      return {
+      const merged = {
         ...DEFAULT_SITE_CONTENT,
         ...parsed,
         announcement: { ...DEFAULT_SITE_CONTENT.announcement, ...(parsed.announcement || {}) },
@@ -244,6 +297,7 @@ export const SiteContentService = {
         faq: { ...DEFAULT_SITE_CONTENT.faq, ...(parsed.faq || {}) },
         contact: { ...DEFAULT_SITE_CONTENT.contact, ...(parsed.contact || {}) }
       };
+      return deepCleanSpss(merged);
     } catch {
       return DEFAULT_SITE_CONTENT;
     }
@@ -251,9 +305,10 @@ export const SiteContentService = {
 
   setSiteContent(config: SiteContentConfig): void {
     if (typeof window === 'undefined') return;
+    const cleaned = deepCleanSpss(config);
     const updated = {
-      ...config,
-      version: 2,
+      ...cleaned,
+      version: 3,
       lastUpdated: new Date().toISOString()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -264,9 +319,11 @@ export const SiteContentService = {
       const res = await fetch('/api/site-content');
       if (res.ok) {
         const data = await res.json();
-        if (data.success && data.content && data.content.version >= 2) {
-          this.setSiteContent(data.content);
-          return this.getSiteContent();
+        if (data.success && data.content) {
+          const cleaned = deepCleanSpss(data.content);
+          cleaned.version = 3;
+          this.setSiteContent(cleaned);
+          return cleaned;
         }
       }
     } catch (e) {
@@ -276,12 +333,14 @@ export const SiteContentService = {
   },
 
   async publishLiveContent(config: SiteContentConfig): Promise<boolean> {
-    this.setSiteContent(config);
+    const cleaned = deepCleanSpss(config);
+    cleaned.version = 3;
+    this.setSiteContent(cleaned);
     try {
       const res = await fetch('/api/site-content', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: { ...config, version: 2 } })
+        body: JSON.stringify({ content: cleaned })
       });
       return res.ok;
     } catch (e) {

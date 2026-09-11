@@ -85,7 +85,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
               {about?.bioParagraphs && about.bioParagraphs.length > 0 ? (
                 about.bioParagraphs.map((para, i) => (
                   <p key={i} className="text-base sm:text-lg">
-                    {para}
+                    {para
+                      .replace(/Research Methodology\s*&\s*SPSS/gi, 'Research Methodology & Data Analysis')
+                      .replace(/&\s*SPSS/gi, '')
+                      .replace(/SPSS statistical insights/gi, 'scientific research insights')
+                      .replace(/\bSPSS\b/gi, '')
+                      .replace(/\s{2,}/g, ' ')}
                   </p>
                 ))
               ) : (

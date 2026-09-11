@@ -22,7 +22,14 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
 }) => {
   const { content } = useSiteContent();
   const resourcesConfig = content.resources;
-  const activeResources = (resourcesConfig?.resources && resourcesConfig.resources.length > 0) ? resourcesConfig.resources : defaultResourcesData;
+  const rawResources: Resource[] = (resourcesConfig?.resources && resourcesConfig.resources.length > 0) ? resourcesConfig.resources : defaultResourcesData;
+  const activeResources: Resource[] = rawResources.map((r: Resource) => ({
+    ...r,
+    title: r.title ? r.title.replace(/Research Methodology\s*&\s*SPSS/gi, 'Research Methodology & Statistical Tests').replace(/\s*&\s*SPSS/gi, '').replace(/\bSPSS\b/gi, '').trim() : r.title,
+    description: r.description ? r.description.replace(/in SPSS/gi, 'in statistical analysis').replace(/\bSPSS\b/gi, 'statistical').replace(/\s{2,}/g, ' ').trim() : r.description,
+    topicsCovered: Array.isArray(r.topicsCovered) ? r.topicsCovered.map((t: string) => t.replace(/SPSS Output Interpretation/gi, 'Statistical Output Interpretation').replace(/\bSPSS\b/gi, 'Statistical').trim()) : r.topicsCovered,
+    previewSnippet: r.previewSnippet ? r.previewSnippet.replace(/SPSS Decision Rule/gi, 'Statistical Decision Rule').replace(/\bSPSS\b/gi, 'Statistical').trim() : r.previewSnippet
+  }));
 
   const [activeTab, setActiveTab] = useState<'all' | 'quiz' | 'notes' | 'pyqs'>('all');
 
