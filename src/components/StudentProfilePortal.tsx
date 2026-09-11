@@ -336,7 +336,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                     required
                     value={loginInput}
                     onChange={(e) => setLoginInput(e.target.value)}
-                    placeholder="e.g. abbisht@gmail.com or 8449137304"
+                    placeholder="e.g. student@gmail.com or 9876543210"
                     className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-700 rounded-2xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium"
                     autoFocus
                   />
@@ -362,33 +362,12 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
               </button>
             </form>
 
-            {/* Quick Demo Access Pills */}
+            {/* Quick Demo Access Pill */}
             <div className="mt-6 pt-5 border-t border-slate-800">
               <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider text-center mb-2.5">
                 Quick 1-Click Demo Login
               </p>
               <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={() => handleQuickDemoLogin('abbisht@gmail.com')}
-                  className="w-full text-left p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 hover:border-brand-500/50 transition-all text-xs flex items-center justify-between group cursor-pointer"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-950/70 border border-emerald-500/40 text-emerald-400 font-bold flex items-center justify-center text-xs">
-                      AN
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-200 block group-hover:text-brand-300 transition-colors">
-                        Anoop Negi (Enrolled Student)
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">abbisht@gmail.com • 8449137304</span>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold bg-brand-600/30 text-brand-300 border border-brand-500/40 px-2 py-0.5 rounded-md">
-                    Login →
-                  </span>
-                </button>
-
                 <button
                   type="button"
                   onClick={() => handleQuickDemoLogin('pooja.rawat@gmail.com')}
@@ -400,13 +379,13 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                     </div>
                     <div>
                       <span className="font-bold text-slate-200 block group-hover:text-brand-300 transition-colors">
-                        Pooja Rawat (UGC NET Paper 1)
+                        Pooja Rawat (Sample Enrolled Student)
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">pooja.rawat@gmail.com</span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 px-2 py-0.5 rounded-md">
-                    Login →
+                    Demo Login →
                   </span>
                 </button>
               </div>
