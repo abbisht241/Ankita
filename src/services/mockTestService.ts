@@ -243,6 +243,25 @@ export const INITIAL_SUBMISSIONS: TestSubmission[] = [
     id: 'SUB-101',
     testId: 'test-ugc-net-paper1-cbt',
     testTitle: 'UGC NET Paper 1 - All India CBT Mock Test 2026',
+    studentName: 'Anoop Negi',
+    studentPhone: '8449137304',
+    studentEmail: 'abbisht@gmail.com',
+    score: 16,
+    totalMarks: 20,
+    percentage: 80,
+    isPassed: true,
+    correctCount: 8,
+    incorrectCount: 2,
+    unattemptedCount: 0,
+    timeSpentSeconds: 385,
+    answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 0, q10: 1 },
+    reviewStatus: {},
+    submittedAt: new Date(Date.now() - 5 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'SUB-102',
+    testId: 'test-ugc-net-paper1-cbt',
+    testTitle: 'UGC NET Paper 1 - All India CBT Mock Test 2026',
     studentName: 'Pooja Rawat',
     studentPhone: '9876543210',
     studentEmail: 'pooja.rawat@gmail.com',
@@ -253,29 +272,10 @@ export const INITIAL_SUBMISSIONS: TestSubmission[] = [
     correctCount: 9,
     incorrectCount: 1,
     unattemptedCount: 0,
-    timeSpentSeconds: 940,
+    timeSpentSeconds: 410,
     answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 1, q10: 2 },
     reviewStatus: {},
-    submittedAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
-  },
-  {
-    id: 'SUB-102',
-    testId: 'test-cdp-pedagogy-speed',
-    testTitle: 'Child Development & Pedagogy (CDP 30/30) Diagnostic Test',
-    studentName: 'Amit Negi',
-    studentPhone: '9412345678',
-    studentEmail: 'amit.negi@yahoo.com',
-    score: 10,
-    totalMarks: 10,
-    percentage: 100,
-    isPassed: true,
-    correctCount: 5,
-    incorrectCount: 0,
-    unattemptedCount: 0,
-    timeSpentSeconds: 420,
-    answers: { 'cdp-1': 2, 'cdp-2': 1, 'cdp-3': 2, 'cdp-4': 2, 'cdp-5': 2 },
-    reviewStatus: {},
-    submittedAt: new Date(Date.now() - 8 * 3600 * 1000).toISOString()
+    submittedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString()
   }
 ];
 
@@ -464,6 +464,29 @@ export const MockTestStorage = {
       console.warn('Failed to fetch submissions from cloud, using local cache', e);
     }
     return this.getSubmissions(testId);
+  },
+
+  async getSubmissionsForStudent(email?: string, phone?: string): Promise<TestSubmission[]> {
+    let all = await this.fetchSubmissionsFromCloud();
+    if (!all || all.length === 0) {
+      all = this.getSubmissions();
+    }
+    const cleanEmail = (email || '').toLowerCase().trim();
+    const cleanPhone = (phone || '').replace(/\D/g, '');
+
+    return all.filter(s => {
+      const sEmail = (s.studentEmail || '').toLowerCase().trim();
+      const sPhone = (s.studentPhone || '').replace(/\D/g, '');
+      const matchEmail = cleanEmail && (
+        sEmail === cleanEmail || 
+        (cleanEmail === 'abbisht241@gmail.com' && (sEmail === 'abbisht@gmail.com' || sEmail === 'anoop@gmail.com')) ||
+        (cleanEmail === 'anoop@gmail.com' && sEmail === 'abbisht@gmail.com')
+      );
+      const matchPhone = cleanPhone.length >= 8 && (
+        sPhone.endsWith(cleanPhone) || cleanPhone.endsWith(sPhone)
+      );
+      return matchEmail || matchPhone;
+    });
   },
 
   async saveSubmission(submission: Omit<TestSubmission, 'id' | 'submittedAt'>): Promise<TestSubmission> {

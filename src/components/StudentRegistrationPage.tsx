@@ -96,8 +96,12 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
             paymentMode: 'razorpay',
             paymentStatus: 'paid',
             status: 'active',
+            timing: formData.timing,
+            targetExam: formData.targetExam,
+            cityState: formData.cityState,
             notes: `Paid Online via Razorpay | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
           });
+          AdminStorage.setStudentSession({ email: newStudent.email, phone: newStudent.phone, studentId: newStudent.id });
           setEnrolledStudent(newStudent);
           try {
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
@@ -129,8 +133,12 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
         paymentMode: 'upi_direct',
         paymentStatus: 'pending',
         status: 'pending_payment',
+        timing: formData.timing,
+        targetExam: formData.targetExam,
+        cityState: formData.cityState,
         notes: `Direct Registration - Fee Pending (₹${selectedCourse.price} Due) | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
       });
+      AdminStorage.setStudentSession({ email: newStudent.email, phone: newStudent.phone, studentId: newStudent.id });
       setIsLoading(false);
       setEnrolledStudent(newStudent);
       try {
@@ -585,6 +593,22 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                     <span>Share Payment Screenshot on WhatsApp (+91 7417268651)</span>
                   </a>
                 )}
+
+                <button
+                  onClick={() => {
+                    AdminStorage.setStudentSession({
+                      email: enrolledStudent.email,
+                      phone: enrolledStudent.phone,
+                      studentId: enrolledStudent.id
+                    });
+                    window.history.pushState(null, '', '/portal');
+                    window.dispatchEvent(new Event('popstate'));
+                  }}
+                  className="w-full bg-brand-600 hover:bg-brand-500 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <GraduationCap className="w-4 h-4 text-amber-300" />
+                  <span>Go to My Student Portal &amp; Mock Tests (विद्यार्थी पोर्टल)</span>
+                </button>
 
                 <div className="flex items-center justify-center gap-3">
                   <button

@@ -197,6 +197,20 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
         {/* Desktop CTA & Phone Link */}
         <div className="hidden sm:flex items-center gap-2.5 shrink-0">
           <a
+            href="/portal"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState(null, '', '/portal');
+              window.dispatchEvent(new Event('popstate'));
+            }}
+            className="flex items-center gap-1.5 text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-2 rounded-xl border border-brand-200 transition-colors cursor-pointer"
+            title="Student Learning Portal &amp; Test Records"
+          >
+            <GraduationCap className="w-3.5 h-3.5 text-brand-600" />
+            <span>Student Portal</span>
+          </a>
+
+          <a
             href="tel:+917417268651"
             className="flex items-center gap-2 text-xs font-semibold text-slate-700 hover:text-brand-700 px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors border border-slate-200"
             title="Talk to counselor"
@@ -239,6 +253,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
       {mobileMenuOpen && (
         <div className="lg:hidden bg-white border-b border-slate-200 shadow-xl px-4 pt-3 pb-6 animate-fadeIn">
           <div className="space-y-1 pb-3">
+            <a
+              href="/portal"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                window.history.pushState(null, '', '/portal');
+                window.dispatchEvent(new Event('popstate'));
+              }}
+              className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-bold text-brand-700 bg-brand-50 hover:bg-brand-100 border border-brand-200 mb-1.5"
+            >
+              <div className="flex items-center gap-3">
+                <GraduationCap className="w-4 h-4 text-brand-600" />
+                <span>Student Portal (विद्यार्थी लॉगिन)</span>
+              </div>
+              <span className="text-[10px] font-extrabold text-white bg-brand-600 px-2.5 py-0.5 rounded-full">
+                Open
+              </span>
+            </a>
+
             <a
               href="#hero"
               onClick={(e) => handleNavClick(e, '#hero')}

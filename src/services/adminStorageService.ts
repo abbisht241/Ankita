@@ -18,6 +18,9 @@ export interface StudentEnrollment {
   billingType?: 'monthly' | 'one_time';
   billingMonth?: string;
   nextDueMonth?: string;
+  timing?: string;
+  targetExam?: string;
+  cityState?: string;
 }
 
 export interface LeadInquiry {
@@ -100,7 +103,8 @@ const STORAGE_KEYS = {
   INVOICES: 'dr_ankita_admin_invoices',
   BANK_DETAILS: 'dr_ankita_admin_bank_details',
   PASSCODE: 'dr_ankita_admin_passcode',
-  AUTH_SESSION: 'dr_ankita_admin_session'
+  AUTH_SESSION: 'dr_ankita_admin_session',
+  STUDENT_SESSION: 'dr_ankita_student_session'
 };
 
 export const DEFAULT_BATCH_TIMINGS: string[] = [
@@ -114,9 +118,9 @@ const DEFAULT_PASSCODE = 'ankita2026';
 
 const INITIAL_STUDENTS: StudentEnrollment[] = [
   {
-    id: 'ENR-1001',
+    id: 'ENR-5264',
     name: 'Anoop Negi',
-    email: 'anoop@gmail.com',
+    email: 'abbisht@gmail.com',
     phone: '8449137304',
     courseId: 'ugc-net-paper-1',
     courseTitle: 'UGC NET Paper 1 Complete Masterclass (Target 85+ Marks)',
@@ -128,7 +132,30 @@ const INITIAL_STUDENTS: StudentEnrollment[] = [
     paymentStatus: 'paid',
     status: 'active',
     enrolledAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    notes: 'Enrolled via Razorpay Gateway'
+    notes: 'Enrolled via Razorpay Gateway',
+    timing: 'Evening Batch (7:00 PM - 8:30 PM)',
+    targetExam: 'UGC NET Dec 2026 Paper 1 (JRF)',
+    cityState: 'Kotdwar, Uttarakhand'
+  },
+  {
+    id: 'ENR-1002',
+    name: 'Pooja Rawat',
+    email: 'pooja.rawat@gmail.com',
+    phone: '9876543210',
+    courseId: 'ugc-net-paper-1',
+    courseTitle: 'UGC NET Paper 1 Complete Masterclass (Target 85+ Marks)',
+    amount: 999,
+    feeDue: 0,
+    paymentId: 'pay_PR987654321',
+    orderId: 'order_PR987654321',
+    paymentMode: 'razorpay',
+    paymentStatus: 'paid',
+    status: 'active',
+    enrolledAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+    notes: 'Online Admission',
+    timing: 'Night Batch (8:45 PM - 10:00 PM)',
+    targetExam: 'UGC NET Paper 1',
+    cityState: 'Dehradun, Uttarakhand'
   }
 ];
 
@@ -400,6 +427,70 @@ export const AdminStorage = {
         method: 'DELETE'
       });
     } catch (e) {}
+  },
+
+  // Student Session & Portal Authentication
+  getStudentSession(): { email?: string; phone?: string; studentId?: string } | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.STUDENT_SESSION);
+      if (!data) return null;
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  },
+
+  setStudentSession(session: { email?: string; phone?: string; studentId?: string }): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem(STORAGE_KEYS.STUDENT_SESSION, JSON.stringify(session));
+  },
+
+  clearStudentSession(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(STORAGE_KEYS.STUDENT_SESSION);
+  },
+
+  async findStudentByEmailOrPhone(input: string): Promise<StudentEnrollment | null> {
+    if (!input || !input.trim()) return null;
+    const cleanInput = input.trim().toLowerCase();
+    const digitsOnly = input.replace(/\D/g, '');
+
+    const matcher = (s: StudentEnrollment) => {
+      const sEmail = (s.email || '').toLowerCase().trim();
+      const sPhone = (s.phone || '').replace(/\D/g, '');
+      const sId = (s.id || '').toLowerCase().trim();
+
+      // Direct email match or admin alias
+      if (sEmail && (sEmail === cleanInput || (cleanInput === 'abbisht241@gmail.com' && sEmail === 'abbisht@gmail.com'))) {
+        return true;
+      }
+      // Phone match (last 10 digits)
+      if (digitsOnly.length >= 8 && sPhone && (sPhone.endsWith(digitsOnly) || digitsOnly.endsWith(sPhone))) {
+        return true;
+      }
+      // ID match
+      if (sId && sId === cleanInput) {
+        return true;
+      }
+      return false;
+    };
+
+    // 1. Search local cache
+    let students = this.getStudents();
+    let found = students.find(matcher);
+    if (found) return found;
+
+    // 2. Fetch remote and search
+    try {
+      students = await this.fetchRemoteStudents();
+      found = students.find(matcher);
+      if (found) return found;
+    } catch (e) {
+      console.warn('Could not query remote students', e);
+    }
+
+    return null;
   },
 
   // Inquiries / Leads - Local

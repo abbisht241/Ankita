@@ -253,6 +253,15 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                     </a>
                   </>
                 )}
+                <a
+                  href={`/portal?email=${encodeURIComponent(s.email || s.phone)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-2 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-500 hover:text-brand-600 cursor-pointer"
+                  title="View Student Portal"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
                 <button onClick={() => { if (confirm(`Remove ${s.name}?`)) onDeleteStudent(s.id); }}
                   className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 cursor-pointer">
                   <Trash2 className="w-4 h-4" />
@@ -319,6 +328,15 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                           <button onClick={() => { if(confirm(`Confirm ₹${dueAmount} for ${s.name}?`)) onMarkPaid(s.id); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><CheckCircle2 className="w-3.5 h-3.5" />Mark Paid</button>
                           <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: 7417268651@okbizaxis`)}`} target="_blank" rel="noreferrer" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><MessageCircle className="w-3.5 h-3.5" />Remind</a>
                         </>)}
+                        <a
+                          href={`/portal?email=${encodeURIComponent(s.email || s.phone)}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-slate-400 hover:text-brand-600 p-1.5 rounded-lg hover:bg-brand-50 cursor-pointer"
+                          title={`Open Student Portal for ${s.name}`}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
                         <button onClick={() => { if(confirm(`Remove ${s.name}?`)) onDeleteStudent(s.id); }} className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 cursor-pointer"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     </td>

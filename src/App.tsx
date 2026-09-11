@@ -18,6 +18,7 @@ import { StudentRegistrationPage } from './components/StudentRegistrationPage';
 import { PublicInvoicePage } from './components/PublicInvoicePage';
 import { CbtTestPortal } from './components/CbtTestPortal';
 import { PublicLeaderboardPage } from './components/PublicLeaderboardPage';
+import { StudentProfilePortal } from './components/StudentProfilePortal';
 
 // Modals
 import { DemoBookingModal } from './components/modals/DemoBookingModal';
@@ -33,6 +34,14 @@ import type { Course, Resource } from './types';
 
 export function App() {
   // Route Detection
+  const isPortalPath = () => {
+    const p = window.location.pathname.toLowerCase();
+    const h = window.location.hash.toLowerCase();
+    return p === '/portal' || p === '/portal/' || p === '/student' || p === '/student/' || p === '/login' || p === '/login/' ||
+           h === '#portal' || h === '#/portal' || h.startsWith('#portal') || h.startsWith('#/portal') ||
+           h === '#student' || h === '#/student' || h === '#login' || h === '#/login';
+  };
+
   const isPanelPath = () => {
     const p = window.location.pathname.toLowerCase();
     const h = window.location.hash.toLowerCase();
@@ -63,6 +72,7 @@ export function App() {
     return p === '/results' || p === '/results/' || p === '/leaderboard' || p === '/leaderboard/' || h === '#results' || h === '#/results' || h === '#leaderboard';
   };
 
+  const [isPortal, setIsPortal] = useState(isPortalPath);
   const [isPanel, setIsPanel] = useState(isPanelPath);
   const [isRegister, setIsRegister] = useState(isRegisterPath);
   const [isInvoice, setIsInvoice] = useState(isInvoicePath);
@@ -71,6 +81,7 @@ export function App() {
 
   useEffect(() => {
     const handleLocationChange = () => {
+      setIsPortal(isPortalPath());
       setIsPanel(isPanelPath());
       setIsRegister(isRegisterPath());
       setIsInvoice(isInvoicePath());
@@ -89,6 +100,7 @@ export function App() {
 
   const handleBackToWebsite = () => {
     window.history.pushState(null, '', '/');
+    setIsPortal(false);
     setIsPanel(false);
     setIsRegister(false);
     setIsInvoice(false);
@@ -114,6 +126,10 @@ export function App() {
   });
 
   const [prefilledCourse, setPrefilledCourse] = useState<string>('');
+
+  if (isPortal) {
+    return <StudentProfilePortal onBackToWebsite={handleBackToWebsite} />;
+  }
 
   if (isPanel) {
     return <AdminPanel onBackToWebsite={handleBackToWebsite} />;
