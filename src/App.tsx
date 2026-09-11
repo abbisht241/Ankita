@@ -28,11 +28,17 @@ import { ResourceDownloadModal } from './components/modals/ResourceDownloadModal
 import { LegalModal } from './components/modals/LegalModal';
 import { RazorpayCheckoutModal } from './components/modals/RazorpayCheckoutModal';
 
-import { coursesData } from './data/coursesData';
+import { coursesData as defaultCoursesData } from './data/coursesData';
+import { useSiteContent } from './context/SiteContentContext';
 
 import type { Course, Resource } from './types';
 
 export function App() {
+  const { content } = useSiteContent();
+  const activeCourses = (content?.courses?.courses && content.courses.courses.length > 0)
+    ? content.courses.courses
+    : defaultCoursesData;
+
   // Route Detection
   const isPortalPath = () => {
     const p = window.location.pathname.toLowerCase();
@@ -171,7 +177,7 @@ export function App() {
   };
 
   const handleSelectCourseModal = (courseId: string) => {
-    const foundCourse = coursesData.find(c => c.id === courseId);
+    const foundCourse = activeCourses.find(c => c.id === courseId);
     if (foundCourse) {
       setSelectedCourseForCheckout(foundCourse);
     }

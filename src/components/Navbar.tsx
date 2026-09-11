@@ -12,7 +12,8 @@ import {
   ChevronDown,
   ShieldCheck
 } from 'lucide-react';
-import { coursesData } from '../data/coursesData';
+import { coursesData as defaultCoursesData } from '../data/coursesData';
+import { useSiteContent } from '../context/SiteContentContext';
 
 interface NavbarProps {
   onOpenDemoModal: () => void;
@@ -20,6 +21,11 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseModal }) => {
+  const { content } = useSiteContent();
+  const activeCourses = (content?.courses?.courses && content.courses.courses.length > 0)
+    ? content.courses.courses
+    : defaultCoursesData;
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [coursesDropdownOpen, setCoursesDropdownOpen] = useState(false);
@@ -117,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
             {coursesDropdownOpen && (
               <div className="absolute top-full left-0 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-2.5 mt-1 animate-fadeIn z-50">
                 <div className="px-2.5 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">All Courses (Flat ₹999)</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">All Target Batches</span>
                   <a 
                     href="#courses" 
                     onClick={(e) => handleNavClick(e, '#courses')}
@@ -127,7 +133,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
                   </a>
                 </div>
                 <div className="space-y-1">
-                  {coursesData.map((c) => (
+                  {activeCourses.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => handleCourseClick(c.id)}
@@ -139,8 +145,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
                           <p className="text-xs font-semibold text-slate-800 group-hover:text-brand-700 truncate">
                             {c.title.split('(')[0]}
                           </p>
-                          <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.2 rounded shrink-0">
-                            ₹999
+                          <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded shrink-0 font-mono">
+                            ₹{c.price}
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-400 truncate">{c.category}</p>
@@ -290,8 +296,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
                 <BookOpen className="w-4 h-4 text-brand-600" />
                 <span>All Courses (6 Batches)</span>
               </div>
-              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                Flat ₹999
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                Special Batches
               </span>
             </a>
 

@@ -12,9 +12,15 @@ import {
   RotateCcw,
   FileText
 } from 'lucide-react';
-import { coursesData } from '../../data/coursesData';
+import { coursesData as defaultCoursesData } from '../../data/coursesData';
+import { useSiteContent } from '../../context/SiteContentContext';
 
 export const AdminShareLinkTab: React.FC = () => {
+  const { content } = useSiteContent();
+  const activeCourses = (content?.courses?.courses && content.courses.courses.length > 0)
+    ? content.courses.courses
+    : defaultCoursesData;
+
   const [copiedGeneralLink, setCopiedGeneralLink] = useState(false);
   const [copiedMessage, setCopiedMessage] = useState(false);
   const [copiedCourseId, setCopiedCourseId] = useState<string | null>(null);
@@ -390,8 +396,8 @@ Helpline: +91 7417268651`
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {coursesData.map((course) => {
-            const courseUrl = `https://learnwithdrankita.com/register`;
+          {activeCourses.map((course) => {
+            const courseUrl = `https://learnwithdrankita.com/register?course=${encodeURIComponent(course.id)}`;
             const isCopied = copiedCourseId === course.id;
 
             const handleCopyCourseLink = () => {
@@ -402,7 +408,7 @@ Helpline: +91 7417268651`
 
             const handleShareCourseWhatsApp = () => {
               const text = encodeURIComponent(
-                `Namaste! 🙏\n\nAdmissions are open for *${course.title}* with Dr. Ankita Bisht.\n\nFee: Flat *₹${course.price}* (Limited Seats)\nDuration: ${course.duration} | Bilingual Live Classes\n\n👉 *Direct Registration Link:*\n${courseUrl}\n\nHelpline: +91 7417268651`
+                `Namaste! 🙏\n\nAdmissions are open for *${course.title}* with Dr. Ankita Bisht.\n\nFee: Special *₹${course.price}* (Limited Seats)\nDuration: ${course.duration} | Bilingual Live Classes\n\n👉 *Direct Registration Link:*\n${courseUrl}\n\nHelpline: +91 7417268651`
               );
               window.open(`https://wa.me/?text=${text}`, '_blank');
             };

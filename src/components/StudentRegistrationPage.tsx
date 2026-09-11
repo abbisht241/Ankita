@@ -17,16 +17,35 @@ import {
   Award
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { coursesData } from '../data/coursesData';
+import { useSiteContent } from '../context/SiteContentContext';
+import { SiteContentService } from '../services/siteContentService';
+import { coursesData as defaultCoursesData } from '../data/coursesData';
 import { AdminStorage, type StudentEnrollment } from '../services/adminStorageService';
 import { startRazorpayCheckout, type RazorpaySuccessPayload } from '../services/razorpayService';
+import type { Course } from '../types';
 
 interface StudentRegistrationPageProps {
   onBackToWebsite: () => void;
 }
 
 export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = ({ onBackToWebsite }) => {
-  const [selectedCourseId, setSelectedCourseId] = useState<string>(coursesData[0]?.id || 'ugc-net-paper-1');
+  const { content } = useSiteContent();
+  const liveCourses: Course[] = (content?.courses?.courses && content.courses.courses.length > 0)
+    ? content.courses.courses
+    : (SiteContentService.getSiteContent()?.courses?.courses || defaultCoursesData);
+
+  const [selectedCourseId, setSelectedCourseId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('course') || params.get('id');
+      if (q) {
+        const match = liveCourses.find(c => c.id === q || c.id.toLowerCase() === q.toLowerCase());
+        if (match) return match.id;
+      }
+    }
+    return liveCourses[0]?.id || 'ugc-net-paper-1';
+  });
+
   const [batchTimings, setBatchTimings] = useState<string[]>(() => AdminStorage.getBatchTimings());
   const [formData, setFormData] = useState({
     name: '',
@@ -51,11 +70,25 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
     });
   }, []);
 
+  // Sync URL query params if user visited with a specific course
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('course') || params.get('id');
+      if (q) {
+        const match = liveCourses.find(c => c.id === q || c.id.toLowerCase() === q.toLowerCase());
+        if (match) {
+          setSelectedCourseId(match.id);
+        }
+      }
+    }
+  }, [liveCourses]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [enrolledStudent, setEnrolledStudent] = useState<StudentEnrollment | null>(null);
 
-  const selectedCourse = coursesData.find(c => c.id === selectedCourseId) || coursesData[0];
+  const selectedCourse = liveCourses.find(c => c.id === selectedCourseId) || liveCourses[0] || defaultCoursesData[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,13 +215,13 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                     <BookOpen className="w-4 h-4" />
                     <span>Step 1: Select Your Course / Batch</span>
                   </label>
-                  <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                    Flat Special Tuition: ₹999 Only
+                  <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    Tuition Fee: ₹{selectedCourse.price}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {coursesData.map((course) => {
+                  {liveCourses.map((course) => {
                     const isSelected = selectedCourseId === course.id;
                     return (
                       <div
