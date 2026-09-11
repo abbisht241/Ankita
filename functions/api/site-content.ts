@@ -7,6 +7,8 @@ const KV_KEY = 'global_site_content_db';
 function removeSpssFromText(text: string): string {
   if (typeof text !== 'string') return text;
   return text
+    .replace(/Hands-with practical data analysis/gi, 'Hands-on Statistical')
+    .replace(/Hands-on\s*SPSS/gi, 'Hands-on Statistical')
     .replace(/Research Methodology\s*&\s*SPSS\s*Data Analysis/gi, 'Research Methodology & Data Analysis')
     .replace(/Research Methodology\s*&\s*SPSS/gi, 'Research Methodology & Data Analysis')
     .replace(/&\s*SPSS\s*(\(?Ph\.D\.\s*PET\)?)?/gi, '')
@@ -57,9 +59,9 @@ export const onRequestGet = async (context: { request: Request; env: Env }) => {
         try {
           const parsed = JSON.parse(raw);
           const cleaned = deepCleanSpss(parsed);
-          cleaned.version = 3;
-          // Auto-heal KV database in background if SPSS was present
-          if (raw.includes('SPSS')) {
+          cleaned.version = 4;
+          // Auto-heal KV database in background if SPSS or Hands-with was present
+          if (raw.includes('SPSS') || raw.includes('Hands-with')) {
             await context.env.ADMIN_KV.put(KV_KEY, JSON.stringify(cleaned));
           }
           content = cleaned;
@@ -98,7 +100,7 @@ export const onRequestPut = async (context: { request: Request; env: Env }) => {
     }
 
     const cleaned = deepCleanSpss(body.content);
-    cleaned.version = 3;
+    cleaned.version = 4;
 
     if (context.env.ADMIN_KV) {
       await context.env.ADMIN_KV.put(KV_KEY, JSON.stringify(cleaned));

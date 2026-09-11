@@ -97,7 +97,7 @@ export interface SiteContentConfig {
 }
 
 export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
-  version: 3,
+  version: 4,
   lastUpdated: new Date().toISOString(),
   announcement: {
     enabled: true,
@@ -218,6 +218,8 @@ const STORAGE_KEY = 'dr_ankita_site_content_config';
 function removeSpssFromText(text: string): string {
   if (typeof text !== 'string') return text;
   return text
+    .replace(/Hands-with practical data analysis/gi, 'Hands-on Statistical')
+    .replace(/Hands-on\s*SPSS/gi, 'Hands-on Statistical')
     .replace(/Research Methodology\s*&\s*SPSS\s*Data Analysis/gi, 'Research Methodology & Data Analysis')
     .replace(/Research Methodology\s*&\s*SPSS/gi, 'Research Methodology & Data Analysis')
     .replace(/&\s*SPSS\s*(\(?Ph\.D\.\s*PET\)?)?/gi, '')
@@ -269,17 +271,17 @@ export const SiteContentService = {
     }
     try {
       const parsed = JSON.parse(local);
-      // Auto-migrate if older version or contains legacy SPSS
-      if (!parsed.version || parsed.version < 3 || local.includes('SPSS')) {
+      // Auto-migrate if older version or contains legacy SPSS or Hands-with
+      if (!parsed.version || parsed.version < 4 || local.includes('SPSS') || local.includes('Hands-with')) {
         const cleaned = deepCleanSpss({
           ...DEFAULT_SITE_CONTENT,
           ...parsed,
-          version: 3,
+          version: 4,
           about: { ...DEFAULT_SITE_CONTENT.about, ...(parsed.about || {}) },
           resources: { ...DEFAULT_SITE_CONTENT.resources, ...(parsed.resources || {}) },
           courses: { ...DEFAULT_SITE_CONTENT.courses, ...(parsed.courses || {}) }
         });
-        cleaned.version = 3;
+        cleaned.version = 4;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
         return cleaned;
       }
@@ -308,7 +310,7 @@ export const SiteContentService = {
     const cleaned = deepCleanSpss(config);
     const updated = {
       ...cleaned,
-      version: 3,
+      version: 4,
       lastUpdated: new Date().toISOString()
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -321,7 +323,7 @@ export const SiteContentService = {
         const data = await res.json();
         if (data.success && data.content) {
           const cleaned = deepCleanSpss(data.content);
-          cleaned.version = 3;
+          cleaned.version = 4;
           this.setSiteContent(cleaned);
           return cleaned;
         }
@@ -334,7 +336,7 @@ export const SiteContentService = {
 
   async publishLiveContent(config: SiteContentConfig): Promise<boolean> {
     const cleaned = deepCleanSpss(config);
-    cleaned.version = 3;
+    cleaned.version = 4;
     this.setSiteContent(cleaned);
     try {
       const res = await fetch('/api/site-content', {

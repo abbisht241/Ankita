@@ -65,7 +65,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
               <span>Target Examinations:</span>
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {course.targetExams.map((exam, i) => (
+              {(course.targetExams || []).map((exam, i) => (
                 <span key={i} className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-slate-700 font-medium">
                   {exam}
                 </span>
@@ -77,7 +77,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
               <span>Key Preparation Outcomes:</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-              {course.keyBenefits.map((ben, i) => (
+              {(course.keyBenefits || []).map((ben, i) => (
                 <div key={i} className="flex items-start gap-1.5 text-slate-600">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                   <span>{ben}</span>
@@ -94,11 +94,11 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 <span>Unit-by-Unit Detailed Syllabus</span>
               </h4>
               <span className="text-xs text-slate-500 font-medium">
-                {course.syllabusModules.length} Detailed Modules
+                {(course.syllabusModules || []).length} Detailed Modules
               </span>
             </div>
 
-            {course.syllabusModules.map((module, idx) => (
+            {(course.syllabusModules || []).map((module, idx) => (
               <div 
                 key={idx}
                 className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-brand-300 transition-colors"
@@ -119,7 +119,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
                 </div>
 
                 <ul className="space-y-1.5 text-xs text-slate-600 pl-1">
-                  {module.topics.map((topic, tIdx) => (
+                  {(module.topics || []).map((topic, tIdx) => (
                     <li key={tIdx} className="flex items-start gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-brand-400 shrink-0 mt-1.5" />
                       <span className="leading-relaxed">{topic}</span>

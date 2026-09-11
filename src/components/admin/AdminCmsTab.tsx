@@ -24,6 +24,7 @@ import { useSiteContent } from '../../context/SiteContentContext';
 import type { SiteContentConfig } from '../../services/siteContentService';
 import { AdminStorage } from '../../services/adminStorageService';
 import type { Course, FAQItem, Resource, Testimonial } from '../../types';
+import { CourseSyllabusEditorModal } from './CourseSyllabusEditorModal';
 
 export const AdminCmsTab: React.FC = () => {
   const { content, publishContent, resetToDefaults } = useSiteContent();
@@ -33,6 +34,8 @@ export const AdminCmsTab: React.FC = () => {
   >('announcement');
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
+  const [editingSyllabusCourseIndex, setEditingSyllabusCourseIndex] = useState<number | null>(null);
+  const [syllabusNotification, setSyllabusNotification] = useState<string | null>(null);
 
   // Sync when content loads
   React.useEffect(() => {
@@ -439,6 +442,23 @@ export const AdminCmsTab: React.FC = () => {
               </button>
             </div>
 
+            {syllabusNotification && (
+              <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between animate-fadeIn shadow-xs">
+                <div className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>{syllabusNotification}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveAndPublish}
+                  disabled={isPublishing}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-colors shrink-0 ml-2"
+                >
+                  Publish Live Now 🚀
+                </button>
+              </div>
+            )}
+
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -715,6 +735,36 @@ export const AdminCmsTab: React.FC = () => {
                         }}
                         className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white text-xs"
                       />
+                    </div>
+
+                    {/* Full Syllabus & Curriculum Action Section */}
+                    <div className="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gradient-to-r from-brand-50/70 via-slate-50 to-brand-50/70 p-3.5 rounded-xl border border-brand-200 shadow-xs">
+                      <div>
+                        <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                          <BookOpen className="w-4 h-4 text-brand-700" />
+                          <span>Detailed Syllabus &amp; Curriculum Breakdown</span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-1.5">
+                          <span className="bg-white text-brand-800 font-semibold px-2 py-0.5 rounded border border-brand-200">
+                            {course.syllabusModules?.length || 0} Modules / Units
+                          </span>
+                          <span className="bg-white text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200">
+                            {course.targetExams?.length || 0} Target Exams
+                          </span>
+                          <span className="bg-white text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200">
+                            {course.keyBenefits?.length || 0} Outcomes
+                          </span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setEditingSyllabusCourseIndex(idx)}
+                        className="px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer shrink-0"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        <span>Edit Full Syllabus &amp; Curriculum</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1685,6 +1735,28 @@ export const AdminCmsTab: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Course Syllabus & Curriculum Editor Modal */}
+      {editingSyllabusCourseIndex !== null && formData.courses.courses[editingSyllabusCourseIndex] && (
+        <CourseSyllabusEditorModal
+          course={formData.courses.courses[editingSyllabusCourseIndex]}
+          onClose={() => setEditingSyllabusCourseIndex(null)}
+          onSave={(updatedCourse) => {
+            const updated = [...formData.courses.courses];
+            updated[editingSyllabusCourseIndex] = updatedCourse;
+            setFormData({
+              ...formData,
+              courses: {
+                ...formData.courses,
+                courses: updated
+              }
+            });
+            setEditingSyllabusCourseIndex(null);
+            setSyllabusNotification(`✓ Syllabus & curriculum updated for "${updatedCourse.title}". Click "Save & Publish All Changes" to publish live!`);
+            setTimeout(() => setSyllabusNotification(null), 8000);
+          }}
+        />
+      )}
 
     </div>
   );
