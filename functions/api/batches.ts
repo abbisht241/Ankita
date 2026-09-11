@@ -19,7 +19,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-1',
     courseId: 'ugc-net-paper-1',
-    title: 'UGC NET Paper 1 - Super 50 Batch (June/Dec)',
+    title: 'UGC NET Paper 1 - Super 50 Batch',
     timing: 'Mon to Fri 7:00 PM - 8:30 PM',
     startDate: '10th Sept 2026',
     liveClassLink: 'https://meet.google.com/ugc-net-paper1-live',
@@ -95,10 +95,14 @@ async function getBatchesList(env: Env): Promise<BatchConfig[]> {
       try {
         const list: BatchConfig[] = JSON.parse(raw);
         return list.map(b => {
-          if (!b.whatsappGroupLink || b.whatsappGroupLink.includes('DrAnkita')) {
-            return { ...b, whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK };
+          let updated = { ...b };
+          if (!updated.whatsappGroupLink || updated.whatsappGroupLink.includes('DrAnkita')) {
+            updated.whatsappGroupLink = OFFICIAL_BATCH_WHATSAPP_LINK;
           }
-          return b;
+          if (updated.title && updated.title.includes('(June/Dec)')) {
+            updated.title = updated.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
+          }
+          return updated;
         });
       } catch (e) {}
     }

@@ -201,7 +201,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-1',
     courseId: 'ugc-net-paper-1',
-    title: 'UGC NET Paper 1 - Super 50 Batch (June/Dec)',
+    title: 'UGC NET Paper 1 - Super 50 Batch',
     timing: 'Mon to Fri 7:00 PM - 8:30 PM',
     startDate: '10th Sept 2026',
     liveClassLink: 'https://meet.google.com/ugc-net-paper1-live',
@@ -594,11 +594,16 @@ export const AdminStorage = {
       const parsed: BatchConfig[] = JSON.parse(data);
       let changed = false;
       const updated = parsed.map(b => {
-        if (!b.whatsappGroupLink || b.whatsappGroupLink.includes('DrAnkita')) {
+        let u = { ...b };
+        if (!u.whatsappGroupLink || u.whatsappGroupLink.includes('DrAnkita')) {
           changed = true;
-          return { ...b, whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK };
+          u.whatsappGroupLink = OFFICIAL_BATCH_WHATSAPP_LINK;
         }
-        return b;
+        if (u.title && u.title.includes('(June/Dec)')) {
+          changed = true;
+          u.title = u.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
+        }
+        return u;
       });
       if (changed) {
         localStorage.setItem(STORAGE_KEYS.BATCHES, JSON.stringify(updated));
@@ -617,10 +622,14 @@ export const AdminStorage = {
         const data = await res.json();
         if (data.success && Array.isArray(data.batches)) {
           const sanitized = data.batches.map((b: BatchConfig) => {
-            if (!b.whatsappGroupLink || b.whatsappGroupLink.includes('DrAnkita')) {
-              return { ...b, whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK };
+            let u = { ...b };
+            if (!u.whatsappGroupLink || u.whatsappGroupLink.includes('DrAnkita')) {
+              u.whatsappGroupLink = OFFICIAL_BATCH_WHATSAPP_LINK;
             }
-            return b;
+            if (u.title && u.title.includes('(June/Dec)')) {
+              u.title = u.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
+            }
+            return u;
           });
           localStorage.setItem(STORAGE_KEYS.BATCHES, JSON.stringify(sanitized));
           return sanitized;

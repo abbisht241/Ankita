@@ -34,7 +34,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
     phone: '',
     email: '',
     timing: AdminStorage.getBatchTimings()[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
-    targetExam: 'UGC NET June/Dec 2025-2026',
+    targetExam: 'UGC NET 2025-2026',
     cityState: '',
     paymentChoice: 'razorpay' as 'razorpay' | 'upi_direct',
     notes: ''
