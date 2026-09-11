@@ -15,7 +15,8 @@ import {
   Eye,
   BookOpen,
   RefreshCw,
-  Clock
+  Clock,
+  CheckCircle2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { 
@@ -101,9 +102,24 @@ export const AdminMockTestsTab: React.FC = () => {
   };
 
   const handleDeleteSubmission = async (subId: string, studentName: string) => {
-    if (confirm(`Delete submission by "${studentName}"? This cannot be undone.`)) {
+    if (confirm(`Delete submission record for "${studentName}"? This cannot be undone.`)) {
       await MockTestStorage.deleteSubmission(subId);
-      setSubmissions(MockTestStorage.getSubmissions());
+      setSubmissions(prev => prev.filter(s => s.id !== subId));
+      if (selectedSubmission?.id === subId) {
+        setSelectedSubmission(null);
+      }
+      setImportFeedbackMessage(`Deleted test record for ${studentName}`);
+      setTimeout(() => setImportFeedbackMessage(null), 4000);
+    }
+  };
+
+  const handleClearAllSubmissions = async () => {
+    if (confirm('Are you sure you want to permanently delete ALL student test records? This cannot be undone.')) {
+      await MockTestStorage.clearAllSubmissions();
+      setSubmissions([]);
+      setSelectedSubmission(null);
+      setImportFeedbackMessage('All test records have been deleted.');
+      setTimeout(() => setImportFeedbackMessage(null), 4000);
     }
   };
 
@@ -503,7 +519,17 @@ export const AdminMockTestsTab: React.FC = () => {
                 Cloud KV Synced
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
+              {submissions.length > 0 && (
+                <button
+                  onClick={handleClearAllSubmissions}
+                  className="flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl cursor-pointer transition-colors"
+                  title="Permanently clear all test submissions"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Clear All Submissions</span>
+                </button>
+              )}
               <button
                 onClick={() => loadAllData(true)}
                 disabled={isRefreshing}
@@ -530,59 +556,74 @@ export const AdminMockTestsTab: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {submissions.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-4 py-3.5 font-bold text-slate-900">
-                      <div>{sub.studentName}</div>
-                      <div className="text-[11px] text-slate-400 font-normal">{sub.studentPhone}</div>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <div className="font-medium text-slate-800 max-w-xs truncate">{sub.testTitle}</div>
-                      <div className="text-[10px] text-slate-400">{new Date(sub.submittedAt).toLocaleString()}</div>
-                    </td>
-                    <td className="px-4 py-3.5 font-bold">
-                      <div className="text-sm text-slate-900">{sub.score} / {sub.totalMarks}</div>
-                      <div className="text-[11px] text-indigo-600 font-semibold">{sub.percentage}% Marks</div>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs">
-                      <span className="text-emerald-700 font-bold">{sub.correctCount} Correct</span> • <span className="text-rose-600">{sub.incorrectCount} Wrong</span>
-                    </td>
-                    <td className="px-4 py-3.5 text-slate-600">
-                      {Math.round(sub.timeSpentSeconds / 60)} Mins
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                        sub.isPassed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                      }`}>
-                        {sub.isPassed ? 'PASSED ✓' : 'NEEDS PRACTICE'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right space-x-1.5 whitespace-nowrap">
-                      <button
-                        onClick={() => setSelectedSubmission(sub)}
-                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer"
-                        title="View Full Answer Sheet"
-                      >
-                        Answer Sheet
-                      </button>
-                      <button
-                        onClick={() => handleSendStudentScorecardWhatsApp(sub)}
-                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
-                        title="Send Scorecard on WhatsApp"
-                      >
-                        <MessageSquare className="w-3 h-3" />
-                        <span>WhatsApp</span>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteSubmission(sub.id, sub.studentName)}
-                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-800 p-1.5 rounded-lg cursor-pointer"
-                        title="Delete this submission"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                {submissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-12 text-center text-slate-400">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                        <div className="font-semibold text-sm text-slate-700">No test submissions recorded</div>
+                        <p className="text-xs text-slate-400 max-w-sm">When students attempt mock tests, their scores and answer sheets will appear here automatically.</p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  submissions.map((sub) => (
+                    <tr key={sub.id} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="px-4 py-3.5 font-bold text-slate-900">
+                        <div>{sub.studentName}</div>
+                        <div className="text-[11px] text-slate-400 font-normal">{sub.studentPhone}</div>
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <div className="font-medium text-slate-800 max-w-xs truncate">{sub.testTitle}</div>
+                        <div className="text-[10px] text-slate-400">{new Date(sub.submittedAt).toLocaleString()}</div>
+                      </td>
+                      <td className="px-4 py-3.5 font-bold">
+                        <div className="text-sm text-slate-900">{sub.score} / {sub.totalMarks}</div>
+                        <div className="text-[11px] text-indigo-600 font-semibold">{sub.percentage}% Marks</div>
+                      </td>
+                      <td className="px-4 py-3.5 text-xs">
+                        <span className="text-emerald-700 font-bold">{sub.correctCount} Correct</span> • <span className="text-rose-600">{sub.incorrectCount} Wrong</span>
+                      </td>
+                      <td className="px-4 py-3.5 text-slate-600">
+                        {Math.round(sub.timeSpentSeconds / 60)} Mins
+                      </td>
+                      <td className="px-4 py-3.5">
+                        <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                          sub.isPassed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        }`}>
+                          {sub.isPassed ? 'PASSED ✓' : 'NEEDS PRACTICE'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => setSelectedSubmission(sub)}
+                            className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer transition-colors"
+                            title="View Full Answer Sheet"
+                          >
+                            Answer Sheet
+                          </button>
+                          <button
+                            onClick={() => handleSendStudentScorecardWhatsApp(sub)}
+                            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1.5 rounded-lg font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 transition-colors"
+                            title="Send Scorecard on WhatsApp"
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            <span>WhatsApp</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSubmission(sub.id, sub.studentName)}
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-800 px-2 py-1.5 rounded-lg cursor-pointer inline-flex items-center gap-1 font-bold text-[11px] transition-colors border border-rose-200"
+                            title="Delete this submission"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -1002,14 +1043,24 @@ export const AdminMockTestsTab: React.FC = () => {
               <div className="text-slate-600">📅 Submitted: {new Date(selectedSubmission.submittedAt).toLocaleString()}</div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between">
-              <button
-                onClick={() => handleSendStudentScorecardWhatsApp(selectedSubmission)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow flex items-center gap-1.5 cursor-pointer"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-                <span>Send Scorecard on WhatsApp</span>
-              </button>
+            <div className="mt-6 pt-4 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleSendStudentScorecardWhatsApp(selectedSubmission)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow flex items-center gap-1.5 cursor-pointer transition-colors"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Send Scorecard on WhatsApp</span>
+                </button>
+                <button
+                  onClick={() => handleDeleteSubmission(selectedSubmission.id, selectedSubmission.studentName)}
+                  className="bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-rose-200 flex items-center gap-1.5 cursor-pointer transition-colors"
+                  title="Delete this submission record permanently"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Delete Record</span>
+                </button>
+              </div>
 
               <button
                 onClick={() => setSelectedSubmission(null)}

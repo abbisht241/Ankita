@@ -238,46 +238,7 @@ export const INITIAL_MOCK_TESTS: MockTest[] = [
   }
 ];
 
-export const INITIAL_SUBMISSIONS: TestSubmission[] = [
-  {
-    id: 'SUB-5264-1',
-    testId: 'test-ugc-net-paper1-cbt',
-    testTitle: 'UGC NET Paper 1 - All India CBT Mock Test 2026 (Full Syllabus)',
-    studentName: 'Anoop Negi',
-    studentPhone: '8449137304',
-    studentEmail: 'abbisht@gmail.com',
-    score: 16,
-    totalMarks: 20,
-    percentage: 80,
-    isPassed: true,
-    correctCount: 8,
-    incorrectCount: 2,
-    unattemptedCount: 0,
-    timeSpentSeconds: 385,
-    answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 0, q10: 1 },
-    reviewStatus: {},
-    submittedAt: '2026-09-10T14:30:00.000Z'
-  },
-  {
-    id: 'SUB-5264-2',
-    testId: 'test-ugc-net-paper1-cbt',
-    testTitle: 'UGC NET Paper 1 - Teaching & Research Aptitude Practice Set',
-    studentName: 'Anoop Negi',
-    studentPhone: '8449137304',
-    studentEmail: 'abbisht@gmail.com',
-    score: 18,
-    totalMarks: 20,
-    percentage: 90,
-    isPassed: true,
-    correctCount: 9,
-    incorrectCount: 1,
-    unattemptedCount: 0,
-    timeSpentSeconds: 410,
-    answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 1, q10: 2 },
-    reviewStatus: {},
-    submittedAt: '2026-09-11T16:15:00.000Z'
-  }
-];
+export const INITIAL_SUBMISSIONS: TestSubmission[] = [];
 
 function cleanTestSpss(test: MockTest): MockTest {
   return {
@@ -416,34 +377,32 @@ export const MockTestStorage = {
     } catch (e) {}
   },
 
+  DELETED_SUBMISSION_IDS: new Set(['SUB-5264-1', 'SUB-5264-2']),
+
   // Submissions
   getSubmissions(testId?: string): TestSubmission[] {
-    if (typeof window === 'undefined') return INITIAL_SUBMISSIONS;
+    if (typeof window === 'undefined') return [];
     const data = localStorage.getItem(STORAGE_KEYS.SUBMISSIONS);
     let subs: TestSubmission[] = [];
-    if (!data) {
-      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(INITIAL_SUBMISSIONS));
-      subs = INITIAL_SUBMISSIONS;
-    } else {
+    if (data) {
       try {
-        subs = JSON.parse(data);
-        if (!Array.isArray(subs)) subs = INITIAL_SUBMISSIONS;
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed)) subs = parsed;
       } catch {
-        subs = INITIAL_SUBMISSIONS;
+        subs = [];
       }
     }
 
-    // Ensure baseline submissions exist in cache so new students have their records
-    INITIAL_SUBMISSIONS.forEach(initSub => {
-      if (!subs.some(s => s.id === initSub.id)) {
-        subs.push(initSub);
-      }
-    });
+    const filtered = subs.filter(s => !MockTestStorage.DELETED_SUBMISSION_IDS.has(s.id));
+
+    if (filtered.length !== subs.length && typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(filtered));
+    }
 
     if (testId && testId !== 'all') {
-      return subs.filter(s => s.testId === testId);
+      return filtered.filter(s => s.testId === testId);
     }
-    return subs;
+    return filtered;
   },
 
   async fetchSubmissionsFromCloud(testId?: string): Promise<TestSubmission[]> {
@@ -454,35 +413,18 @@ export const MockTestStorage = {
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data)) {
-          const cloudSubs: TestSubmission[] = json.data;
-          
-          // Merge local submissions with cloud submissions
-          const localSubs = this.getSubmissions();
-          const mergedMap = new Map<string, TestSubmission>();
-          
-          // Add local submissions first
-          localSubs.forEach(s => {
-            if (s && s.id) {
-              mergedMap.set(s.id, s);
-            }
-          });
+          const cloudSubs: TestSubmission[] = json.data.filter(
+            (s: TestSubmission) => !MockTestStorage.DELETED_SUBMISSION_IDS.has(s.id)
+          );
 
-          // Overlay cloud submissions (authoritative across all students' devices)
-          cloudSubs.forEach(s => {
-            if (s && s.id) {
-              mergedMap.set(s.id, s);
-            }
-          });
-
-          const mergedList = Array.from(mergedMap.values());
           if (typeof window !== 'undefined') {
-            localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(mergedList));
+            localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(cloudSubs));
           }
 
           if (testId && testId !== 'all') {
-            return mergedList.filter(s => s.testId === testId);
+            return cloudSubs.filter(s => s.testId === testId);
           }
-          return mergedList;
+          return cloudSubs;
         }
       }
     } catch (e) {
@@ -499,20 +441,18 @@ export const MockTestStorage = {
         const map = new Map<string, TestSubmission>();
         all.forEach(s => map.set(s.id, s));
         cloud.forEach(s => map.set(s.id, s));
-        all = Array.from(map.values());
+        all = Array.from(map.values()).filter(s => !MockTestStorage.DELETED_SUBMISSION_IDS.has(s.id));
       }
     } catch (e) {}
 
     const cleanEmail = (email || '').toLowerCase().trim();
     const cleanPhone = (phone || '').replace(/\D/g, '');
 
-    let matched = all.filter(s => {
+    const matched = all.filter(s => {
       const sEmail = (s.studentEmail || '').toLowerCase().trim();
       const sPhone = (s.studentPhone || '').replace(/\D/g, '');
       const matchEmail = cleanEmail && (
         sEmail === cleanEmail || 
-        (cleanEmail === 'abbisht241@gmail.com' && (sEmail === 'abbisht@gmail.com' || sEmail === 'anoop@gmail.com')) ||
-        (cleanEmail === 'anoop@gmail.com' && sEmail === 'abbisht@gmail.com') ||
         (cleanEmail.includes('abbisht') && sEmail.includes('abbisht'))
       );
       const matchPhone = cleanPhone.length >= 8 && (
@@ -520,25 +460,6 @@ export const MockTestStorage = {
       );
       return matchEmail || matchPhone;
     });
-
-    // Ensure baseline submissions for Anoop Negi are present on any device (phone, laptop)
-    if ((cleanEmail.includes('abbisht') || cleanPhone === '8449137304') && matched.length < 2) {
-      INITIAL_SUBMISSIONS.forEach(initSub => {
-        if ((initSub.studentEmail.includes('abbisht') || initSub.studentPhone === '8449137304') && !matched.some(m => m.id === initSub.id)) {
-          matched.push(initSub);
-          all.push(initSub);
-          // Sync to cloud in background
-          fetch('/api/mock-tests', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'save_submission', submission: initSub })
-          }).catch(() => {});
-        }
-      });
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(all));
-      }
-    }
 
     return matched;
   },
@@ -579,10 +500,20 @@ export const MockTestStorage = {
   },
 
   async deleteSubmission(id: string): Promise<void> {
-    const subs = this.getSubmissions().filter(s => s.id !== id);
-    localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(subs));
+    this.DELETED_SUBMISSION_IDS.add(id);
+    const existing = this.getSubmissions();
+    const remaining = existing.filter(s => s.id !== id);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(remaining));
+    }
 
     try {
+      // Overwrite full array in Cloudflare KV so it is permanently deleted
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_all_submissions', submissions: remaining })
+      });
       await fetch('/api/mock-tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -594,10 +525,28 @@ export const MockTestStorage = {
     } catch (e) {}
   },
 
+  async clearAllSubmissions(): Promise<void> {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify([]));
+    }
+    try {
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clear_all_submissions' })
+      });
+      await fetch('/api/mock-tests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'save_all_submissions', submissions: [] })
+      });
+    } catch (e) {}
+  },
+
   resetToDefaults(): MockTest[] {
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(INITIAL_MOCK_TESTS));
-      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(INITIAL_SUBMISSIONS));
+      localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify([]));
     }
     return INITIAL_MOCK_TESTS;
   }
