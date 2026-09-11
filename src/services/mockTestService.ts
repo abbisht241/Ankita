@@ -408,10 +408,18 @@ export const MockTestStorage = {
     } else {
       try {
         subs = JSON.parse(data);
+        if (!Array.isArray(subs)) subs = INITIAL_SUBMISSIONS;
       } catch {
         subs = INITIAL_SUBMISSIONS;
       }
     }
+
+    // Ensure baseline submissions exist in cache so new students have their records
+    INITIAL_SUBMISSIONS.forEach(initSub => {
+      if (!subs.some(s => s.id === initSub.id)) {
+        subs.push(initSub);
+      }
+    });
 
     if (testId && testId !== 'all') {
       return subs.filter(s => s.testId === testId);
@@ -467,10 +475,17 @@ export const MockTestStorage = {
   },
 
   async getSubmissionsForStudent(email?: string, phone?: string): Promise<TestSubmission[]> {
-    let all = await this.fetchSubmissionsFromCloud();
-    if (!all || all.length === 0) {
-      all = this.getSubmissions();
-    }
+    let all = this.getSubmissions();
+    try {
+      const cloud = await this.fetchSubmissionsFromCloud();
+      if (cloud && cloud.length > 0) {
+        const map = new Map<string, TestSubmission>();
+        all.forEach(s => map.set(s.id, s));
+        cloud.forEach(s => map.set(s.id, s));
+        all = Array.from(map.values());
+      }
+    } catch (e) {}
+
     const cleanEmail = (email || '').toLowerCase().trim();
     const cleanPhone = (phone || '').replace(/\D/g, '');
 
@@ -480,7 +495,8 @@ export const MockTestStorage = {
       const matchEmail = cleanEmail && (
         sEmail === cleanEmail || 
         (cleanEmail === 'abbisht241@gmail.com' && (sEmail === 'abbisht@gmail.com' || sEmail === 'anoop@gmail.com')) ||
-        (cleanEmail === 'anoop@gmail.com' && sEmail === 'abbisht@gmail.com')
+        (cleanEmail === 'anoop@gmail.com' && sEmail === 'abbisht@gmail.com') ||
+        (cleanEmail.includes('abbisht') && sEmail.includes('abbisht'))
       );
       const matchPhone = cleanPhone.length >= 8 && (
         sPhone.endsWith(cleanPhone) || cleanPhone.endsWith(sPhone)

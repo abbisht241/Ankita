@@ -11,20 +11,19 @@ import {
   ArrowLeft, 
   Download, 
   ExternalLink, 
-  Video, 
   MessageCircle, 
   FileText, 
-  PhoneCall, 
   LogOut, 
   Sparkles, 
   Printer, 
-  Calendar, 
   Layers, 
   User, 
   Mail, 
   Phone, 
-  X,
-  Target
+  X, 
+  Target, 
+  CreditCard, 
+  Zap 
 } from 'lucide-react';
 import { 
   AdminStorage, 
@@ -38,6 +37,8 @@ import {
   type MockQuestion,
   formatTestDuration
 } from '../services/mockTestService';
+import { startRazorpayCheckout, type RazorpaySuccessPayload } from '../services/razorpayService';
+import { coursesData } from '../data/coursesData';
 
 interface StudentProfilePortalProps {
   onBackToWebsite: () => void;
@@ -58,7 +59,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
   const [batches, setBatches] = useState<BatchConfig[]>([]);
   const [submissions, setSubmissions] = useState<TestSubmission[]>([]);
   const [availableTests, setAvailableTests] = useState<MockTest[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'mock_tests' | 'study_material' | 'receipt'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'mock_tests' | 'study_material' | 'fee_history'>('dashboard');
 
   // Scorecard Review Modal
   const [selectedSubmissionForReview, setSelectedSubmissionForReview] = useState<TestSubmission | null>(null);
@@ -66,6 +67,22 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
   // Receipt Modal
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+
+  // Pay Fee Modal
+  const [showPayFeeModal, setShowPayFeeModal] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentSuccessMessage, setPaymentSuccessMessage] = useState('');
+
+  // Current Month String helper
+  const currentMonthName = useMemo(() => {
+    return new Date().toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  }, []);
+
+  const nextMonthName = useMemo(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() + 1);
+    return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  }, []);
 
   // Initialize & check auto-login from URL or localStorage session
   useEffect(() => {
@@ -150,7 +167,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
         AdminStorage.setStudentSession({ email: found.email, phone: found.phone, studentId: found.id });
         setCurrentStudent(found);
       } else {
-        setLoginError('No enrolled student found with this Email/Phone. Please check the spelling or WhatsApp support.');
+        setLoginError('No student record found with this Email / Phone. Please check spelling or WhatsApp support.');
       }
     } catch (err) {
       setLoginError('An error occurred during verification. Please try again.');
@@ -176,6 +193,28 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
       batches[0]
     );
   }, [currentStudent, batches]);
+
+  // Fee Details
+  const isFeePaid = useMemo(() => {
+    if (!currentStudent) return false;
+    return (
+      (currentStudent.paymentStatus === 'paid' || currentStudent.paymentMode === 'razorpay') &&
+      Number(currentStudent.amount) > 0 &&
+      (currentStudent.feeDue === 0 || currentStudent.feeDue === undefined)
+    );
+  }, [currentStudent]);
+
+  const dueAmount = useMemo(() => {
+    if (!currentStudent) return 999;
+    if (isFeePaid) return 0;
+    return currentStudent.feeDue !== undefined ? Number(currentStudent.feeDue) : 999;
+  }, [currentStudent, isFeePaid]);
+
+  const studentBillingMonth = useMemo(() => {
+    if (!currentStudent) return currentMonthName;
+    if (currentStudent.billingMonth) return currentStudent.billingMonth;
+    return new Date(currentStudent.enrolledAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  }, [currentStudent, currentMonthName]);
 
   // Mock test statistics
   const testStats = useMemo(() => {
@@ -237,66 +276,124 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
     });
   }, [selectedSubmissionForReview, reviewTestQuestions, reviewFilter]);
 
+  // Online Fee Payment via Razorpay
+  const handlePayFeeOnline = async () => {
+    if (!currentStudent) return;
+    setIsProcessingPayment(true);
+    setPaymentSuccessMessage('');
+
+    const targetCourse = coursesData.find(c => c.id === currentStudent.courseId) || {
+      id: currentStudent.courseId || 'ugc-net-paper-1',
+      title: currentStudent.courseTitle,
+      price: dueAmount > 0 ? dueAmount : 999,
+      category: 'Paper 1 Masterclass'
+    };
+
+    try {
+      await startRazorpayCheckout({
+        course: {
+          id: targetCourse.id,
+          title: `Monthly Tuition Fee - ${targetCourse.title}`,
+          price: dueAmount > 0 ? dueAmount : 999,
+          category: targetCourse.category
+        } as any,
+        studentName: currentStudent.name,
+        studentEmail: currentStudent.email,
+        studentPhone: currentStudent.phone,
+        onSuccess: async (_verifyResult, payload: RazorpaySuccessPayload) => {
+          setIsProcessingPayment(false);
+          // Mark paid in storage
+          await AdminStorage.updateStudent(currentStudent.id, {
+            amount: (Number(currentStudent.amount) || 0) + (dueAmount > 0 ? dueAmount : 999),
+            feeDue: 0,
+            paymentStatus: 'paid',
+            status: 'active',
+            paymentMode: 'razorpay',
+            paymentId: payload.razorpay_payment_id,
+            billingMonth: currentMonthName,
+            nextDueMonth: nextMonthName,
+            notes: `Monthly fee paid online via Razorpay (${payload.razorpay_payment_id}) for ${currentMonthName}`
+          });
+
+          // Refresh current student state
+          const updated = await AdminStorage.findStudentByEmailOrPhone(currentStudent.email);
+          if (updated) setCurrentStudent(updated);
+
+          setPaymentSuccessMessage(`Fee payment successful! Reference: ${payload.razorpay_payment_id}. Your admission & batch access are confirmed.`);
+          setTimeout(() => {
+            setShowPayFeeModal(false);
+          }, 2500);
+        },
+        onFailure: (err) => {
+          setIsProcessingPayment(false);
+          alert(`Payment Error: ${err}. You can also pay directly via UPI.`);
+        },
+        onDismiss: () => {
+          setIsProcessingPayment(false);
+        }
+      });
+    } catch (e: any) {
+      setIsProcessingPayment(false);
+      alert(e.message || 'Failed to initialize payment gateway.');
+    }
+  };
+
   // ─────────────────────────────────────────────────────────────
-  // 1. LOGIN SCREEN (If student not logged in)
+  // 1. LOGIN SCREEN (Clean, modern light aesthetic)
   // ─────────────────────────────────────────────────────────────
   if (!currentStudent) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-brand-500 selection:text-white relative overflow-hidden">
-        {/* Background glow ornaments */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 bg-gradient-to-b from-brand-600/20 via-indigo-900/10 to-transparent blur-3xl pointer-events-none -z-10" />
-        <div className="absolute -bottom-20 right-0 w-80 h-80 bg-amber-500/10 blur-3xl pointer-events-none -z-10" />
-
-        {/* Top Header */}
-        <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md sticky top-0 z-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col justify-between selection:bg-brand-500 selection:text-white relative">
+        {/* Subtle Top Header bar */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-20 shadow-xs">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
             <button
               onClick={onBackToWebsite}
-              className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition-colors cursor-pointer group"
+              className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-brand-700 transition-colors cursor-pointer group"
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-brand-400" />
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-brand-600" />
               <span>Back to Main Website</span>
             </button>
 
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-brand-950/80 text-brand-300 border border-brand-800/60">
-                <GraduationCap className="w-3.5 h-3.5 text-brand-400" />
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
+                <GraduationCap className="w-4 h-4 text-brand-600" />
                 <span>Student Portal</span>
               </span>
             </div>
           </div>
         </header>
 
-        {/* Login Form Container */}
+        {/* Login Form Card */}
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
-          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md relative">
+          <div className="w-full max-w-md bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-9 shadow-xl relative">
             
             {/* Header / Avatar */}
             <div className="text-center space-y-2 mb-6">
-              <div className="w-16 h-16 bg-gradient-to-tr from-brand-600 to-indigo-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-brand-500/20 mb-3 border border-brand-400/30">
-                <GraduationCap className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-brand-600 text-white rounded-2xl mx-auto flex items-center justify-center shadow-md shadow-brand-500/20 mb-3">
+                <GraduationCap className="w-8 h-8" />
               </div>
-              <h1 className="text-2xl font-black tracking-tight text-white">
+              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                 Student Learning Portal
               </h1>
-              <p className="text-xs text-slate-400">
-                विद्यार्थी लॉगिन पोर्टल • Access your enrolled batch, live classes &amp; mock test scorecards.
+              <p className="text-xs text-slate-500">
+                विद्यार्थी लॉगिन पोर्टल • Check your monthly fee status, batch community &amp; CBT mock test scorecards.
               </p>
             </div>
 
             {/* Error Message */}
             {loginError && (
-              <div className="mb-5 p-3.5 bg-rose-950/50 border border-rose-800/60 rounded-2xl text-xs text-rose-200 flex items-start gap-2.5 animate-shake">
-                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-800 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">{loginError}</p>
-                  <p className="text-[11px] text-rose-300 mt-1">
+                  <p className="text-[11px] text-rose-700 mt-1">
                     Need help? WhatsApp Dr. Ankita at{' '}
                     <a 
                       href="https://wa.me/917417268651?text=Hello%20Dr.%20Ankita,%20I%20am%20having%20trouble%20logging%20into%20my%20Student%20Portal." 
                       target="_blank" 
                       rel="noreferrer"
-                      className="underline font-bold text-white hover:text-rose-100"
+                      className="underline font-bold text-rose-900"
                     >
                       +91 7417268651
                     </a>
@@ -308,9 +405,9 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             {/* Login Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
                   <span>Registered Email or WhatsApp Mobile</span>
-                  <span className="text-[10px] text-brand-400 font-normal">ईमेल या मोबाइल नंबर</span>
+                  <span className="text-[10px] text-brand-600 font-medium">ईमेल या मोबाइल नंबर</span>
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -322,7 +419,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                     value={loginInput}
                     onChange={(e) => setLoginInput(e.target.value)}
                     placeholder="e.g. student@gmail.com or 9876543210"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-950/80 border border-slate-700 rounded-2xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500 transition-all font-medium"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-2xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all font-medium"
                     autoFocus
                   />
                 </div>
@@ -331,7 +428,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
               <button
                 type="submit"
                 disabled={loginLoading}
-                className="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-500 disabled:opacity-60 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-brand-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3.5 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-extrabold text-sm rounded-2xl shadow-md hover:shadow transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loginLoading ? (
                   <>
@@ -348,12 +445,12 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </form>
 
             {/* Footer Registration link */}
-            <div className="mt-5 text-center">
-              <p className="text-xs text-slate-400">
-                Not registered yet?{' '}
+            <div className="mt-6 pt-5 border-t border-slate-100 text-center">
+              <p className="text-xs text-slate-500">
+                New admission / Not enrolled yet?{' '}
                 <a 
                   href="/register" 
-                  className="font-bold text-brand-400 hover:text-brand-300 underline underline-offset-2 ml-1"
+                  className="font-bold text-brand-700 hover:text-brand-800 underline underline-offset-2 ml-1"
                 >
                   Enroll in a Course (₹999) →
                 </a>
@@ -364,48 +461,48 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
         </main>
 
         {/* Helpline note */}
-        <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-900">
+        <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200 bg-white">
           Dr. Ankita Bisht Academic Academy • Student Support Helpline:{' '}
-          <a href="tel:+917417268651" className="text-slate-400 hover:text-white font-mono">+91 7417268651</a>
+          <a href="tel:+917417268651" className="text-slate-700 font-semibold hover:underline">+91 7417268651</a>
         </footer>
       </div>
     );
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 2. LOGGED-IN STUDENT DASHBOARD
+  // 2. LOGGED-IN STUDENT DASHBOARD (Executive Light & Clean LMS UI)
   // ─────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col selection:bg-brand-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col selection:bg-brand-500 selection:text-white">
       
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-30 bg-slate-950/90 border-b border-slate-800 backdrop-blur-md">
+      {/* ── Top Header Navigation ── */}
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
           
-          {/* Logo & Student Welcome */}
+          {/* Logo & Student Identity */}
           <div className="flex items-center gap-3">
             <button
               onClick={onBackToWebsite}
-              className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 hover:text-white bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/60 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-brand-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors cursor-pointer"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3.5 h-3.5 text-brand-600" />
               <span>Website</span>
             </button>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-brand-600 text-white font-black text-base flex items-center justify-center shadow-sm">
                 {currentStudent.name ? currentStudent.name.charAt(0).toUpperCase() : 'S'}
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-extrabold text-white text-sm sm:text-base leading-tight">
+                  <h1 className="font-extrabold text-slate-900 text-sm sm:text-base leading-tight">
                     {currentStudent.name}
                   </h1>
-                  <span className="font-mono text-[10px] font-bold bg-brand-950 text-brand-300 border border-brand-700/50 px-2 py-0.5 rounded-full">
+                  <span className="font-mono text-[10px] font-bold bg-brand-50 text-brand-700 border border-brand-200 px-2 py-0.5 rounded-full">
                     {currentStudent.id}
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 truncate max-w-[200px] sm:max-w-xs">
+                <p className="text-[11px] text-slate-500 truncate max-w-[220px] sm:max-w-sm">
                   {currentStudent.courseTitle.split('(')[0]}
                 </p>
               </div>
@@ -414,28 +511,47 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
           {/* Right Action buttons */}
           <div className="flex items-center gap-2">
+            
+            {/* Fee Status Badge in Navbar */}
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold">
+              {isFeePaid ? (
+                <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Fee Paid ({studentBillingMonth})</span>
+                </span>
+              ) : (
+                <button
+                  onClick={() => setShowPayFeeModal(true)}
+                  className="flex items-center gap-1 text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200 hover:bg-rose-100 cursor-pointer transition-colors"
+                >
+                  <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Fee Due: ₹{dueAmount} (Pay Now)</span>
+                </button>
+              )}
+            </div>
+
             <button
               onClick={() => setShowReceiptModal(true)}
-              className="hidden md:flex items-center gap-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition-colors cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5 text-brand-400" />
-              <span>Admission Slip</span>
+              <FileText className="w-3.5 h-3.5 text-brand-600" />
+              <span>Fee Receipt</span>
             </button>
 
             <a
               href="https://wa.me/917417268651"
               target="_blank"
               rel="noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold bg-emerald-950/80 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-800/80 px-3 py-2 rounded-xl transition-colors"
+              className="hidden md:flex items-center gap-1.5 text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-2 rounded-xl transition-colors"
             >
-              <MessageCircle className="w-3.5 h-3.5" />
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
               <span>Faculty Helpline</span>
             </a>
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 text-xs font-semibold text-rose-300 hover:text-white bg-rose-950/50 hover:bg-rose-900/80 border border-rose-800/60 px-3 py-2 rounded-xl transition-colors cursor-pointer"
-              title="Logout from Portal"
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-rose-600 bg-white hover:bg-rose-50 border border-slate-200 px-3 py-2 rounded-xl transition-colors cursor-pointer"
+              title="Logout"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -445,104 +561,226 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
         </div>
       </header>
 
-      {/* Main Container */}
+      {/* ── Main Container ── */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* ── Banner: Student Status & Overview ── */}
-        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl relative overflow-hidden">
+        {/* ── Section 1: Hero Welcome & Two Major Status Cards (Fee & WhatsApp Batch) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="space-y-2">
+          {/* Left Column (2 cols): Student Identity & Enrolled Course Info */}
+          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-5">
+            <div className="space-y-3">
+              
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Enrolled &amp; Active Student</span>
                 </span>
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-brand-950 text-brand-300 border border-brand-700/60">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Fee Paid: ₹{currentStudent.amount || 999}</span>
-                </span>
-                {currentStudent.timing && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    <Clock className="w-3 h-3 text-amber-400" />
-                    <span>{currentStudent.timing}</span>
+                
+                {isFeePaid ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                    <span>Monthly Fee Status: Paid ({studentBillingMonth})</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-3 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Fee Due: ₹{dueAmount} Pending</span>
                   </span>
                 )}
               </div>
 
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 {currentStudent.courseTitle}
               </h2>
 
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-400 pt-1">
-                <div className="flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{currentStudent.email}</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs text-slate-600">
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <Mail className="w-4 h-4 text-brand-600 shrink-0" />
+                  <span className="truncate">{currentStudent.email}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-slate-500" />
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>+91 {currentStudent.phone}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Enrolled: {new Date(currentStudent.enrolledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                  <Clock className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>{currentStudent.timing || matchedBatch?.timing || 'Evening 7:00 PM'}</span>
                 </div>
+              </div>
+
+            </div>
+
+            {/* Quick Helper Notice: Classes are sent on WhatsApp */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <strong className="block font-bold">📢 Live Class Reminder / लाइव क्लास सूचना:</strong>
+                <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
+                  सभी लाइव क्लास के लिंक और दैनिक नोट्स डॉ. अंकिता बिष्ट द्वारा सीधे आपके <strong>Official WhatsApp Batch Group</strong> में क्लास शुरू होने से 10 मिनट पहले भेजे जाते हैं।
+                </p>
               </div>
             </div>
 
-            {/* Quick Actions in Banner */}
-            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2.5 shrink-0">
-              {matchedBatch?.liveClassLink && (
-                <a
-                  href={matchedBatch.liveClassLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-lg shadow-rose-600/30 transition-all active:scale-95 cursor-pointer"
-                >
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white"></span>
-                  </span>
-                  <Video className="w-4 h-4" />
-                  <span>Join Live Class</span>
-                </a>
-              )}
+          </div>
 
-              {matchedBatch?.whatsappGroupLink && (
-                <a
-                  href={matchedBatch.whatsappGroupLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs sm:text-sm px-4 py-3 rounded-2xl shadow-lg shadow-emerald-600/30 transition-all active:scale-95 cursor-pointer"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Batch WhatsApp</span>
-                </a>
+          {/* Right Column (1 col): Monthly Fee Card with Direct Pay Button */}
+          <div className={`rounded-3xl p-6 border shadow-xs flex flex-col justify-between space-y-4 ${
+            isFeePaid 
+              ? 'bg-gradient-to-br from-emerald-50 via-white to-white border-emerald-200' 
+              : 'bg-gradient-to-br from-rose-50 via-white to-white border-rose-200'
+          }`}>
+            
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-brand-600" />
+                  <span>Monthly Fee Status</span>
+                </span>
+                
+                {isFeePaid ? (
+                  <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                    PAID ✓
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-extrabold text-rose-700 bg-rose-100/80 px-2.5 py-0.5 rounded-full animate-pulse">
+                    PENDING
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <span className="text-xs text-slate-500 block">Billing Month:</span>
+                <p className="text-lg font-black text-slate-900">{studentBillingMonth}</p>
+              </div>
+
+              {isFeePaid ? (
+                <div className="space-y-1.5 bg-white p-3 rounded-2xl border border-emerald-100 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Paid Amount:</span>
+                    <strong className="text-emerald-700 font-mono font-bold text-sm">₹{currentStudent.amount || 999}</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Next Billing Month:</span>
+                    <span className="text-slate-700 font-semibold">{nextMonthName}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                    <span>Payment Mode:</span>
+                    <span className="uppercase font-semibold text-slate-600">{currentStudent.paymentMode.replace('_', ' ')}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2 bg-white p-3 rounded-2xl border border-rose-100 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500">Fee Balance Due:</span>
+                    <strong className="text-rose-600 font-mono font-black text-base">₹{dueAmount}</strong>
+                  </div>
+                  <p className="text-[11px] text-rose-700 leading-relaxed">
+                    Please pay your monthly tuition fee to keep your mock tests and batch active.
+                  </p>
+                </div>
               )}
             </div>
+
+            {/* Action Buttons for Fee */}
+            <div className="space-y-2 pt-2">
+              {!isFeePaid ? (
+                <button
+                  onClick={() => setShowPayFeeModal(true)}
+                  className="w-full bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs sm:text-sm py-3 px-4 rounded-2xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <CreditCard className="w-4 h-4" />
+                  <span>Pay Fee Online (₹{dueAmount})</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowReceiptModal(true)}
+                    className="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-slate-200 shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-brand-600" />
+                    <span>Download Receipt</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowPayFeeModal(true)}
+                    className="flex-1 bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-brand-200 transition-colors cursor-pointer"
+                  >
+                    <span>Advance Pay</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* ── Section 2: Batch Community Banner (WhatsApp Group - No Google Meet links) ── */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-5 sm:p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="bg-white/20 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Official Batch Community
+              </span>
+              <span className="text-emerald-100 text-xs font-semibold">
+                Daily Batch Timing: {currentStudent.timing || matchedBatch?.timing || 'Mon to Fri 7:00 PM - 8:30 PM'}
+              </span>
+            </div>
+            <h3 className="text-lg sm:text-xl font-black">
+              {matchedBatch?.title || currentStudent.courseTitle}
+            </h3>
+            <p className="text-xs text-emerald-100 max-w-2xl leading-relaxed">
+              Dr. Ankita Bisht posts the live class link, daily doubt discussion, and class PDFs directly inside this official WhatsApp group.
+            </p>
+          </div>
+
+          <div className="shrink-0">
+            {matchedBatch?.whatsappGroupLink ? (
+              <a
+                href={matchedBatch.whatsappGroupLink}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-white hover:bg-emerald-50 text-emerald-800 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg transition-all active:scale-95 cursor-pointer"
+              >
+                <MessageCircle className="w-5 h-5 text-emerald-600" />
+                <span>Open Batch WhatsApp Group</span>
+                <ExternalLink className="w-3.5 h-3.5 text-emerald-500" />
+              </a>
+            ) : (
+              <a
+                href="https://wa.me/917417268651?text=Hello%20Dr.%20Ankita,%20please%20add%20me%20to%20my%20enrolled%20batch%20group."
+                target="_blank"
+                rel="noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 font-black text-xs sm:text-sm px-5 py-3.5 rounded-2xl shadow-lg cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-600" />
+                <span>Join Batch Group on WhatsApp</span>
+              </a>
+            )}
           </div>
         </div>
 
-        {/* ── Navigation Tabs ── */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto">
+        {/* ── Section 3: Navigation Tabs ── */}
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer whitespace-nowrap transition-all ${
               activeTab === 'dashboard'
-                ? 'bg-brand-600 text-white shadow-md'
-                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80'
             }`}
           >
             <Layers className="w-4 h-4" />
-            <span>Dashboard &amp; Live Batch</span>
+            <span>Overview &amp; Batch Info</span>
           </button>
 
           <button
             onClick={() => setActiveTab('mock_tests')}
             className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer whitespace-nowrap transition-all ${
               activeTab === 'mock_tests'
-                ? 'bg-brand-600 text-white shadow-md'
-                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80'
             }`}
           >
             <Target className="w-4 h-4" />
@@ -553,218 +791,87 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             onClick={() => setActiveTab('study_material')}
             className={`px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer whitespace-nowrap transition-all ${
               activeTab === 'study_material'
-                ? 'bg-brand-600 text-white shadow-md'
-                : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+                ? 'bg-brand-600 text-white shadow-sm'
+                : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-slate-200/80'
             }`}
           >
             <BookOpen className="w-4 h-4" />
-            <span>Study Notes &amp; Syllabus</span>
-          </button>
-
-          <button
-            onClick={() => setShowReceiptModal(true)}
-            className="md:hidden px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer whitespace-nowrap bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white transition-all"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Fee Receipt</span>
+            <span>Study Notes &amp; Syllabus PDF</span>
           </button>
         </div>
 
-        {/* ── TAB 1: DASHBOARD & LIVE BATCH ── */}
+        {/* ── TAB 1: OVERVIEW & BATCH INFO ── */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             
             {/* Quick Stat Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               
-              <div className="bg-slate-950/80 border border-slate-800 p-4 sm:p-5 rounded-2xl space-y-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">CBT Tests Attempted</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-white">{testStats.totalAttempted}</span>
-                  <span className="text-xs text-slate-500">tests</span>
+              <div className="bg-white border border-slate-200/90 p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">CBT Tests Attempted</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-slate-900">{testStats.totalAttempted}</span>
+                  <span className="text-xs text-slate-400">tests</span>
                 </div>
-                <p className="text-[11px] text-brand-400 font-medium">Real exam simulation</p>
+                <p className="text-[11px] text-brand-600 font-semibold">Real NTA exam simulation</p>
               </div>
 
-              <div className="bg-slate-950/80 border border-slate-800 p-4 sm:p-5 rounded-2xl space-y-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Average Score %</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-amber-400">
+              <div className="bg-white border border-slate-200/90 p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Average Accuracy</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-amber-600">
                     {testStats.avgPercentage}%
                   </span>
-                  <span className="text-xs text-slate-500">accuracy</span>
+                  <span className="text-xs text-slate-400">score</span>
                 </div>
-                <p className="text-[11px] text-emerald-400 font-medium">
-                  {testStats.avgPercentage >= 70 ? 'Target JRF on Track' : 'Keep Practicing'}
+                <p className="text-[11px] text-emerald-600 font-semibold">
+                  {testStats.avgPercentage >= 70 ? 'Target JRF on Track 🏆' : 'Practice regularly'}
                 </p>
               </div>
 
-              <div className="bg-slate-950/80 border border-slate-800 p-4 sm:p-5 rounded-2xl space-y-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Highest Score</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-black text-emerald-400">
+              <div className="bg-white border border-slate-200/90 p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Highest CBT Score</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-600">
                     {testStats.bestScore}
                   </span>
-                  <span className="text-xs text-slate-500">/ {testStats.bestTotal}</span>
+                  <span className="text-xs text-slate-400">/ {testStats.bestTotal}</span>
                 </div>
-                <p className="text-[11px] text-slate-400 font-medium">Best CBT attempt</p>
+                <p className="text-[11px] text-slate-500 font-medium">Best CBT performance</p>
               </div>
 
-              <div className="bg-slate-950/80 border border-slate-800 p-4 sm:p-5 rounded-2xl space-y-1">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Admission Status</span>
+              <div className="bg-white border border-slate-200/90 p-4 sm:p-5 rounded-2xl shadow-xs space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Admission ID</span>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-xl sm:text-2xl font-black text-white">CONFIRMED</span>
+                  <span className="text-xl sm:text-2xl font-black text-slate-900">{currentStudent.id}</span>
                 </div>
-                <p className="text-[11px] text-emerald-400 font-medium">ID: {currentStudent.id}</p>
+                <p className="text-[11px] text-emerald-600 font-semibold">Confirmed Active</p>
               </div>
 
             </div>
 
-            {/* Grid: Live Class Card & Faculty Notice */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Batch & Class schedule (2 cols) */}
-              <div className="lg:col-span-2 bg-slate-950/80 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-5 h-5 text-brand-400" />
-                    <h3 className="font-extrabold text-base text-white">Live Classroom &amp; Batch Schedule</h3>
-                  </div>
-                  <span className="text-xs text-emerald-400 font-bold bg-emerald-950/80 border border-emerald-800/60 px-2.5 py-0.5 rounded-full">
-                    Active Batch
-                  </span>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <div>
-                        <span className="text-xs font-bold text-brand-300 uppercase tracking-wider">Batch Title</span>
-                        <h4 className="text-sm sm:text-base font-bold text-white">
-                          {matchedBatch?.title || currentStudent.courseTitle}
-                        </h4>
-                      </div>
-                      <div className="text-left sm:text-right">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Timing</span>
-                        <div className="text-xs font-semibold text-amber-300 flex items-center gap-1.5 sm:justify-end">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{currentStudent.timing || matchedBatch?.timing || 'Mon to Fri • 7:00 PM - 8:30 PM'}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-slate-800 flex flex-wrap items-center gap-3">
-                      {matchedBatch?.liveClassLink && (
-                        <a
-                          href={matchedBatch.liveClassLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow transition-all cursor-pointer"
-                        >
-                          <Video className="w-4 h-4" />
-                          <span>Enter Google Meet Live Class</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-
-                      {matchedBatch?.whatsappGroupLink && (
-                        <a
-                          href={matchedBatch.whatsappGroupLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow transition-all cursor-pointer"
-                        >
-                          <MessageCircle className="w-4 h-4" />
-                          <span>Join Batch WhatsApp Community</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Instructions */}
-                  <div className="text-xs text-slate-400 space-y-2 leading-relaxed bg-slate-900/50 p-4 rounded-2xl border border-slate-800/80">
-                    <p className="font-bold text-slate-300">📌 Live Class Instructions / आवश्यक निर्देश:</p>
-                    <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-400">
-                      <li>Join the Google Meet live classroom 5 minutes before class time.</li>
-                      <li>Keep your notebook, paper 1 syllabus, and PYQ booklet ready.</li>
-                      <li>Live doubts are answered in real-time during and after every lecture.</li>
-                      <li>Class recordings and PDF notes are uploaded in the WhatsApp batch group within 2 hours.</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              {/* Faculty Helpline Card (1 col) */}
-              <div className="bg-slate-950/80 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-11 h-11 rounded-2xl bg-brand-600/30 border border-brand-500/40 text-brand-300 flex items-center justify-center font-black">
-                      DA
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm">Dr. Ankita Bisht</h4>
-                      <p className="text-[11px] text-brand-300">UGC NET &amp; Ph.D. Faculty Mentor</p>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Have any questions regarding Paper 1 strategy, research topic selection, or mock test doubts? Feel free to connect directly.
-                  </p>
-
-                  <div className="space-y-2 pt-2">
-                    <a
-                      href={`https://wa.me/917417268651?text=${encodeURIComponent(
-                        `Namaste Dr. Ankita Bisht! I am ${currentStudent.name} (Student ID: ${currentStudent.id}), enrolled in ${currentStudent.courseTitle}. I have a doubt regarding our class.`
-                      )}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs py-3 px-4 rounded-xl shadow transition-all cursor-pointer"
-                    >
-                      <MessageCircle className="w-4 h-4" />
-                      <span>Chat on WhatsApp (+91 7417268651)</span>
-                    </a>
-
-                    <a
-                      href="tel:+917417268651"
-                      className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs py-2.5 px-4 rounded-xl border border-slate-700 transition-colors"
-                    >
-                      <PhoneCall className="w-3.5 h-3.5 text-brand-400" />
-                      <span>Call Faculty Desk</span>
-                    </a>
-                  </div>
-                </div>
-
-                <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[11px] text-slate-400">
-                  <span className="font-bold text-slate-300 block mb-0.5">Faculty Office Hours:</span>
-                  10:00 AM – 7:00 PM (Monday to Saturday)
-                </div>
-              </div>
-
-            </div>
-
-            {/* Quick Recent CBT Test Record Widget */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-3xl p-5 sm:p-6 space-y-4">
+            {/* Recent Mock Test Records Widget */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 space-y-4 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-extrabold text-base text-white">Recent Mock Test Attempts (CBT)</h3>
-                  <p className="text-xs text-slate-400">Your latest examination performance &amp; scorecards</p>
+                  <h3 className="font-black text-base text-slate-900">Your Recent Mock Test Attempts (CBT Record)</h3>
+                  <p className="text-xs text-slate-500">Review your past test scores, answers, and faculty rationales</p>
                 </div>
                 <button
                   onClick={() => setActiveTab('mock_tests')}
-                  className="text-xs font-bold text-brand-400 hover:text-brand-300 underline underline-offset-2 cursor-pointer"
+                  className="text-xs font-bold text-brand-600 hover:text-brand-800 underline underline-offset-2 cursor-pointer"
                 >
                   View All ({submissions.length}) →
                 </button>
               </div>
 
               {submissions.length === 0 ? (
-                <div className="p-8 text-center rounded-2xl bg-slate-900/50 border border-dashed border-slate-800 space-y-3">
-                  <Target className="w-10 h-10 text-slate-600 mx-auto" />
-                  <p className="text-xs text-slate-400">You haven't attempted any CBT Mock Tests yet.</p>
+                <div className="p-8 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-200 space-y-3">
+                  <Target className="w-10 h-10 text-slate-400 mx-auto" />
+                  <p className="text-xs text-slate-500">You haven't attempted any CBT Mock Tests yet.</p>
                   <button
                     onClick={() => setActiveTab('mock_tests')}
-                    className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                    className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
                   >
                     <span>Attempt Your First CBT Test</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -773,40 +880,67 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {submissions.slice(0, 2).map((sub) => (
-                    <div key={sub.id} className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                    <div key={sub.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <h4 className="font-bold text-sm text-white line-clamp-1">{sub.testTitle}</h4>
-                          <span className="text-[11px] text-slate-400">
-                            Attempted on {new Date(sub.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          <h4 className="font-bold text-sm text-slate-900 line-clamp-1">{sub.testTitle}</h4>
+                          <span className="text-[11px] text-slate-500">
+                            {new Date(sub.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                         <span className={`text-xs font-black px-2.5 py-1 rounded-full border ${
                           sub.isPassed 
-                            ? 'bg-emerald-950 text-emerald-300 border-emerald-700/60' 
-                            : 'bg-amber-950 text-amber-300 border-amber-700/60'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                            : 'bg-amber-50 text-amber-700 border-amber-200'
                         }`}>
                           {sub.score} / {sub.totalMarks} ({sub.percentage}%)
                         </span>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-slate-800/80">
+                      <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-200/80">
                         <span>Time: {Math.floor(sub.timeSpentSeconds / 60)}m {sub.timeSpentSeconds % 60}s</span>
                         <button
                           onClick={() => {
                             setSelectedSubmissionForReview(sub);
                             setReviewFilter('all');
                           }}
-                          className="font-bold text-brand-400 hover:text-brand-300 flex items-center gap-1 cursor-pointer"
+                          className="font-bold text-brand-600 hover:text-brand-800 flex items-center gap-1 cursor-pointer"
                         >
-                          <span>Review Questions &amp; Answers</span>
-                          <ArrowRight className="w-3 h-3" />
+                          <span>Review Question Scorecard</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Faculty Guidance Card */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-brand-50 text-brand-700 border border-brand-200 flex items-center justify-center font-black text-lg shrink-0">
+                  DA
+                </div>
+                <div>
+                  <h4 className="font-black text-sm sm:text-base text-slate-900">Need Guidance from Dr. Ankita Bisht?</h4>
+                  <p className="text-xs text-slate-500">
+                    Connect directly on WhatsApp for Paper 1 study strategy, doubts, or Ph.D. research inquiries.
+                  </p>
+                </div>
+              </div>
+
+              <a
+                href={`https://wa.me/917417268651?text=${encodeURIComponent(
+                  `Namaste Dr. Ankita Bisht! I am ${currentStudent.name} (ID: ${currentStudent.id}), enrolled in ${currentStudent.courseTitle}. I have a doubt regarding our class.`
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm px-4 py-2.5 rounded-xl shadow-xs transition-colors shrink-0 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span>Chat on WhatsApp (+91 7417268651)</span>
+              </a>
             </div>
 
           </div>
@@ -817,82 +951,82 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
           <div className="space-y-6">
             
             {/* Header */}
-            <div className="bg-slate-950/80 border border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h3 className="font-black text-lg sm:text-xl text-white flex items-center gap-2">
-                  <Target className="w-5 h-5 text-brand-400" />
-                  <span>CBT Mock Test Performance Center</span>
+                <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-brand-600" />
+                  <span>CBT Mock Test Performance &amp; Scorecards</span>
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  Practice high-yield NTA UGC NET format tests with strict 35s speed timers and detailed faculty rationales.
+                <p className="text-xs text-slate-500 mt-1">
+                  Check all your attempted tests, view correct/incorrect answers, and read Dr. Ankita's academic rationales.
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Average Accuracy</span>
-                  <span className="text-base font-black text-amber-400">{testStats.avgPercentage}%</span>
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Total Attempts</span>
+                  <span className="text-base font-black text-slate-900">{submissions.length} Tests</span>
                 </div>
-                <div className="h-8 w-px bg-slate-800 hidden sm:block" />
-                <div className="text-right hidden sm:block">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Attempted</span>
-                  <span className="text-base font-black text-white">{submissions.length}</span>
+                <div className="h-8 w-px bg-slate-200" />
+                <div className="text-right">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Avg Accuracy</span>
+                  <span className="text-base font-black text-emerald-600">{testStats.avgPercentage}%</span>
                 </div>
               </div>
             </div>
 
-            {/* Submissions History */}
-            <div className="space-y-4">
-              <h4 className="font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
-                <Award className="w-4 h-4 text-amber-400" />
-                <span>Your Test Attempt History ({submissions.length})</span>
+            {/* Test Attempt History */}
+            <div className="space-y-3">
+              <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-500" />
+                <span>Your Completed CBT Attempts ({submissions.length})</span>
               </h4>
 
               {submissions.length === 0 ? (
-                <div className="p-8 text-center rounded-3xl bg-slate-950/80 border border-slate-800 text-slate-400 text-xs">
-                  No mock test submissions recorded yet for this account. Pick an active test below to start practicing!
+                <div className="p-8 text-center rounded-2xl bg-white border border-slate-200 text-slate-500 text-xs">
+                  No mock test submissions found for your account. Click on any test below to start practicing!
                 </div>
               ) : (
                 <div className="space-y-3">
                   {submissions.map((sub) => (
                     <div 
                       key={sub.id}
-                      className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                      className="bg-white border border-slate-200 hover:border-brand-300 rounded-2xl p-4 sm:p-5 shadow-xs transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                     >
                       <div className="space-y-1.5 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-[10px] bg-slate-900 text-slate-400 px-2 py-0.5 rounded border border-slate-800">
+                          <span className="font-mono text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-bold">
                             {sub.id}
                           </span>
-                          <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
+                          <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full border ${
                             sub.isPassed 
-                              ? 'bg-emerald-950 text-emerald-300 border-emerald-700/60' 
-                              : 'bg-amber-950 text-amber-300 border-amber-700/60'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
                           }`}>
-                            {sub.isPassed ? 'PASSED' : 'NEEDS PRACTICE'}
+                            {sub.isPassed ? 'PASSED ✓' : 'NEEDS PRACTICE'}
                           </span>
                           <span className="text-xs text-slate-400 flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-slate-500" />
+                            <Clock className="w-3 h-3 text-slate-400" />
                             <span>{new Date(sub.submittedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                           </span>
                         </div>
 
-                        <h4 className="font-bold text-sm sm:text-base text-white">
+                        <h4 className="font-bold text-sm sm:text-base text-slate-900">
                           {sub.testTitle}
                         </h4>
 
-                        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 pt-1">
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
                           <div>
-                            Score: <strong className="text-white font-mono">{sub.score} / {sub.totalMarks}</strong> ({sub.percentage}%)
+                            Score: <strong className="text-slate-900 font-mono">{sub.score} / {sub.totalMarks}</strong> ({sub.percentage}%)
                           </div>
                           <div>
-                            Correct: <strong className="text-emerald-400 font-mono">{sub.correctCount}</strong>
+                            Correct: <strong className="text-emerald-600 font-mono font-bold">{sub.correctCount}</strong>
                           </div>
                           <div>
-                            Incorrect: <strong className="text-rose-400 font-mono">{sub.incorrectCount}</strong>
+                            Incorrect: <strong className="text-rose-600 font-mono font-bold">{sub.incorrectCount}</strong>
                           </div>
                           <div>
-                            Time Spent: <strong className="text-slate-200 font-mono">{Math.floor(sub.timeSpentSeconds / 60)}m {sub.timeSpentSeconds % 60}s</strong>
+                            Time Spent: <strong className="text-slate-700 font-mono">{Math.floor(sub.timeSpentSeconds / 60)}m {sub.timeSpentSeconds % 60}s</strong>
                           </div>
                         </div>
                       </div>
@@ -903,10 +1037,10 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                             setSelectedSubmissionForReview(sub);
                             setReviewFilter('all');
                           }}
-                          className="flex-1 sm:flex-none bg-brand-600 hover:bg-brand-500 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                           <BookOpen className="w-4 h-4" />
-                          <span>View Scorecard &amp; Explanations</span>
+                          <span>View Scorecard &amp; Answers</span>
                         </button>
                       </div>
                     </div>
@@ -915,48 +1049,48 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
               )}
             </div>
 
-            {/* Available Mock Tests to Attempt */}
-            <div className="space-y-4 pt-4">
-              <h4 className="font-extrabold text-sm sm:text-base text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand-400" />
-                <span>Available Tests to Practice Now</span>
+            {/* Available Tests to Practice */}
+            <div className="space-y-3 pt-2">
+              <h4 className="font-extrabold text-sm text-slate-900 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-brand-600" />
+                <span>Available CBT Tests to Practice Now</span>
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {availableTests.map((test) => (
                   <div 
                     key={test.id}
-                    className="bg-slate-950/80 border border-slate-800 hover:border-brand-500/50 rounded-2xl p-5 space-y-4 transition-all flex flex-col justify-between"
+                    className="bg-white border border-slate-200 hover:border-brand-400 rounded-2xl p-5 space-y-3 transition-all flex flex-col justify-between shadow-xs"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[10px] font-bold text-brand-300 bg-brand-950 border border-brand-800/60 px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-bold text-brand-700 bg-brand-50 border border-brand-200 px-2.5 py-0.5 rounded-md">
                           {test.category}
                         </span>
-                        <span className="text-xs font-bold text-amber-400 flex items-center gap-1">
+                        <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
                           <Clock className="w-3.5 h-3.5" />
                           <span>{formatTestDuration(test.questions?.length || 0)}</span>
                         </span>
                       </div>
 
-                      <h4 className="font-bold text-sm sm:text-base text-white">
+                      <h4 className="font-bold text-sm sm:text-base text-slate-900">
                         {test.title}
                       </h4>
 
-                      <p className="text-xs text-slate-400 line-clamp-2">
+                      <p className="text-xs text-slate-500 line-clamp-2">
                         {test.description}
                       </p>
 
-                      <div className="flex items-center gap-4 text-xs text-slate-400 pt-1">
-                        <span>Questions: <strong className="text-white">{test.questions?.length || 0}</strong></span>
-                        <span>Total Marks: <strong className="text-white">{test.totalMarks}</strong></span>
-                        <span>Marks/Q: <strong className="text-emerald-400">+{test.positiveMarks}</strong></span>
+                      <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
+                        <span>Questions: <strong className="text-slate-800">{test.questions?.length || 0}</strong></span>
+                        <span>Total Marks: <strong className="text-slate-800">{test.totalMarks}</strong></span>
+                        <span>Marks/Q: <strong className="text-emerald-600">+{test.positiveMarks}</strong></span>
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleStartTest(test.id)}
-                      className="w-full bg-slate-800 hover:bg-brand-600 text-white font-extrabold text-xs py-3 px-4 rounded-xl border border-slate-700 hover:border-brand-500 transition-all flex items-center justify-center gap-2 cursor-pointer group"
+                      className="w-full bg-slate-900 hover:bg-brand-600 text-white font-extrabold text-xs py-3 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer group"
                     >
                       <span>Start CBT Examination</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -969,81 +1103,81 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
           </div>
         )}
 
-        {/* ── TAB 3: STUDY MATERIAL & SYLLABUS ── */}
+        {/* ── TAB 3: STUDY NOTES & SYLLABUS ── */}
         {activeTab === 'study_material' && (
-          <div className="space-y-6">
+          <div className="space-y-5">
             
-            <div className="bg-slate-950/80 border border-slate-800 rounded-3xl p-5 sm:p-6">
-              <h3 className="font-black text-lg sm:text-xl text-white flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-brand-400" />
-                <span>Course Syllabus &amp; Study Notes</span>
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs">
+              <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-brand-600" />
+                <span>Course Study Material &amp; Syllabus Downloads</span>
               </h3>
-              <p className="text-xs text-slate-400 mt-1">
-                Official PDF resources, unit-wise notes, and formula sheets curated by Dr. Ankita Bisht.
+              <p className="text-xs text-slate-500 mt-1">
+                Official PDF resources, unit-wise notes, and formula cheat sheets prepared by Dr. Ankita Bisht.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               
-              {/* Item 1 */}
-              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+              {/* Resource 1 */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
                 <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-brand-950 border border-brand-800/60 text-brand-400 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
                     <FileText className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-white">UGC NET Paper 1 Official Syllabus (10 Units)</h4>
-                  <p className="text-xs text-slate-400">
+                  <h4 className="font-bold text-sm text-slate-900">UGC NET Paper 1 Official Syllabus (10 Units)</h4>
+                  <p className="text-xs text-slate-500">
                     Complete bilingual breakdown of Teaching Aptitude, Research, ICT, Logic, Higher Education.
                   </p>
                 </div>
                 <a
                   href="/resources/ugc-net-paper-1-syllabus.pdf"
                   download
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-brand-400" />
+                  <Download className="w-3.5 h-3.5 text-brand-600" />
                   <span>Download Syllabus PDF</span>
                 </a>
               </div>
 
-              {/* Item 2 */}
-              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+              {/* Resource 2 */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
                 <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-amber-950 border border-amber-800/60 text-amber-400 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
                     <Sparkles className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-white">Indian Logic &amp; Classical Square Cheat Sheet</h4>
-                  <p className="text-xs text-slate-400">
+                  <h4 className="font-bold text-sm text-slate-900">Indian Logic &amp; Classical Square Cheat Sheet</h4>
+                  <p className="text-xs text-slate-500">
                     Pramanas, Hetvabhasa fallacies, and Categorical Syllogism high-yield summary table.
                   </p>
                 </div>
                 <a
                   href="/resources/indian-logic-cheatsheet.pdf"
                   download
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-amber-400" />
+                  <Download className="w-3.5 h-3.5 text-amber-600" />
                   <span>Download Cheat Sheet</span>
                 </a>
               </div>
 
-              {/* Item 3 */}
-              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between space-y-4">
+              {/* Resource 3 */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
                 <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-950 border border-emerald-800/60 text-emerald-400 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-white">Research Methodology &amp; SPSS Handbook</h4>
-                  <p className="text-xs text-slate-400">
+                  <h4 className="font-bold text-sm text-slate-900">Research Methodology &amp; SPSS Handbook</h4>
+                  <p className="text-xs text-slate-500">
                     Hypothesis testing, parametric vs non-parametric tests, p-value decision rules.
                   </p>
                 </div>
                 <a
                   href="/resources/research-methodology-handbook.pdf"
                   download
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Download Handbook</span>
                 </a>
               </div>
@@ -1056,28 +1190,142 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
       </main>
 
       {/* ─────────────────────────────────────────────────────────────
-          SCORECARD & QUESTION-BY-QUESTION REVIEW MODAL
+          MODAL 1: PAY MONTHLY FEE ONLINE / UPI DIRECT MODAL
+      ───────────────────────────────────────────────────────────── */}
+      {showPayFeeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl w-full max-w-md p-6 sm:p-7 shadow-2xl border border-slate-200 relative text-slate-900">
+            
+            <button
+              onClick={() => setShowPayFeeModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-4">
+              
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <div className="w-11 h-11 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold">
+                  <CreditCard className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-black text-lg text-slate-900">Pay Monthly Course Fee</h3>
+                  <p className="text-xs text-slate-500">Admission ID: <span className="font-mono font-bold text-slate-700">{currentStudent.id}</span></p>
+                </div>
+              </div>
+
+              {paymentSuccessMessage ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs text-emerald-800 space-y-2 text-center animate-fadeIn">
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                  <p className="font-bold text-sm">Payment Successful!</p>
+                  <p>{paymentSuccessMessage}</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  
+                  {/* Fee Summary Box */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Student Name:</span>
+                      <strong className="text-slate-900">{currentStudent.name}</strong>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Course:</span>
+                      <span className="font-semibold text-slate-800 truncate max-w-[200px]">{currentStudent.courseTitle.split('(')[0]}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500">Month:</span>
+                      <span className="font-bold text-brand-700">{studentBillingMonth}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1.5 border-t border-slate-200">
+                      <span className="font-bold text-slate-700">Total Amount to Pay:</span>
+                      <span className="text-base font-black text-emerald-700 font-mono">₹{dueAmount > 0 ? dueAmount : 999}.00</span>
+                    </div>
+                  </div>
+
+                  {/* Payment Option 1: Instant Online Gateway */}
+                  <button
+                    onClick={handlePayFeeOnline}
+                    disabled={isProcessingPayment}
+                    className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-60 text-white font-extrabold text-xs sm:text-sm py-3.5 px-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {isProcessingPayment ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Opening Payment Gateway...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4" />
+                        <span>Pay ₹{dueAmount > 0 ? dueAmount : 999} via Razorpay (UPI / Cards)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Divider */}
+                  <div className="relative text-center">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200"></div></div>
+                    <span className="relative bg-white px-2 text-[10px] font-bold text-slate-400 uppercase">OR PAY DIRECTLY VIA UPI</span>
+                  </div>
+
+                  {/* Payment Option 2: Direct UPI */}
+                  <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2 text-xs">
+                    <div className="font-bold text-emerald-900 flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 text-emerald-600" />
+                      <span>Direct GPay / PhonePe / Paytm:</span>
+                    </div>
+                    <div className="p-2.5 bg-white rounded-xl border border-emerald-200 font-mono text-xs text-slate-800 font-bold select-all text-center">
+                      7417268651@okbizaxis
+                    </div>
+                    <p className="text-[11px] text-emerald-800">
+                      After sending ₹{dueAmount > 0 ? dueAmount : 999}, share your screenshot on WhatsApp for instant receipt &amp; batch confirmation:
+                    </p>
+                    <a
+                      href={`https://wa.me/917417268651?text=${encodeURIComponent(
+                        `Namaste Dr. Ankita Bisht! I am ${currentStudent.name} (Student ID: ${currentStudent.id}). I have paid ₹${dueAmount > 0 ? dueAmount : 999} monthly fee for ${studentBillingMonth}. Please find my payment screenshot attached.`
+                      )}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                      <span>Share Screenshot on WhatsApp</span>
+                    </a>
+                  </div>
+
+                </div>
+              )}
+
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          MODAL 2: QUESTION-BY-QUESTION SCORECARD REVIEW MODAL
       ───────────────────────────────────────────────────────────── */}
       {selectedSubmissionForReview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white text-slate-900 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden relative border border-slate-200">
             
             {/* Modal Header */}
-            <div className="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between gap-4 bg-slate-950/80">
+            <div className="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between gap-4 bg-slate-50">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                  <span className="font-mono text-xs font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
                     {selectedSubmissionForReview.id}
                   </span>
                   <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${
                     selectedSubmissionForReview.isPassed 
-                      ? 'bg-emerald-950 text-emerald-300 border-emerald-700/60' 
-                      : 'bg-amber-950 text-amber-300 border-amber-700/60'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
-                    {selectedSubmissionForReview.isPassed ? 'PASSED' : 'NEEDS PRACTICE'}
+                    {selectedSubmissionForReview.isPassed ? 'PASSED ✓' : 'NEEDS PRACTICE'}
                   </span>
                 </div>
-                <h3 className="font-bold text-base sm:text-lg text-white mt-1 line-clamp-1">
+                <h3 className="font-black text-base sm:text-lg text-slate-900 mt-1 line-clamp-1">
                   {selectedSubmissionForReview.testTitle}
                 </h3>
               </div>
@@ -1085,7 +1333,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => window.print()}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer"
                   title="Print Scorecard"
                 >
                   <Printer className="w-4 h-4" />
@@ -1093,7 +1341,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                 <button
                   onClick={() => setSelectedSubmissionForReview(null)}
-                  className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-400 hover:text-slate-700 border border-slate-200 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -1101,41 +1349,41 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </div>
 
             {/* Score Summary Strip */}
-            <div className="px-4 sm:px-6 py-3 bg-slate-950 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="px-4 sm:px-6 py-3 bg-white border-b border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Score Obtained</span>
-                <p className="font-black text-white text-sm">
+                <p className="font-black text-slate-900 text-sm">
                   {selectedSubmissionForReview.score} / {selectedSubmissionForReview.totalMarks} ({selectedSubmissionForReview.percentage}%)
                 </p>
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Correct Answers</span>
-                <p className="font-black text-emerald-400 text-sm">
+                <p className="font-black text-emerald-600 text-sm">
                   {selectedSubmissionForReview.correctCount} Correct
                 </p>
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase">Incorrect</span>
-                <p className="font-black text-rose-400 text-sm">
+                <p className="font-black text-rose-600 text-sm">
                   {selectedSubmissionForReview.incorrectCount} Wrong
                 </p>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">Time Spent</span>
-                <p className="font-black text-slate-200 text-sm">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">Time Taken</span>
+                <p className="font-black text-slate-700 text-sm">
                   {Math.floor(selectedSubmissionForReview.timeSpentSeconds / 60)}m {selectedSubmissionForReview.timeSpentSeconds % 60}s
                 </p>
               </div>
             </div>
 
             {/* Filter Pills */}
-            <div className="px-4 sm:px-6 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center gap-2 overflow-x-auto text-xs">
+            <div className="px-4 sm:px-6 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2 overflow-x-auto text-xs">
               <button
                 onClick={() => setReviewFilter('all')}
                 className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
                   reviewFilter === 'all'
                     ? 'bg-brand-600 text-white'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
                 All Questions ({reviewTestQuestions.length})
@@ -1145,7 +1393,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
                   reviewFilter === 'correct'
                     ? 'bg-emerald-600 text-white'
-                    : 'bg-slate-800 text-emerald-300 hover:bg-slate-700'
+                    : 'bg-white text-emerald-700 hover:bg-slate-100 border border-emerald-200'
                 }`}
               >
                 Correct ({selectedSubmissionForReview.correctCount})
@@ -1155,7 +1403,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
                   reviewFilter === 'incorrect'
                     ? 'bg-rose-600 text-white'
-                    : 'bg-slate-800 text-rose-300 hover:bg-slate-700'
+                    : 'bg-white text-rose-700 hover:bg-slate-100 border border-rose-200'
                 }`}
               >
                 Incorrect ({selectedSubmissionForReview.incorrectCount})
@@ -1165,7 +1413,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 className={`px-3 py-1.5 rounded-xl font-bold cursor-pointer transition-colors ${
                   reviewFilter === 'unattempted'
                     ? 'bg-amber-600 text-white'
-                    : 'bg-slate-800 text-amber-300 hover:bg-slate-700'
+                    : 'bg-white text-amber-700 hover:bg-slate-100 border border-amber-200'
                 }`}
               >
                 Unattempted ({selectedSubmissionForReview.unattemptedCount || 0})
@@ -1187,22 +1435,22 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                   return (
                     <div 
                       key={q.id}
-                      className={`p-5 rounded-2xl border bg-slate-950/60 space-y-4 ${
+                      className={`p-5 rounded-2xl border space-y-4 ${
                         !isAttempted
-                          ? 'border-slate-800'
+                          ? 'border-slate-200 bg-white'
                           : isCorrect
-                          ? 'border-emerald-800/60 bg-emerald-950/10'
-                          : 'border-rose-800/60 bg-rose-950/10'
+                          ? 'border-emerald-200 bg-emerald-50/30'
+                          : 'border-rose-200 bg-rose-50/30'
                       }`}
                     >
                       {/* Question Header */}
-                      <div className="flex items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs bg-slate-800 text-white px-2 py-0.5 rounded">
+                          <span className="font-bold text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded">
                             Q{idx + 1}
                           </span>
                           {q.subject && (
-                            <span className="text-[10px] font-semibold text-brand-300 bg-brand-950 px-2 py-0.5 rounded border border-brand-800/60">
+                            <span className="text-[10px] font-semibold text-brand-700 bg-brand-50 px-2 py-0.5 rounded border border-brand-200">
                               {q.subject}
                             </span>
                           )}
@@ -1215,23 +1463,23 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                         <div>
                           {!isAttempted ? (
-                            <span className="text-[10px] font-bold text-slate-400 bg-slate-800 px-2 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
                               Unattempted (0 Marks)
                             </span>
                           ) : isCorrect ? (
-                            <span className="text-[10px] font-black text-emerald-400 bg-emerald-950 border border-emerald-700/60 px-2 py-0.5 rounded flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" /> Correct (+2 Marks)
+                            <span className="text-[10px] font-black text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Correct (+2 Marks)
                             </span>
                           ) : (
-                            <span className="text-[10px] font-black text-rose-400 bg-rose-950 border border-rose-700/60 px-2 py-0.5 rounded flex items-center gap-1">
-                              <XCircle className="w-3 h-3" /> Incorrect (0 Marks)
+                            <span className="text-[10px] font-black text-rose-700 bg-rose-100/80 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                              <XCircle className="w-3 h-3 text-rose-600" /> Incorrect (0 Marks)
                             </span>
                           )}
                         </div>
                       </div>
 
                       {/* Question text */}
-                      <p className="text-sm font-semibold text-white leading-relaxed">
+                      <p className="text-sm font-bold text-slate-900 leading-relaxed">
                         {q.question}
                       </p>
 
@@ -1241,11 +1489,11 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                           const isStudentPick = studentAns === optIdx;
                           const isRightAnswer = q.correctIndex === optIdx;
 
-                          let optionStyles = 'border-slate-800 bg-slate-900/60 text-slate-300';
+                          let optionStyles = 'border-slate-200 bg-white text-slate-700';
                           if (isRightAnswer) {
-                            optionStyles = 'border-emerald-500/80 bg-emerald-950/40 text-emerald-200 font-bold';
+                            optionStyles = 'border-emerald-300 bg-emerald-50 text-emerald-900 font-bold';
                           } else if (isStudentPick && !isRightAnswer) {
-                            optionStyles = 'border-rose-500/80 bg-rose-950/40 text-rose-200 font-bold';
+                            optionStyles = 'border-rose-300 bg-rose-50 text-rose-900 font-bold';
                           }
 
                           return (
@@ -1259,7 +1507,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                                     ? 'bg-emerald-600 text-white' 
                                     : isStudentPick 
                                     ? 'bg-rose-600 text-white' 
-                                    : 'bg-slate-800 text-slate-400'
+                                    : 'bg-slate-100 text-slate-600'
                                 }`}>
                                   {String.fromCharCode(65 + optIdx)}
                                 </span>
@@ -1268,13 +1516,13 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                               <div className="shrink-0 flex items-center gap-1.5">
                                 {isRightAnswer && (
-                                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">
+                                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
                                     ✓ Correct Answer
                                   </span>
                                 )}
                                 {isStudentPick && !isRightAnswer && (
-                                  <span className="text-[10px] font-bold text-rose-400 bg-rose-950 px-2 py-0.5 rounded border border-rose-800">
-                                    ✗ Your Answer
+                                  <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded">
+                                    ✗ Your Pick
                                   </span>
                                 )}
                               </div>
@@ -1285,12 +1533,12 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                       {/* Faculty Explanation / Rationale Box */}
                       {q.explanation && (
-                        <div className="p-3.5 rounded-xl bg-brand-950/50 border border-brand-800/60 space-y-1">
-                          <span className="text-[11px] font-bold text-brand-300 flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <div className="p-3.5 rounded-xl bg-brand-50/70 border border-brand-200/80 space-y-1">
+                          <span className="text-[11px] font-bold text-brand-800 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                             <span>Dr. Ankita Bisht's Academic Rationale (विस्तृत व्याख्या):</span>
                           </span>
-                          <p className="text-xs text-slate-300 leading-relaxed">
+                          <p className="text-xs text-slate-700 leading-relaxed">
                             {q.explanation}
                           </p>
                         </div>
@@ -1303,11 +1551,11 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex items-center justify-between text-xs text-slate-400">
-              <span>Student: {selectedSubmissionForReview.studentName} ({selectedSubmissionForReview.studentPhone})</span>
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+              <span>Candidate: {selectedSubmissionForReview.studentName} ({selectedSubmissionForReview.studentPhone})</span>
               <button
                 onClick={() => setSelectedSubmissionForReview(null)}
-                className="bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
+                className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
               >
                 Close Review
               </button>
@@ -1318,15 +1566,15 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          OFFICIAL ADMISSION FEE RECEIPT MODAL
+          MODAL 3: OFFICIAL ADMISSION FEE RECEIPT MODAL
       ───────────────────────────────────────────────────────────── */}
       {showReceiptModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-          <div className="bg-white text-slate-900 rounded-3xl w-full max-w-lg p-6 sm:p-8 shadow-2xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white text-slate-900 rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl relative border border-slate-200">
             
             <button
               onClick={() => setShowReceiptModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-lg text-slate-400 hover:text-slate-700 cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1335,12 +1583,12 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             <div className="space-y-5 text-left text-xs">
               
               <div className="border-b border-slate-200 pb-4 text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 text-white mb-2 shadow">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-600 text-white mb-2 shadow-sm">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <h3 className="font-black text-lg text-slate-900">Dr. Ankita Bisht Academic Academy</h3>
                 <p className="text-[11px] text-slate-500">Official Student Admission &amp; Fee Receipt</p>
-                <div className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full mt-2">
+                <div className="inline-block bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold px-3 py-0.5 rounded-full mt-2">
                   CONFIRMED &amp; PAID
                 </div>
               </div>
@@ -1377,16 +1625,16 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 <span className="font-mono font-black text-emerald-700 text-base">₹{currentStudent.amount || 999}.00</span>
               </div>
 
-              <div className="text-[10px] text-slate-400 space-y-1">
-                <p>• Payment Reference: <span className="font-mono text-slate-600">{currentStudent.paymentId}</span></p>
-                <p>• Mode: <span className="font-medium text-slate-600 uppercase">{currentStudent.paymentMode.replace('_', ' ')}</span></p>
-                <p>• Faculty Desk Contact: +91 7417268651 | contact@learnwithdrankita.com</p>
+              <div className="text-[10px] text-slate-500 space-y-1">
+                <p>• Payment Reference: <span className="font-mono text-slate-700">{currentStudent.paymentId}</span></p>
+                <p>• Mode: <span className="font-semibold text-slate-700 uppercase">{currentStudent.paymentMode.replace('_', ' ')}</span></p>
+                <p>• Faculty Helpline: +91 7417268651 | contact@learnwithdrankita.com</p>
               </div>
 
               <div className="pt-2 flex items-center justify-between gap-3">
                 <button
                   onClick={() => window.print()}
-                  className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Print Receipt</span>
