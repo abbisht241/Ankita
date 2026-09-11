@@ -26,6 +26,7 @@ import {
   formatTestDuration,
   calculateTestDurationMinutes
 } from '../../services/mockTestService';
+import { AdminMockTestImportModal } from './AdminMockTestImportModal';
 
 export const AdminMockTestsTab: React.FC = () => {
   const [tests, setTests] = useState<MockTest[]>(() => MockTestStorage.getTests());
@@ -39,6 +40,11 @@ export const AdminMockTestsTab: React.FC = () => {
 
   // Question Editor State
   const [selectedTestForQuestions, setSelectedTestForQuestions] = useState<MockTest | null>(null);
+
+  // AI & Spreadsheet Import Modal State
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [targetTestForImport, setTargetTestForImport] = useState<MockTest | null>(null);
+  const [importFeedbackMessage, setImportFeedbackMessage] = useState<string | null>(null);
 
   // Submission Detail Modal
   const [selectedSubmission, setSelectedSubmission] = useState<TestSubmission | null>(null);
@@ -210,6 +216,18 @@ export const AdminMockTestsTab: React.FC = () => {
             <span>+ Create Mock Test</span>
           </button>
 
+          <button
+            type="button"
+            onClick={() => {
+              setTargetTestForImport(null);
+              setIsImportModalOpen(true);
+            }}
+            className="bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 text-xs sm:text-sm font-black px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4 text-slate-950" />
+            <span>⚡ Import from Gemini / Excel</span>
+          </button>
+
           <a
             href="/test"
             target="_blank"
@@ -233,6 +251,23 @@ export const AdminMockTestsTab: React.FC = () => {
 
         <div className="absolute right-0 top-0 w-80 h-80 bg-indigo-500/10 blur-3xl rounded-full pointer-events-none" />
       </div>
+
+      {/* Import Feedback Banner */}
+      {importFeedbackMessage && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-950 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between shadow-xs animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>{importFeedbackMessage}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setImportFeedbackMessage(null)}
+            className="text-emerald-700 hover:text-emerald-900 font-bold ml-2 cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* 2. Key Metrics Summary Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -610,12 +645,25 @@ export const AdminMockTestsTab: React.FC = () => {
                   {selectedTestForQuestions.title} ({selectedTestForQuestions.questions.length} Questions • {formatTestDuration(selectedTestForQuestions.questions.length)})
                 </h3>
               </div>
-              <button
-                onClick={() => setSelectedTestForQuestions(null)}
-                className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full cursor-pointer"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTargetTestForImport(selectedTestForQuestions);
+                    setIsImportModalOpen(true);
+                  }}
+                  className="bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-bold text-xs px-3 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Import (Gemini / Excel)</span>
+                </button>
+                <button
+                  onClick={() => setSelectedTestForQuestions(null)}
+                  className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Questions List */}
@@ -723,31 +771,45 @@ export const AdminMockTestsTab: React.FC = () => {
                 </div>
               ))}
 
-              {/* Add Question Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  const newQ: MockQuestion = {
-                    id: `q-${Date.now().toString().slice(-4)}`,
-                    question: 'New Concept Question...',
-                    options: ['Option A', 'Option B', 'Option C', 'Option D'],
-                    correctIndex: 0,
-                    explanation: 'Step-by-step rationale for the correct answer.',
-                    marks: 2
-                  };
-                  const updatedTest = {
-                    ...selectedTestForQuestions,
-                    questions: [...selectedTestForQuestions.questions, newQ]
-                  };
-                  setSelectedTestForQuestions(updatedTest);
-                  MockTestStorage.saveTest(updatedTest);
-                  setTests(MockTestStorage.getTests());
-                }}
-                className="w-full py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold rounded-2xl border-2 border-dashed border-indigo-300 flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>+ Add Another Question</span>
-              </button>
+              {/* Add Question Actions */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newQ: MockQuestion = {
+                      id: `q-${Date.now().toString().slice(-4)}`,
+                      question: 'New Concept Question...',
+                      options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                      correctIndex: 0,
+                      explanation: 'Step-by-step rationale for the correct answer.',
+                      marks: 2
+                    };
+                    const updatedTest = {
+                      ...selectedTestForQuestions,
+                      questions: [...selectedTestForQuestions.questions, newQ]
+                    };
+                    setSelectedTestForQuestions(updatedTest);
+                    MockTestStorage.saveTest(updatedTest);
+                    setTests(MockTestStorage.getTests());
+                  }}
+                  className="py-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 font-bold rounded-2xl border-2 border-dashed border-indigo-300 flex items-center justify-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add Single Question</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTargetTestForImport(selectedTestForQuestions);
+                    setIsImportModalOpen(true);
+                  }}
+                  className="py-3 bg-amber-50 hover:bg-amber-100 text-amber-950 font-bold rounded-2xl border-2 border-dashed border-amber-300 flex items-center justify-center gap-1.5 cursor-pointer text-xs"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <span>⚡ Bulk Import (Gemini / Excel)</span>
+                </button>
+              </div>
             </div>
 
             <div className="mt-6 pt-4 border-t border-slate-200 flex justify-end">
@@ -958,6 +1020,27 @@ export const AdminMockTestsTab: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 10. AI & SPREADSHEET MOCK TEST IMPORT MODAL */}
+      {isImportModalOpen && (
+        <AdminMockTestImportModal
+          existingTests={tests}
+          preSelectedTest={targetTestForImport}
+          onClose={() => {
+            setIsImportModalOpen(false);
+            setTargetTestForImport(null);
+          }}
+          onSuccess={(updatedTests, message) => {
+            setTests(updatedTests);
+            if (selectedTestForQuestions) {
+              const refreshed = updatedTests.find(t => t.id === selectedTestForQuestions.id);
+              if (refreshed) setSelectedTestForQuestions(refreshed);
+            }
+            setImportFeedbackMessage(message);
+            setTimeout(() => setImportFeedbackMessage(null), 8000);
+          }}
+        />
       )}
 
     </div>

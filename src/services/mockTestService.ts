@@ -279,6 +279,23 @@ export const INITIAL_SUBMISSIONS: TestSubmission[] = [
   }
 ];
 
+function cleanTestSpss(test: MockTest): MockTest {
+  return {
+    ...test,
+    title: test.title?.replace(/SPSS/gi, 'Statistical') || '',
+    category: test.category?.replace(/SPSS/gi, 'Research Methodology') || '',
+    description: test.description?.replace(/SPSS/gi, 'Statistical') || '',
+    questions: (test.questions || []).map(q => ({
+      ...q,
+      question: q.question
+        ?.replace(/In SPSS statistical analysis/gi, 'In statistical research hypothesis testing')
+        ?.replace(/\bSPSS\b/gi, 'statistical') || '',
+      options: (q.options || []).map(o => o?.replace(/\bSPSS\b/gi, 'statistical') || ''),
+      explanation: q.explanation?.replace(/\bSPSS\b/gi, 'statistical') || ''
+    }))
+  };
+}
+
 export const MockTestStorage = {
   // Known deleted test IDs that must never resurrect
   DELETED_TEST_IDS: new Set(['test-cdp-pedagogy-speed', 'test-research-methodology-spss', 'test-3964']),
@@ -302,6 +319,7 @@ export const MockTestStorage = {
     // Filter out deleted test IDs from local cache & auto-sync duration based on 35s per question
     const filtered = tests
       .filter(t => !MockTestStorage.DELETED_TEST_IDS.has(t.id))
+      .map(cleanTestSpss)
       .map(t => ({
         ...t,
         durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0)
@@ -324,6 +342,7 @@ export const MockTestStorage = {
           // Filter out deleted tests & auto-sync duration based on 35s per question
           const cleanTests: MockTest[] = json.data
             .filter((t: MockTest) => !MockTestStorage.DELETED_TEST_IDS.has(t.id))
+            .map(cleanTestSpss)
             .map((t: MockTest) => ({
               ...t,
               durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0)

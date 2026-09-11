@@ -70,6 +70,19 @@ export const onRequestGet = async (context: { request: Request; env: Env }) => {
         }
       });
       data = list;
+    } else if (type === 'tests' && Array.isArray(data)) {
+      data = data.map((t: any) => ({
+        ...t,
+        title: t.title?.replace(/SPSS/gi, 'Statistical'),
+        category: t.category?.replace(/SPSS/gi, 'Research Methodology'),
+        description: t.description?.replace(/SPSS/gi, 'Statistical'),
+        questions: (t.questions || []).map((q: any) => ({
+          ...q,
+          question: q.question?.replace(/In SPSS statistical analysis/gi, 'In statistical research hypothesis testing')?.replace(/\bSPSS\b/gi, 'statistical'),
+          options: (q.options || []).map((o: string) => o?.replace(/\bSPSS\b/gi, 'statistical')),
+          explanation: q.explanation?.replace(/\bSPSS\b/gi, 'statistical')
+        }))
+      }));
     }
 
     return new Response(JSON.stringify({ 
