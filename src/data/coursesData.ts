@@ -105,13 +105,13 @@ export const coursesData: Course[] = [
   },
   {
     id: 'research-methodology-spss',
-    title: 'Research Methodology & SPSS Data Analysis Masterclass',
-    slug: 'research-methodology-spss-masterclass',
+    title: 'Research Methodology & Data Analysis Masterclass',
+    slug: 'research-methodology-masterclass',
     category: 'Research',
     badge: 'Ph.D. & NET 🎓',
     isPopular: true,
-    shortDesc: 'Hands-on guide for Ph.D. Entrance PET, Synopsis Writing, Quantitative/Qualitative Research & SPSS Statistical Tests.',
-    fullDesc: 'Designed by Dr. Ankita Bisht (Ph.D., author of 8+ research papers in UGC CARE List and Scopus journals). Learn how to formulate research problems, design questionnaires, perform hypothesis testing (t-test, ANOVA, Chi-Square, Correlation, Regression) on SPSS, and publish in indexed journals.',
+    shortDesc: 'Hands-on guide for Ph.D. Entrance PET, Synopsis Writing, Quantitative/Qualitative Research & Statistical Tests.',
+    fullDesc: 'Designed by Dr. Ankita Bisht (Ph.D., author of 8+ research papers in UGC CARE List and Scopus journals). Learn how to formulate research problems, design questionnaires, perform hypothesis testing (t-test, ANOVA, Chi-Square, Correlation, Regression) with practical data analysis, and publish in indexed journals.',
     duration: '3 Months (60+ Hours)',
     liveHours: '60+ Live Interactive Hours',
     validity: '1 Year Full Access',
@@ -124,16 +124,16 @@ export const coursesData: Course[] = [
     targetExams: ['Ph.D. Entrance (PET/RET/JNU/DU/BHU/HNBGU)', 'UGC NET Paper 1 & Paper 2', 'Ph.D. Coursework Exam', 'Research Paper Publishing'],
     highlights: [
       'Comprehensive Coverage of Positivism, Interpretivism & Mixed Methods',
-      'Step-by-Step Hands-on SPSS Training (t-test, ANOVA, Chi-Square, Regression)',
+      'Step-by-Step Hands-on Statistical Training (t-test, ANOVA, Chi-Square, Regression)',
       'Practical Guide to Writing Research Proposals (Synopsis) for Ph.D. Interviews',
       'Plagiarism Rules, Turnitin Best Practices & Reference Management (Mendeley/Zotero)',
       '1-on-1 Synopsis / Research Proposal Review Session with Dr. Ankita Bisht'
     ],
     keyBenefits: [
       'Crack Ph.D. entrance tests with top ranks and clear university interview defense effortlessly',
-      'Understand complex statistical tests with SPSS outputs without memorization',
+      'Understand complex statistical tests and analytical outputs without memorization',
       'Learn how to draft and publish papers in UGC-CARE & Scopus indexed journals',
-      'Download sample Ph.D. proposals, validated questionnaires & SPSS practice datasets'
+      'Download sample Ph.D. proposals, validated questionnaires & research practice datasets'
     ],
     syllabusModules: [
       {
@@ -160,14 +160,14 @@ export const coursesData: Course[] = [
       },
       {
         unitNumber: 'Module 3',
-        unitTitle: 'Statistical Analysis & Hands-on SPSS Software',
+        unitTitle: 'Statistical Analysis & Practical Research Methods',
         hours: '20 Hours',
         topics: [
           'Data Coding, Variable View, Data Cleaning & Normality Testing (Shapiro-Wilk, NPC)',
           'Parametric Tests: Independent Samples t-test, Paired t-test, One-Way & Two-Way ANOVA',
           'Non-Parametric Tests: Chi-Square Test of Independence, Mann-Whitney U, Kruskal-Wallis',
-          'Correlation (Pearson r, Spearman rho) & Simple/Multiple Linear Regression in SPSS',
-          'Interpreting SPSS Output Tables, p-values, and Reporting Results in APA 7th Format'
+          'Correlation (Pearson r, Spearman rho) & Simple/Multiple Linear Regression Analysis',
+          'Interpreting Statistical Output Tables, p-values, and Reporting Results in APA 7th Format'
         ]
       },
       {

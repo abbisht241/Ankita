@@ -101,7 +101,7 @@ export const INITIAL_MOCK_TESTS: MockTest[] = [
       },
       {
         id: 'q2',
-        question: 'In SPSS statistical analysis, if the calculated p-value (Sig. 2-tailed) is 0.018 for an alpha level of 0.05, what is the appropriate research decision?',
+        question: 'In statistical research hypothesis testing, if the calculated p-value (Sig. 2-tailed) is 0.018 for an alpha level of 0.05, what is the appropriate research decision?',
         options: [
           'Accept the Null Hypothesis (H0)',
           'Reject the Null Hypothesis (H0) and accept Alternate Hypothesis (H1)',
@@ -111,7 +111,7 @@ export const INITIAL_MOCK_TESTS: MockTest[] = [
         correctIndex: 1,
         explanation: 'Decision Rule: When p-value < 0.05 (here 0.018 < 0.05), we reject the Null Hypothesis (H0) and conclude a statistically significant difference exists between the experimental groups.',
         subject: 'Research Methodology',
-        topic: 'Hypothesis Testing & SPSS',
+        topic: 'Hypothesis Testing & Data Analysis',
         marks: 2
       },
       {

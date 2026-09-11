@@ -562,7 +562,7 @@ export const AdminCmsTab: React.FC = () => {
                           className="w-full px-3 py-2 border border-slate-300 rounded-xl bg-white font-semibold text-slate-800"
                         >
                           <option value="UGC NET Paper 1">UGC NET Paper 1</option>
-                          <option value="Research">Research &amp; SPSS</option>
+                          <option value="Research">Research Methodology</option>
                           <option value="Pedagogy & CDP">Pedagogy &amp; CDP</option>
                           <option value="Nutrition & Health">Nutrition &amp; Health</option>
                           <option value="Psychology">Psychology</option>

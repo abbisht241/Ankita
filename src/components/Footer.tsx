@@ -48,7 +48,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
             </div>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
-              Academic mentorship platform led by Dr. Ankita Bisht (Ph.D., UGC-NET, HNB Garhwal Central University). Specializing in UGC NET Paper 1, Research Methodology &amp; SPSS, Child Development &amp; Pedagogy (CDP), and Food Science.
+              Academic mentorship platform led by Dr. Ankita Bisht (Ph.D., UGC-NET, HNB Garhwal Central University). Specializing in UGC NET Paper 1, Research Methodology, Child Development &amp; Pedagogy (CDP), and Food Science.
             </p>
 
             {/* Social Channels with SVG icons */}
@@ -133,7 +133,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">UGC NET Paper 1 Complete</a>
               </li>
               <li>
-                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology &amp; SPSS</a>
+                <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Research Methodology &amp; Data Analysis</a>
               </li>
               <li>
                 <a href="#courses" onClick={(e) => handleNavClick(e, '#courses')} className="hover:text-brand-400 transition-colors">Child Development (CDP 30/30)</a>
@@ -186,7 +186,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
         {/* SEO Keywords Cloud */}
         <div className="py-6 border-b border-slate-900 text-[11px] text-slate-500 leading-relaxed">
           <strong className="text-slate-400 font-semibold">Specialized Areas: </strong>
-          UGC NET Home Science Coaching • UGC NET Paper 1 Classes • Research Methodology &amp; SPSS • Child Development and Pedagogy • Food and Nutrition Dietetics • Extension Education &amp; Self-Help Groups • Clothing and Textiles • Home Management • Assistant Professor Home Science Coaching • CTET CDP 30/30 • Ph.D. Entrance PET Preparation.
+          UGC NET Home Science Coaching • UGC NET Paper 1 Classes • Research Methodology • Child Development and Pedagogy • Food and Nutrition Dietetics • Extension Education &amp; Self-Help Groups • Clothing and Textiles • Home Management • Assistant Professor Home Science Coaching • CTET CDP 30/30 • Ph.D. Entrance PET Preparation.
         </div>
 
         {/* Bottom Bar: Copyright and Legal links */}

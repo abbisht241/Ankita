@@ -33,7 +33,7 @@ Admissions are officially open for *Dr. Ankita Bisht Academic Academy (2026 Batc
 
 Specialized live interactive coaching for:
 ✅ UGC NET Paper 1 (Target 85+ Marks)
-✅ Research Methodology & SPSS Data Analysis
+✅ Research Methodology & Data Analysis
 ✅ Child Development & Pedagogy (CDP)
 ✅ Food Science & Nutrition
 
@@ -65,14 +65,14 @@ https://learnwithdrankita.com/register
 Helpline: +91 7417268651`
     },
     research: {
-      title: '🔬 Research Methodology & SPSS Bootcamp',
+      title: '🔬 Research Methodology & Ph.D. Bootcamp',
       defaultText: `Dear [NAME], 🎓
 
 If you are a Ph.D. Scholar, PET Aspirant, or Assistant Professor aspirant:
 
-Join Dr. Ankita Bisht's *Research Methodology & SPSS Ph.D. Bootcamp*:
+Join Dr. Ankita Bisht's *Research Methodology & Ph.D. Bootcamp*:
 📊 Research Design & Hypothesis Formulation
-📊 SPSS Software Practical Data Analysis & Interpretation
+📊 Practical Statistical Data Analysis & Interpretation
 📊 Thesis Writing & High-Impact Journal Publication Guidance
 
 Special Fee: *₹999 Only*

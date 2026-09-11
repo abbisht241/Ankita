@@ -31,7 +31,7 @@ export const LeadContactSection: React.FC<LeadContactSectionProps> = ({ initialC
 
   const coursesList = [
     'UGC NET Paper 1 Complete Masterclass',
-    'Research Methodology & SPSS Data Analysis',
+    'Research Methodology & Data Analysis',
     'Child Development & Pedagogy (CDP)',
     'Food Science, Nutrition & Maternal Health',
     'Educational Psychology & Learning Theories',

@@ -176,11 +176,11 @@ const INITIAL_INQUIRIES: LeadInquiry[] = [
     name: 'Deepak Bhatt',
     email: 'deepak.bhatt@yahoo.co.in',
     phone: '7417268651',
-    targetExam: 'Research Methodology & SPSS Bootcamp',
+    targetExam: 'Research Methodology Bootcamp',
     source: 'contact_form',
     status: 'demo_scheduled',
     createdAt: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
-    notes: 'Ph.D. scholar needing SPSS guidance'
+    notes: 'Ph.D. scholar needing Research guidance'
   },
   {
     id: 'INQ-503',
@@ -211,7 +211,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-2',
     courseId: 'research-methodology-spss',
-    title: 'Research Methodology & SPSS Ph.D. Bootcamp',
+    title: 'Research Methodology & Ph.D. Bootcamp',
     timing: 'Sat & Sun 8:00 PM - 9:30 PM',
     startDate: '12th Sept 2026',
     liveClassLink: 'https://meet.google.com/res-mthd-spss',
@@ -603,6 +603,10 @@ export const AdminStorage = {
           changed = true;
           u.title = u.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
         }
+        if (u.title && u.title.includes('SPSS')) {
+          changed = true;
+          u.title = u.title.replace(/\s*&\s*SPSS/gi, '').replace(/SPSS\s*/gi, '').trim();
+        }
         return u;
       });
       if (changed) {
@@ -628,6 +632,9 @@ export const AdminStorage = {
             }
             if (u.title && u.title.includes('(June/Dec)')) {
               u.title = u.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
+            }
+            if (u.title && u.title.includes('SPSS')) {
+              u.title = u.title.replace(/\s*&\s*SPSS/gi, '').replace(/SPSS\s*/gi, '').trim();
             }
             return u;
           });

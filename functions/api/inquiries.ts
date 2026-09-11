@@ -31,11 +31,11 @@ const INITIAL_INQUIRIES: LeadInquiry[] = [
     name: 'Deepak Bhatt',
     email: 'deepak.bhatt@yahoo.co.in',
     phone: '7417268651',
-    targetExam: 'Research Methodology & SPSS Bootcamp',
+    targetExam: 'Research Methodology Bootcamp',
     source: 'contact_form',
     status: 'demo_scheduled',
     createdAt: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
-    notes: 'Ph.D. scholar needing SPSS guidance'
+    notes: 'Ph.D. scholar needing Research guidance'
   },
   {
     id: 'INQ-503',

@@ -994,7 +994,7 @@ Website: https://learnwithdrankita.com`;
                     </h1>
                   </div>
                   <p className="text-xs text-slate-500 max-w-sm">
-                    Center for Advanced UGC NET, CDP, Research Methodology (SPSS) &amp; Educational Excellence
+                    Center for Advanced UGC NET, CDP, Research Methodology &amp; Educational Excellence
                   </p>
                   <p className="text-[11px] text-slate-400 mt-1">
                     🌐 learnwithdrankita.com | 📞 {bankDetails.helplinePhone} | 📍 Uttarakhand, India

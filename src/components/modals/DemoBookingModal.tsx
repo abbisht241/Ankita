@@ -174,7 +174,7 @@ export const DemoBookingModal: React.FC<DemoBookingModalProps> = ({
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none"
                   >
                     <option value="UGC NET Paper 1 Complete Masterclass">UGC NET Paper 1 Masterclass</option>
-                    <option value="Research Methodology & SPSS Data Analysis Masterclass">Research Methodology &amp; SPSS</option>
+                    <option value="Research Methodology & Data Analysis Masterclass">Research Methodology &amp; Data Analysis</option>
                     <option value="Child Development & Pedagogy (CDP) Super Batch">Child Development &amp; Pedagogy (CDP)</option>
                     <option value="Food Science, Nutrition & Maternal Health Masterclass">Food Science &amp; Nutrition</option>
                     <option value="Educational Psychology & Learning Theories Advanced">Educational Psychology Advanced</option>

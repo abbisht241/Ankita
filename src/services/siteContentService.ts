@@ -135,7 +135,7 @@ export const DEFAULT_SITE_CONTENT: SiteContentConfig = {
     bioParagraphs: [
       'Hello and welcome! I am Dr. Ankita Bisht. I serve as an Assistant Professor (Guest Faculty) in the Department of Home Science at H.N.B. Garhwal Central University, Srinagar Garhwal, Uttarakhand (2023–2026).',
       'Having earned my Ph.D. in Home Science (2024), M.A. in Education (2026), and B.Ed. (2015), along with achieving Rank 1 Gold Medalist honours in M.A. Home Science (8.4 CGPA) and UGC-NET qualification, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams with top percentiles.',
-      'I am also the published author of the academic research book “समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका” and have published 8+ research papers in UGC-CARE Listed and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.'
+      'I am also the published author of the academic research book “समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका” and have published 8+ research papers in UGC-CARE Listed and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and scientific research insights.'
     ],
     qualifications: [
       'Assistant Professor (Guest Faculty), HNB Garhwal Central University (2023-2026)',

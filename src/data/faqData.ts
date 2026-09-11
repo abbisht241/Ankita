@@ -5,7 +5,7 @@ export const faqData: FAQItem[] = [
     id: 'faq-1',
     category: 'Courses & Syllabus',
     question: 'Is the course syllabus updated according to the latest NTA UGC NET pattern?',
-    answer: 'Yes, 100%! All course modules, live lectures, and mock tests are strictly designed according to the latest NTA UGC NET (Home Science Code 12 & General Paper 1) and NEP 2020 syllabus updates, including Food & Nutrition RDA 2020, Extension Education, SPSS statistical tests, and modern research methodologies.'
+    answer: 'Yes, 100%! All course modules, live lectures, and mock tests are strictly designed according to the latest NTA UGC NET (Home Science Code 12 & General Paper 1) and NEP 2020 syllabus updates, including Food & Nutrition RDA 2020, Extension Education, advanced statistical tests, and modern research methodologies.'
   },
   {
     id: 'faq-2',

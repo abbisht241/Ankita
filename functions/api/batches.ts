@@ -29,7 +29,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
   {
     id: 'batch-2',
     courseId: 'research-methodology-spss',
-    title: 'Research Methodology & SPSS Ph.D. Bootcamp',
+    title: 'Research Methodology & Ph.D. Bootcamp',
     timing: 'Sat & Sun 8:00 PM - 9:30 PM',
     startDate: '12th Sept 2026',
     liveClassLink: 'https://meet.google.com/res-mthd-spss',
@@ -101,6 +101,9 @@ async function getBatchesList(env: Env): Promise<BatchConfig[]> {
           }
           if (updated.title && updated.title.includes('(June/Dec)')) {
             updated.title = updated.title.replace(/\s*\(June\/Dec\)/gi, '').trim();
+          }
+          if (updated.title && updated.title.includes('SPSS')) {
+            updated.title = updated.title.replace(/\s*&\s*SPSS/gi, '').replace(/SPSS\s*/gi, '').trim();
           }
           return updated;
         });

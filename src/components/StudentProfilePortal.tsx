@@ -1176,7 +1176,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Research Methodology &amp; SPSS Handbook</h4>
+                  <h4 className="font-bold text-sm text-slate-900">Research Methodology Handbook</h4>
                   <p className="text-xs text-slate-500">
                     Hypothesis testing, parametric vs non-parametric tests, p-value decision rules.
                   </p>

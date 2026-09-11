@@ -197,7 +197,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
               </h1>
 
               <p className="text-xs sm:text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-                Enroll directly into live interactive batches for UGC NET Paper 1, Research Methodology (SPSS), CDP, and Food Science. Get instant class links and study material access.
+                Enroll directly into live interactive batches for UGC NET Paper 1, Research Methodology, CDP, and Food Science. Get instant class links and study material access.
               </p>
             </div>
 

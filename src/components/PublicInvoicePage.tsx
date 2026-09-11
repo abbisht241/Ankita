@@ -336,7 +336,7 @@ export const PublicInvoicePage: React.FC<PublicInvoicePageProps> = ({ onBackToWe
                     </h1>
                   </div>
                   <p className="text-xs text-slate-500 max-w-md">
-                    Official Admissions &amp; Academic Learning Center (UGC NET Paper 1, CDP 30/30, SPSS)
+                    Official Admissions &amp; Academic Learning Center (UGC NET Paper 1, CDP 30/30, Research Methodology)
                   </p>
                   <p className="text-[11px] text-slate-400 mt-1">
                     🌐 learnwithdrankita.com | 📞 {bankDetails.helplinePhone} | 📍 Uttarakhand, India

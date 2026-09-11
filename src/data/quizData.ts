@@ -4,7 +4,7 @@ export const quizQuestions: QuizQuestion[] = [
   {
     id: 1,
     subject: 'Research Methodology',
-    topic: 'SPSS & Hypothesis Testing',
+    topic: 'Hypothesis Testing & Research',
     question: 'A researcher rejects a null hypothesis (H₀) when it is actually true in the population. Which type of error has been committed by the researcher?',
     options: [
       'Type I Error (Alpha Error)',
@@ -13,7 +13,7 @@ export const quizQuestions: QuizQuestion[] = [
       'Systematic Measurement Error'
     ],
     correctIndex: 0,
-    explanation: 'Type I error (denoted by alpha α) occurs when a true null hypothesis is incorrectly rejected (false positive). In SPSS testing, this is checked against the chosen significance level (typically p < 0.05).',
+    explanation: 'Type I error (denoted by alpha α) occurs when a true null hypothesis is incorrectly rejected (false positive). In hypothesis testing, this is checked against the chosen significance level (typically p < 0.05).',
     difficulty: 'Medium'
   },
   {

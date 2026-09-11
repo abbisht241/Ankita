@@ -47,8 +47,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
       desc: 'Lifespan developmental psychology, constructivist paradigms (Piaget, Vygotsky), CWSN & inclusive education.'
     },
     {
-      title: 'Research Methodology & SPSS',
-      desc: 'Hypothesis testing, parametric/non-parametric statistics, SPSS data analysis, sampling & synopsis defense.'
+      title: 'Research Methodology',
+      desc: 'Hypothesis testing, parametric/non-parametric statistics, research data analysis, sampling & synopsis defense.'
     },
     {
       title: 'Teaching Aptitude & Pedagogy',
@@ -97,7 +97,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ onOpenDemoModal }) =
                     Having earned my <strong className="text-slate-900 font-semibold">Ph.D. in Home Science (2024)</strong>, <strong className="text-slate-900 font-semibold">M.A. in Education (2026)</strong>, and <strong className="text-slate-900 font-semibold">B.Ed. (2015)</strong>, along with achieving <strong className="text-slate-900 font-semibold">Rank 1 Gold Medalist</strong> honours in M.A. Home Science and <strong className="text-slate-900 font-semibold">UGC-NET qualification</strong>, I understand exactly what it takes to master complex pedagogical subjects and crack competitive academic exams.
                   </p>
                   <p className="text-base">
-                    I am also the author of the published academic book <em className="text-brand-800 font-medium">“समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका”</em> and have published 8+ research papers in the <strong>UGC CARE List</strong> and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and SPSS statistical insights.
+                    I am also the author of the published academic book <em className="text-brand-800 font-medium">“समृद्ध स्त्रियां, समृद्ध समाज: उत्तराखण्ड में स्वयं सहायता समूहों की भूमिका”</em> and have published 8+ research papers in the <strong>UGC CARE List</strong> and international peer-reviewed journals. My teaching philosophy connects theoretical foundations directly with real-world empirical examples and scientific research insights.
                   </p>
                 </>
               )}

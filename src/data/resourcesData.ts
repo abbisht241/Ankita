@@ -24,7 +24,7 @@ export const resourcesData: Resource[] = [
   },
   {
     id: 'res-2',
-    title: 'Research Methodology & SPSS Statistical Tests Decision Tree',
+    title: 'Research Methodology & Statistical Tests Decision Tree',
     category: 'Research Methodology',
     type: 'Formula Sheet',
     fileSize: '4.6 MB',
@@ -34,14 +34,14 @@ export const resourcesData: Resource[] = [
     downloadUrl: 'https://t.me/drankitaeducator',
     downloadAction: 'modal',
     downloadBtnText: 'Download PDF',
-    description: 'Visual step-by-step flowchart to choose between t-test, ANOVA, Chi-Square, Pearson r, Mann-Whitney U, and Regression in SPSS with APA 7th reporting.',
+    description: 'Visual step-by-step flowchart to choose between t-test, ANOVA, Chi-Square, Pearson r, Mann-Whitney U, and Regression with APA 7th reporting.',
     topicsCovered: [
       'Parametric vs Non-Parametric Test Selection Matrix',
-      'SPSS Output Interpretation: p-value, F-ratio, t-value, Effect Size',
+      'Statistical Output Interpretation: p-value, F-ratio, t-value, Effect Size',
       'Formulating Null (H0) vs Alternative (H1) Hypotheses',
       'UGC Plagiarism Regulations 2018 (Levels 0-3 Penalties)'
     ],
-    previewSnippet: 'SPSS Decision Rule: If p-value (Sig. 2-tailed) < 0.05, reject the Null Hypothesis (H0) and conclude a statistically significant difference/relationship exists between the study groups at 95% confidence level.'
+    previewSnippet: 'Statistical Decision Rule: If p-value (Sig. 2-tailed) < 0.05, reject the Null Hypothesis (H0) and conclude a statistically significant difference/relationship exists between the study groups at 95% confidence level.'
   },
   {
     id: 'res-3',
