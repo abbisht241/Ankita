@@ -5,6 +5,47 @@ interface Env {
 const TESTS_KV_KEY = 'global_mock_tests_db';
 const SUBS_KV_KEY = 'global_test_submissions_db';
 
+const DEFAULT_SUBMISSIONS = [
+  {
+    id: 'SUB-5264-1',
+    testId: 'test-ugc-net-paper1-cbt',
+    testTitle: 'UGC NET Paper 1 - All India CBT Mock Test 2026 (Full Syllabus)',
+    studentName: 'Anoop Negi',
+    studentPhone: '8449137304',
+    studentEmail: 'abbisht@gmail.com',
+    score: 16,
+    totalMarks: 20,
+    percentage: 80,
+    isPassed: true,
+    correctCount: 8,
+    incorrectCount: 2,
+    unattemptedCount: 0,
+    timeSpentSeconds: 385,
+    answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 0, q10: 1 },
+    reviewStatus: {},
+    submittedAt: '2026-09-10T14:30:00.000Z'
+  },
+  {
+    id: 'SUB-5264-2',
+    testId: 'test-ugc-net-paper1-cbt',
+    testTitle: 'UGC NET Paper 1 - Teaching & Research Aptitude Practice Set',
+    studentName: 'Anoop Negi',
+    studentPhone: '8449137304',
+    studentEmail: 'abbisht@gmail.com',
+    score: 18,
+    totalMarks: 20,
+    percentage: 90,
+    isPassed: true,
+    correctCount: 9,
+    incorrectCount: 1,
+    unattemptedCount: 0,
+    timeSpentSeconds: 410,
+    answers: { q1: 1, q2: 1, q3: 1, q4: 2, q5: 2, q6: 0, q7: 2, q8: 3, q9: 1, q10: 2 },
+    reviewStatus: {},
+    submittedAt: '2026-09-11T16:15:00.000Z'
+  }
+];
+
 export const onRequestGet = async (context: { request: Request; env: Env }) => {
   try {
     const url = new URL(context.request.url);
@@ -19,6 +60,16 @@ export const onRequestGet = async (context: { request: Request; env: Env }) => {
           data = JSON.parse(raw);
         } catch (e) {}
       }
+    }
+
+    if (type === 'submissions') {
+      let list: any[] = Array.isArray(data) ? data : [];
+      DEFAULT_SUBMISSIONS.forEach(def => {
+        if (!list.some(s => s.id === def.id)) {
+          list.push(def);
+        }
+      });
+      data = list;
     }
 
     return new Response(JSON.stringify({ 
