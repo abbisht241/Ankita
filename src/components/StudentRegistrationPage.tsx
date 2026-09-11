@@ -12,7 +12,6 @@ import {
   MapPin, 
   CreditCard, 
   Lock, 
-  Send, 
   Download, 
   MessageCircle,
   Award
@@ -36,7 +35,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
     timing: AdminStorage.getBatchTimings()[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
     targetExam: 'UGC NET 2025-2026',
     cityState: '',
-    paymentChoice: 'razorpay' as 'razorpay' | 'upi_direct',
+    paymentChoice: 'razorpay' as const,
     notes: ''
   });
 
@@ -73,81 +72,47 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
       return;
     }
 
-    // If Razorpay online gateway is chosen
-    if (formData.paymentChoice === 'razorpay') {
-      setIsLoading(true);
-      startRazorpayCheckout({
-        course: selectedCourse,
-        studentName: formData.name.trim(),
-        studentEmail: formData.email.trim(),
-        studentPhone: cleanPhone,
-        onSuccess: async (_verifyResult, payload: RazorpaySuccessPayload) => {
-          setIsLoading(false);
-          const newStudent = await AdminStorage.addStudent({
-            name: formData.name.trim(),
-            email: formData.email.trim(),
-            phone: cleanPhone,
-            courseId: selectedCourse.id,
-            courseTitle: selectedCourse.title,
-            amount: selectedCourse.price,
-            feeDue: 0,
-            paymentId: payload.razorpay_payment_id,
-            orderId: payload.razorpay_order_id,
-            paymentMode: 'razorpay',
-            paymentStatus: 'paid',
-            status: 'active',
-            timing: formData.timing,
-            targetExam: formData.targetExam,
-            cityState: formData.cityState,
-            notes: `Paid Online via Razorpay | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
-          });
-          AdminStorage.setStudentSession({ email: newStudent.email, phone: newStudent.phone, studentId: newStudent.id });
-          setEnrolledStudent(newStudent);
-          try {
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
-          } catch (err) {}
-        },
-        onFailure: (err) => {
-          setIsLoading(false);
-          setErrorMessage(`Payment Error: ${err}. Please try again or choose Direct Registration.`);
-        },
-        onDismiss: () => {
-          setIsLoading(false);
-        }
-      });
-      return;
-    }
-
-    // Direct / UPI Registration (Unpaid / Pending Verification)
+    // Razorpay online gateway checkout
     setIsLoading(true);
-    try {
-      const newStudent = await AdminStorage.addStudent({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: cleanPhone,
-        courseId: selectedCourse.id,
-        courseTitle: selectedCourse.title,
-        amount: 0, // Fee not paid yet!
-        feeDue: selectedCourse.price,
-        paymentId: `DIR_PENDING_${Date.now().toString().slice(-6)}`,
-        paymentMode: 'upi_direct',
-        paymentStatus: 'pending',
-        status: 'pending_payment',
-        timing: formData.timing,
-        targetExam: formData.targetExam,
-        cityState: formData.cityState,
-        notes: `Direct Registration - Fee Pending (₹${selectedCourse.price} Due) | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
-      });
-      AdminStorage.setStudentSession({ email: newStudent.email, phone: newStudent.phone, studentId: newStudent.id });
-      setIsLoading(false);
-      setEnrolledStudent(newStudent);
-      try {
-        confetti({ particleCount: 80, spread: 60, origin: { y: 0.5 } });
-      } catch (err) {}
-    } catch (e: any) {
-      setIsLoading(false);
-      setErrorMessage(e.message || 'Failed to complete registration');
-    }
+    startRazorpayCheckout({
+      course: selectedCourse,
+      studentName: formData.name.trim(),
+      studentEmail: formData.email.trim(),
+      studentPhone: cleanPhone,
+      onSuccess: async (_verifyResult, payload: RazorpaySuccessPayload) => {
+        setIsLoading(false);
+        const newStudent = await AdminStorage.addStudent({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: cleanPhone,
+          courseId: selectedCourse.id,
+          courseTitle: selectedCourse.title,
+          amount: selectedCourse.price,
+          feeDue: 0,
+          paymentId: payload.razorpay_payment_id,
+          orderId: payload.razorpay_order_id,
+          paymentMode: 'razorpay',
+          paymentStatus: 'paid',
+          status: 'active',
+          timing: formData.timing,
+          targetExam: formData.targetExam,
+          cityState: formData.cityState,
+          notes: `Paid Online via Razorpay | Batch: ${formData.timing} | Exam: ${formData.targetExam} | City: ${formData.cityState}`
+        });
+        AdminStorage.setStudentSession({ email: newStudent.email, phone: newStudent.phone, studentId: newStudent.id });
+        setEnrolledStudent(newStudent);
+        try {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+        } catch (err) {}
+      },
+      onFailure: (err) => {
+        setIsLoading(false);
+        setErrorMessage(`Payment Error: ${err}. Please try again.`);
+      },
+      onDismiss: () => {
+        setIsLoading(false);
+      }
+    });
   };
 
   const handlePrintSlip = () => {
@@ -377,57 +342,25 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                 </div>
               </div>
 
-              {/* Step 3: Payment & Enrollment Option */}
+              {/* Step 3: Secure Online Enrollment & Payment Mode */}
               <div className="space-y-4 pt-4 border-t border-slate-800">
                 <label className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                   <CreditCard className="w-4 h-4" />
-                  <span>Step 3: Choose Enrollment &amp; Payment Mode</span>
+                  <span>Step 3: Secure Online Enrollment &amp; Payment</span>
                 </label>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  
-                  {/* Option 1: Live Razorpay */}
-                  <div
-                    onClick={() => setFormData({ ...formData, paymentChoice: 'razorpay' })}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                      formData.paymentChoice === 'razorpay'
-                        ? 'bg-brand-900/60 border-brand-400 ring-2 ring-brand-400/30 text-white'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Online Razorpay (Instant)</span>
-                      </span>
-                      <span className="text-xs font-extrabold text-emerald-400 font-mono">₹{selectedCourse.price}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Pay via UPI (GPay/PhonePe/Paytm), Cards, or Net Banking. Instant class link generated.
-                    </p>
+                {/* Single Online Razorpay Option */}
+                <div className="p-4 sm:p-5 rounded-2xl border bg-brand-900/60 border-brand-400 ring-2 ring-brand-400/30 text-white">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                      <Lock className="w-4 h-4 text-emerald-400" />
+                      <span>Online Payment via Razorpay (Instant Activation)</span>
+                    </span>
+                    <span className="text-sm sm:text-base font-extrabold text-emerald-400 font-mono">₹{selectedCourse.price}</span>
                   </div>
-
-                  {/* Option 2: Direct Registration */}
-                  <div
-                    onClick={() => setFormData({ ...formData, paymentChoice: 'upi_direct' })}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                      formData.paymentChoice === 'upi_direct'
-                        ? 'bg-brand-900/60 border-brand-400 ring-2 ring-brand-400/30 text-white'
-                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Send className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Direct Admission / UPI</span>
-                      </span>
-                      <span className="text-xs font-bold text-amber-400">Reserve Seat</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Submit admission form directly. Counselor / Dr. Ankita will verify and confirm batch seat.
-                    </p>
-                  </div>
-
+                  <p className="text-xs text-slate-300">
+                    Pay securely via UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, or Net Banking. Instant class access &amp; official receipt generated automatically.
+                  </p>
                 </div>
               </div>
 
@@ -440,15 +373,10 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                 >
                   {isLoading ? (
                     <span>Processing Admission...</span>
-                  ) : formData.paymentChoice === 'razorpay' ? (
+                  ) : (
                     <>
                       <Lock className="w-5 h-5 text-amber-300" />
                       <span>Proceed to Pay ₹{selectedCourse.price} &amp; Complete Registration</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                      <span>Submit Student Registration Form</span>
                     </>
                   )}
                 </button>
