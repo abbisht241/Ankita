@@ -46,15 +46,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenDemoModal }) => 
           {/* Left Hero Column: Copy, CTAs, Badges */}
           <div className="lg:col-span-7 flex flex-col items-start text-left">
             
-            {/* Trust Pill */}
-            <div className="inline-flex items-center gap-2 bg-brand-100/80 border border-brand-200/80 text-brand-900 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-5 shadow-xs flex-wrap">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
-              </span>
-              <span>{hero.topBadge || 'Rank 1 Gold Medalist & Asst. Professor (Central University)'}</span>
-              <span className="bg-amber-400/30 text-amber-900 text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-400/40">
-                NTA Pattern 2025-26
+            {/* Trust & Accreditations Pill Row */}
+            <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-5">
+              <div className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-50/90 via-white to-indigo-50/70 border border-brand-200/90 text-brand-950 px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold shadow-2xs hover:border-brand-300 transition-colors max-w-full">
+                <span className="flex h-2 w-2 relative shrink-0">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+                </span>
+                <span className="sm:hidden font-medium text-slate-800 truncate">
+                  {hero.topBadge
+                    ? hero.topBadge.replace(/\s*\(Central University\)/gi, '')
+                    : '🌟 Rank 1 Gold Medalist & Asst. Professor'}
+                </span>
+                <span className="hidden sm:inline font-medium text-slate-800">
+                  {hero.topBadge || '🌟 Rank 1 Gold Medalist & Asst. Professor (Central University)'}
+                </span>
+              </div>
+
+              <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-900 text-[11px] font-bold px-2.5 py-1 rounded-full border border-amber-300/80 shadow-2xs shrink-0">
+                <Sparkles className="w-3 h-3 text-amber-600 shrink-0" />
+                <span>NTA Pattern 2025-26</span>
               </span>
             </div>
 
