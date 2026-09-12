@@ -470,7 +470,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                   href="/register" 
                   className="font-bold text-brand-700 hover:text-brand-800 underline underline-offset-2 ml-1"
                 >
-                  Enroll in a Course (₹999) →
+                  Enroll in a Course (₹999/month) →
                 </a>
               </p>
             </div>

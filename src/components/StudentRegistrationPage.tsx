@@ -216,7 +216,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                     <span>Step 1: Select Your Course / Batch</span>
                   </label>
                   <span className="text-[11px] text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                    Tuition Fee: ₹{selectedCourse.price}
+                    Monthly Fee: ₹{selectedCourse.price} / month
                   </span>
                 </div>
 
@@ -240,7 +240,9 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                             </span>
                             <div className="flex items-center gap-1.5">
                               <span className="text-xs line-through text-slate-500">₹{course.originalPrice}</span>
-                              <span className="text-sm font-extrabold text-emerald-400 font-mono">₹{course.price}</span>
+                              <span className="text-sm font-extrabold text-emerald-400 font-mono">
+                                ₹{course.price}<span className="text-[10px] font-normal text-slate-400">/mo</span>
+                              </span>
                             </div>
                           </div>
                           <h4 className="text-xs sm:text-sm font-bold text-white leading-snug line-clamp-2">
@@ -389,10 +391,12 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                       <Lock className="w-4 h-4 text-emerald-400" />
                       <span>Online Payment via Razorpay (Instant Activation)</span>
                     </span>
-                    <span className="text-sm sm:text-base font-extrabold text-emerald-400 font-mono">₹{selectedCourse.price}</span>
+                    <span className="text-sm sm:text-base font-extrabold text-emerald-400 font-mono">
+                      ₹{selectedCourse.price} <span className="text-xs font-normal text-slate-300">/ month</span>
+                    </span>
                   </div>
                   <p className="text-xs text-slate-300">
-                    Pay securely via UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, or Net Banking. Instant class access &amp; official receipt generated automatically.
+                    Pay 1st month tuition fee (₹{selectedCourse.price}/month) securely via UPI (Google Pay, PhonePe, Paytm), Debit/Credit Cards, or Net Banking. Instant class access &amp; official receipt generated automatically.
                   </p>
                 </div>
               </div>
@@ -409,7 +413,7 @@ export const StudentRegistrationPage: React.FC<StudentRegistrationPageProps> = (
                   ) : (
                     <>
                       <Lock className="w-5 h-5 text-amber-300" />
-                      <span>Proceed to Pay ₹{selectedCourse.price} &amp; Complete Registration</span>
+                      <span>Proceed to Pay ₹{selectedCourse.price} (1st Month Fee) &amp; Complete Registration</span>
                     </>
                   )}
                 </button>

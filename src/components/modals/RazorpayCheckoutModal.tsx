@@ -181,7 +181,7 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="font-medium text-slate-500">Amount Paid:</span>
-                  <span className="font-bold text-emerald-700">₹{course.price} (Flat Rate)</span>
+                  <span className="font-bold text-emerald-700">₹{course.price} (1st Month Fee / Monthly)</span>
                 </div>
               </div>
 
@@ -245,7 +245,15 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
                     <span className="text-base font-extrabold text-brand-700">
                       ₹{course.price}
                     </span>
+                    <span className="text-xs font-semibold text-slate-500 block">/ month</span>
                   </div>
+                </div>
+
+                <div className="border-t border-slate-200/70 pt-2 flex justify-between items-center text-xs text-slate-600">
+                  <span>Billing Plan:</span>
+                  <span className="text-slate-800 font-bold bg-slate-200/70 px-2 py-0.5 rounded-md text-[11px]">
+                    Monthly Fee (प्रति माह)
+                  </span>
                 </div>
 
                 <div className="border-t border-slate-200/70 pt-2 flex justify-between items-center text-xs text-slate-600">
@@ -254,8 +262,22 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
                 </div>
 
                 <div className="border-t border-slate-200/70 pt-2 flex justify-between items-center text-sm font-bold text-slate-900">
-                  <span>Total Payable:</span>
-                  <span className="text-lg text-brand-800">₹{course.price}</span>
+                  <div>
+                    <span>Payable Now:</span>
+                    <span className="block text-[10px] font-normal text-slate-500">1st Month Fee</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-lg text-brand-800">₹{course.price}</span>
+                    <span className="text-xs text-slate-500 font-normal"> / month</span>
+                  </div>
+                </div>
+
+                {/* Monthly fee clear note */}
+                <div className="bg-amber-50/90 border border-amber-200/90 rounded-xl p-2.5 text-[11px] text-amber-900 flex items-start gap-1.5 leading-snug">
+                  <span className="font-bold shrink-0">📌 Note:</span>
+                  <span>
+                    यह <strong>₹{course.price} प्रति माह (Monthly Fee)</strong> है। कोर्स अवधि ({course.duration}) के दौरान आपका मासिक शुल्क ₹{course.price}/माह रहेगा।
+                  </span>
                 </div>
               </div>
 
@@ -335,7 +357,7 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
                   ) : (
                     <>
                       <CreditCard className="w-4 h-4 text-amber-300" />
-                      <span>Proceed to Pay ₹{course.price}</span>
+                      <span>Proceed to Pay ₹{course.price} (Monthly Fee)</span>
                     </>
                   )}
                 </button>

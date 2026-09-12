@@ -540,7 +540,7 @@ export const AdminCmsTab: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block font-semibold text-slate-700 mb-1">Discounted Sale Fee (₹) *</label>
+                        <label className="block font-semibold text-slate-700 mb-1">Monthly Discounted Fee (₹/month) *</label>
                         <input
                           type="number"
                           required

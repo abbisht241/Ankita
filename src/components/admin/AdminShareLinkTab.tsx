@@ -111,7 +111,7 @@ Helpline: +91 7417268651`
 
 Thank you for attending / inquiring about Dr. Ankita Bisht's live session!
 
-Your reserved seat is held under the *Flat ₹999 Special Enrollment Offer*. Please complete your registration below to get instant batch group access and PDF materials:
+Your reserved seat is held under the *Special ₹999/month Enrollment Offer*. Please complete your registration below to get instant batch group access and PDF materials:
 
 👉 *Complete Registration Link:*
 https://learnwithdrankita.com/register
@@ -408,7 +408,7 @@ Helpline: +91 7417268651`
 
             const handleShareCourseWhatsApp = () => {
               const text = encodeURIComponent(
-                `Namaste! 🙏\n\nAdmissions are open for *${course.title}* with Dr. Ankita Bisht.\n\nFee: Special *₹${course.price}* (Limited Seats)\nDuration: ${course.duration} | Bilingual Live Classes\n\n👉 *Direct Registration Link:*\n${courseUrl}\n\nHelpline: +91 7417268651`
+                `Namaste! 🙏\n\nAdmissions are open for *${course.title}* with Dr. Ankita Bisht.\n\nFee: Special *₹${course.price}/month* (Monthly Fee - Limited Seats)\nDuration: ${course.duration} | Bilingual Live Classes\n\n👉 *Direct Registration Link:*\n${courseUrl}\n\nHelpline: +91 7417268651`
               );
               window.open(`https://wa.me/?text=${text}`, '_blank');
             };
@@ -424,7 +424,7 @@ Helpline: +91 7417268651`
                       {course.badge || course.category}
                     </span>
                     <span className="text-xs font-extrabold text-emerald-700 font-mono">
-                      ₹{course.price}
+                      ₹{course.price}/mo
                     </span>
                   </div>
                   <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">

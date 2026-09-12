@@ -149,7 +149,7 @@ export const SyllabusModal: React.FC<SyllabusModalProps> = ({
             }}
             className="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Enroll in This Batch (₹{course.price.toLocaleString('en-IN')})</span>
+            <span>Enroll in This Batch (₹{course.price.toLocaleString('en-IN')}/month)</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

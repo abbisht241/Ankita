@@ -204,12 +204,13 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
                   {/* Pricing Bar */}
                   <div className="flex items-baseline justify-between mb-4">
                     <div>
-                      <div className="text-xs text-slate-500 font-medium">Special Batch Fee</div>
-                      <div className="flex items-baseline gap-2">
+                      <div className="text-xs text-slate-500 font-medium">Monthly Fee (प्रति माह)</div>
+                      <div className="flex items-baseline gap-1.5">
                         <span className="text-2xl font-extrabold text-slate-900">
                           ₹{course.price.toLocaleString('en-IN')}
                         </span>
-                        <span className="text-xs text-slate-400 line-through">
+                        <span className="text-xs font-bold text-slate-600">/ month</span>
+                        <span className="text-xs text-slate-400 line-through ml-1">
                           ₹{course.originalPrice.toLocaleString('en-IN')}
                         </span>
                       </div>
@@ -218,7 +219,7 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
                       <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-1 rounded-md border border-emerald-200">
                         Save {discountPercent}%
                       </span>
-                      <div className="text-[10px] text-slate-500 mt-0.5">GST Included</div>
+                      <div className="text-[10px] text-slate-500 mt-0.5">GST Included • Monthly</div>
                     </div>
                   </div>
 

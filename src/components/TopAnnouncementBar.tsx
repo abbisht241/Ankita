@@ -50,7 +50,7 @@ export const TopAnnouncementBar: React.FC<TopAnnouncementBarProps> = ({ onOpenDe
             {announcement.badgeText || 'ADMISSIONS OPEN 🔥'}
           </span>
           <p className="text-slate-200 text-xs sm:text-sm font-medium">
-            {announcement.headline || 'Target UGC NET & CDP 2025/26 — All Complete Masterclasses at Flat ₹999 Only!'}
+            {announcement.headline || 'Target UGC NET & CDP 2025/26 — All Complete Masterclasses at Flat ₹999/month Only!'}
           </p>
         </div>
 
