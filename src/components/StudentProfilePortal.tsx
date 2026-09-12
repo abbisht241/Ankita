@@ -40,6 +40,10 @@ import {
 } from '../services/mockTestService';
 import { startRazorpayCheckout, type RazorpaySuccessPayload } from '../services/razorpayService';
 import { coursesData } from '../data/coursesData';
+import { useSiteContent } from '../context/SiteContentContext';
+import { SiteContentService } from '../services/siteContentService';
+import { resourcesData } from '../data/resourcesData';
+import type { Resource } from '../types';
 
 interface StudentProfilePortalProps {
   onBackToWebsite: () => void;
@@ -50,6 +54,11 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
   onBackToWebsite,
   onLaunchTest 
 }) => {
+  const { content } = useSiteContent();
+  const studyMaterials: Resource[] = (content?.resources?.resources && content.resources.resources.length > 0)
+    ? content.resources.resources
+    : (SiteContentService.getSiteContent()?.resources?.resources || resourcesData);
+
   // Session & Auth state
   const [currentStudent, setCurrentStudent] = useState<StudentEnrollment | null>(null);
   const [loginInput, setLoginInput] = useState('');
@@ -1116,81 +1125,63 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
         {activeTab === 'study_material' && (
           <div className="space-y-5">
             
-            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs">
-              <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-brand-600" />
-                <span>Course Study Material &amp; Syllabus Downloads</span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-1">
-                Official PDF resources, unit-wise notes, and formula cheat sheets prepared by Dr. Ankita Bisht.
-              </p>
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-brand-600" />
+                  <span>Course Study Material &amp; Syllabus Downloads</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">
+                  Official PDF resources, unit-wise notes, and formula cheat sheets prepared by Dr. Ankita Bisht.
+                </p>
+              </div>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 self-start sm:self-auto">
+                {studyMaterials.length} Resources Available
+              </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
-              {/* Resource 1 */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-sm text-slate-900">UGC NET Paper 1 Official Syllabus (10 Units)</h4>
-                  <p className="text-xs text-slate-500">
-                    Complete bilingual breakdown of Teaching Aptitude, Research, ICT, Logic, Higher Education.
-                  </p>
-                </div>
-                <a
-                  href="/resources/ugc-net-paper-1-syllabus.pdf"
-                  download
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-brand-600" />
-                  <span>Download Syllabus PDF</span>
-                </a>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {studyMaterials.map((res, idx) => {
+                const downloadLink = res.downloadUrl && res.downloadUrl !== '#' && !res.downloadUrl.startsWith('/resources/')
+                  ? res.downloadUrl 
+                  : 'https://t.me/drankitaeducator';
+                const isExternal = downloadLink.startsWith('http');
 
-              {/* Resource 2 */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-sm text-slate-900">Indian Logic &amp; Classical Square Cheat Sheet</h4>
-                  <p className="text-xs text-slate-500">
-                    Pramanas, Hetvabhasa fallacies, and Categorical Syllogism high-yield summary table.
-                  </p>
-                </div>
-                <a
-                  href="/resources/indian-logic-cheatsheet.pdf"
-                  download
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-amber-600" />
-                  <span>Download Cheat Sheet</span>
-                </a>
-              </div>
+                return (
+                  <div key={res.id || idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs hover:border-brand-300 transition-all">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-100">
+                          {res.type || 'PDF Notes'}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-sm text-slate-900 line-clamp-2">{res.title}</h4>
+                      <p className="text-xs text-slate-500 line-clamp-2">
+                        {res.description || res.previewSnippet || 'Official study material & revision notes.'}
+                      </p>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
+                        <span>📦 {res.fileSize || 'PDF Document'}</span>
+                        {res.pageCount && <span>• 📄 {res.pageCount} Pages</span>}
+                      </div>
+                    </div>
 
-              {/* Resource 3 */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs">
-                <div className="space-y-2">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                    <CheckCircle2 className="w-5 h-5" />
+                    <a
+                      href={downloadLink}
+                      target={isExternal ? '_blank' : undefined}
+                      rel="noopener noreferrer"
+                      download={!isExternal}
+                      className="w-full bg-slate-100 hover:bg-brand-700 text-slate-800 hover:text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
+                    >
+                      <Download className="w-3.5 h-3.5 text-brand-600 group-hover:text-white transition-colors" />
+                      <span>{res.downloadBtnText || 'Download PDF'}</span>
+                      {isExternal && <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />}
+                    </a>
                   </div>
-                  <h4 className="font-bold text-sm text-slate-900">Research Methodology Handbook</h4>
-                  <p className="text-xs text-slate-500">
-                    Hypothesis testing, parametric vs non-parametric tests, p-value decision rules.
-                  </p>
-                </div>
-                <a
-                  href="/resources/research-methodology-handbook.pdf"
-                  download
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Download Handbook</span>
-                </a>
-              </div>
-
+                );
+              })}
             </div>
 
           </div>

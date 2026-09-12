@@ -2,6 +2,28 @@ import type { Resource } from '../types';
 
 export const resourcesData: Resource[] = [
   {
+    id: 'res-syllabus',
+    title: 'UGC NET Paper 1 Official Syllabus (10 Units Breakdown)',
+    category: 'UGC NET Paper 1',
+    type: 'PDF Notes',
+    fileSize: '3.2 MB',
+    pageCount: 18,
+    downloadCount: '34,200+ Downloads',
+    isPopular: true,
+    downloadUrl: 'https://t.me/drankitaeducator',
+    downloadAction: 'modal',
+    downloadBtnText: 'Download Syllabus PDF',
+    description: 'Complete bilingual breakdown of Teaching Aptitude, Research, ICT, Logic, Higher Education & Environment.',
+    topicsCovered: [
+      'Unit 1 Teaching Aptitude & Unit 2 Research Aptitude',
+      'Unit 3 Comprehension & Unit 4 Communication',
+      'Unit 5 Mathematical Reasoning & Unit 6 Logical Reasoning',
+      'Unit 7 Data Interpretation & Unit 8 ICT',
+      'Unit 9 People & Environment & Unit 10 Higher Education'
+    ],
+    previewSnippet: 'Official NTA UGC NET Paper 1 General Paper on Teaching and Research Aptitude syllabus breakdown with unit-wise marks distribution.'
+  },
+  {
     id: 'res-1',
     title: 'Teaching Aptitude Bloom’s Revised Taxonomy & Pedagogical Skills Cheat Sheet',
     category: 'Teaching Aptitude',
