@@ -629,29 +629,6 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
             </div>
 
-            {/* Quick Helper Notice: Classes are sent on WhatsApp */}
-            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/70 text-xs text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <strong className="block font-bold">📢 Live Class Reminder / लाइव क्लास सूचना:</strong>
-                  <p className="text-[11px] text-amber-800 leading-relaxed mt-0.5">
-                    सभी लाइव क्लास के लिंक और दैनिक नोट्स डॉ. अंकिता बिष्ट द्वारा सीधे आपके <strong>Official WhatsApp Batch Group</strong> में क्लास शुरू होने से 10 मिनट पहले भेजे जाते हैं।
-                  </p>
-                </div>
-              </div>
-              <a
-                href={activeBatchGroupLink}
-                target="_blank"
-                rel="noreferrer"
-                className="shrink-0 inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
-              >
-                <MessageCircle className="w-3.5 h-3.5" />
-                <span>ग्रुप खोलें</span>
-                <ExternalLink className="w-3 h-3 text-emerald-200" />
-              </a>
-            </div>
-
           </div>
 
           {/* Right Column (1 col): Monthly Fee Card with Direct Pay Button */}
