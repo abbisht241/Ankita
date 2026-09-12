@@ -254,7 +254,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                       className="flex-1 bg-emerald-600 text-white font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
                       <CheckCircle2 className="w-3.5 h-3.5" />Mark Paid
                     </button>
-                    <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: 7417268651@okbizaxis`)}`}
+                    <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: abbisht241-1@oksbi`)}`}
                       target="_blank" rel="noreferrer"
                       className="flex-1 bg-amber-400 text-slate-950 font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer">
                       <MessageCircle className="w-3.5 h-3.5" />Remind
@@ -340,7 +340,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                       <div className="flex items-center justify-end gap-1.5">
                         {!isPaid && (<>
                           <button onClick={() => { if(confirm(`Confirm ₹${dueAmount} for ${s.name}?`)) onMarkPaid(s.id); }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><CheckCircle2 className="w-3.5 h-3.5" />Mark Paid</button>
-                          <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: 7417268651@okbizaxis`)}`} target="_blank" rel="noreferrer" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><MessageCircle className="w-3.5 h-3.5" />Remind</a>
+                          <a href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(`Namaste ${s.name} ji, fee ₹${dueAmount} baaki hai. UPI: abbisht241-1@oksbi`)}`} target="_blank" rel="noreferrer" className="bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-1.5 rounded-lg flex items-center gap-1 cursor-pointer"><MessageCircle className="w-3.5 h-3.5" />Remind</a>
                         </>)}
                         <a
                           href={`/portal?email=${encodeURIComponent(s.email || s.phone)}`}

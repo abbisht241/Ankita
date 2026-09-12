@@ -1013,7 +1013,7 @@ export const AdminPaymentsTab: React.FC<AdminPaymentsTabProps> = ({
 
                           <a
                             href={`https://wa.me/91${s.phone}?text=${encodeURIComponent(
-                              `Namaste ${s.name} ji,\n\nDr. Ankita Bisht Academic Academy me aapka admission registration mila hai.\n\n📚 Course: ${s.courseTitle}\n💰 Monthly Fee Due: ₹${dueAmt}\n\nBatch access activate rakhne ke liye kripya fee payment complete karein:\nUPI: 7417268651@okbizaxis\nGooglePay / PhonePe / Paytm: +91 7417268651\n\nPayment receipt isi WhatsApp par share karein.`
+                              `Namaste ${s.name} ji,\n\nDr. Ankita Bisht Academic Academy me aapka admission registration mila hai.\n\n📚 Course: ${s.courseTitle}\n💰 Monthly Fee Due: ₹${dueAmt}\n\nBatch access activate rakhne ke liye kripya fee payment complete karein:\nUPI: abbisht241-1@oksbi\nGooglePay / PhonePe / Paytm: +91 7417268651\n\nPayment receipt isi WhatsApp par share karein.`
                             )}`}
                             target="_blank"
                             rel="noreferrer"

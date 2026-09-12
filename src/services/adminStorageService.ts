@@ -87,7 +87,7 @@ export const DEFAULT_BANK_DETAILS: BankDetailsConfig = {
   accountNumber: '39869278685',
   ifscCode: 'SBIN0010583',
   upiId: 'abbisht241-1@oksbi',
-  secondaryUpi: '7417268651@okbizaxis',
+  secondaryUpi: 'abbisht241-1@oksbi',
   razorpayCheckoutUrl: 'https://learnwithdrankita.com/register',
   helplinePhone: '+91 7417268651',
   helplineEmail: 'contact@learnwithdrankita.com',
@@ -733,7 +733,14 @@ export const AdminStorage = {
     const raw = localStorage.getItem(STORAGE_KEYS.BANK_DETAILS);
     if (!raw) return DEFAULT_BANK_DETAILS;
     try {
-      return { ...DEFAULT_BANK_DETAILS, ...JSON.parse(raw) };
+      const parsed = JSON.parse(raw);
+      if (parsed.secondaryUpi && parsed.secondaryUpi.includes('okbizaxis')) {
+        parsed.secondaryUpi = 'abbisht241-1@oksbi';
+      }
+      if (!parsed.upiId || parsed.upiId.includes('okbizaxis')) {
+        parsed.upiId = 'abbisht241-1@oksbi';
+      }
+      return { ...DEFAULT_BANK_DETAILS, ...parsed };
     } catch {
       return DEFAULT_BANK_DETAILS;
     }

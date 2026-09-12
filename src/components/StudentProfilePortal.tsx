@@ -1264,19 +1264,33 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                   {/* Payment Option 2: Direct UPI */}
                   <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-200 space-y-2 text-xs">
-                    <div className="font-bold text-emerald-900 flex items-center gap-1.5">
-                      <Zap className="w-4 h-4 text-emerald-600" />
-                      <span>Direct GPay / PhonePe / Paytm:</span>
+                    <div className="font-bold text-emerald-900 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-emerald-600" />
+                        <span>Direct GPay / PhonePe / Paytm UPI:</span>
+                      </div>
                     </div>
-                    <div className="p-2.5 bg-white rounded-xl border border-emerald-200 font-mono text-xs text-slate-800 font-bold select-all text-center">
-                      7417268651@okbizaxis
+                    <div className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-emerald-200">
+                      <span className="font-mono text-xs sm:text-sm text-slate-900 font-extrabold select-all">
+                        abbisht241-1@oksbi
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText('abbisht241-1@oksbi');
+                          alert('UPI ID copied to clipboard: abbisht241-1@oksbi');
+                        }}
+                        className="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                      >
+                        Copy UPI
+                      </button>
                     </div>
                     <p className="text-[11px] text-emerald-800">
                       After sending ₹{dueAmount > 0 ? dueAmount : 999}, share your screenshot on WhatsApp for instant receipt &amp; batch confirmation:
                     </p>
                     <a
                       href={`https://wa.me/917417268651?text=${encodeURIComponent(
-                        `Namaste Dr. Ankita Bisht! I am ${currentStudent.name} (Student ID: ${currentStudent.id}). I have paid ₹${dueAmount > 0 ? dueAmount : 999} monthly fee for ${studentBillingMonth}. Please find my payment screenshot attached.`
+                        `Namaste Dr. Ankita Bisht! I am ${currentStudent.name} (Student ID: ${currentStudent.id}). I have paid ₹${dueAmount > 0 ? dueAmount : 999} monthly fee for ${studentBillingMonth} via UPI (abbisht241-1@oksbi). Please find my payment screenshot attached.`
                       )}`}
                       target="_blank"
                       rel="noreferrer"
