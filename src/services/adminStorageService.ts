@@ -110,8 +110,7 @@ const STORAGE_KEYS = {
 export const DEFAULT_BATCH_TIMINGS: string[] = [
   'Evening Batch (7:00 PM - 8:30 PM)',
   'Night Batch (8:45 PM - 10:00 PM)',
-  'Morning Batch (10:00 AM - 11:30 AM)',
-  'Weekend Special (Sat & Sun)'
+  'Morning Batch (10:00 AM - 11:30 AM)'
 ];
 
 const DEFAULT_PASSCODE = 'ankita2026';
@@ -252,7 +251,7 @@ const INITIAL_BATCHES: BatchConfig[] = [
     id: 'batch-6',
     courseId: 'teaching-aptitude-mastery',
     title: 'Teaching Aptitude Masterclass',
-    timing: 'Weekend Special (Sat & Sun 10:00 AM)',
+    timing: 'Evening Batch (7:00 PM - 8:30 PM)',
     startDate: '14th Sept 2026',
     liveClassLink: 'https://meet.google.com/teaching-aptitude-live',
     whatsappGroupLink: OFFICIAL_BATCH_WHATSAPP_LINK,
@@ -296,20 +295,31 @@ export const AdminStorage = {
     try {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed)) {
-        return parsed.map((s: any) => {
+        let studentChanged = false;
+        const mapped = parsed.map((s: any) => {
           const paymentStatus = s.paymentStatus || (s.paymentMode === 'razorpay' || (Number(s.amount) > 0 && s.status === 'active') ? 'paid' : 'pending');
           const isPaid = paymentStatus === 'paid';
           const amount = isPaid ? (Number(s.amount) > 0 ? Number(s.amount) : 999) : 0;
           const feeDue = s.feeDue !== undefined ? Number(s.feeDue) : (isPaid ? 0 : 999);
           const status = s.status || (isPaid ? 'active' : 'pending_payment');
+          let timing = s.timing;
+          if (!timing || timing.includes('Weekend Special')) {
+            timing = 'Evening Batch (7:00 PM - 8:30 PM)';
+            studentChanged = true;
+          }
           return {
             ...s,
             amount,
             feeDue,
             paymentStatus,
-            status
+            status,
+            timing
           };
         });
+        if (studentChanged) {
+          localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(mapped));
+        }
+        return mapped;
       }
       return INITIAL_STUDENTS;
     } catch {
@@ -607,6 +617,10 @@ export const AdminStorage = {
           changed = true;
           u.title = u.title.replace(/\s*&\s*SPSS/gi, '').replace(/SPSS\s*/gi, '').trim();
         }
+        if (u.timing && u.timing.includes('Weekend Special')) {
+          changed = true;
+          u.timing = 'Evening Batch (7:00 PM - 8:30 PM)';
+        }
         return u;
       });
       if (changed) {
@@ -670,7 +684,11 @@ export const AdminStorage = {
     try {
       const parsed = JSON.parse(data);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        const filtered = parsed.filter((t: string) => !t.includes('Weekend Special'));
+        if (filtered.length !== parsed.length) {
+          localStorage.setItem(STORAGE_KEYS.BATCH_TIMINGS, JSON.stringify(filtered));
+        }
+        return filtered.length > 0 ? filtered : DEFAULT_BATCH_TIMINGS;
       }
       return DEFAULT_BATCH_TIMINGS;
     } catch {

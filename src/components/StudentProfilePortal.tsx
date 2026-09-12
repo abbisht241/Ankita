@@ -212,6 +212,15 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
     return OFFICIAL_BATCH_WHATSAPP_LINK;
   }, [matchedBatch]);
 
+  // Batch Timing display
+  const studentDisplayTiming = useMemo(() => {
+    const raw = currentStudent?.timing || matchedBatch?.timing;
+    if (!raw || raw.includes('Weekend Special')) {
+      return 'Evening Batch (7:00 PM - 8:30 PM)';
+    }
+    return raw;
+  }, [currentStudent?.timing, matchedBatch?.timing]);
+
   // Fee Details
   const isFeePaid = useMemo(() => {
     if (!currentStudent) return false;
@@ -623,7 +632,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 </div>
                 <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
                   <Clock className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span>{currentStudent.timing || matchedBatch?.timing || 'Evening 7:00 PM'}</span>
+                  <span>{studentDisplayTiming}</span>
                 </div>
               </div>
 
@@ -731,7 +740,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                 Official Batch Community
               </span>
               <span className="text-emerald-100 text-xs font-semibold">
-                Daily Batch Timing: {currentStudent.timing || matchedBatch?.timing || 'Mon to Fri 7:00 PM - 8:30 PM'}
+                Daily Batch Timing: {studentDisplayTiming}
               </span>
             </div>
             <h3 className="text-lg sm:text-xl font-black">

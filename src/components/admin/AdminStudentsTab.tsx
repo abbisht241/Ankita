@@ -14,7 +14,7 @@ import {
   Sparkles,
   Clock
 } from 'lucide-react';
-import type { StudentEnrollment } from '../../services/adminStorageService';
+import { AdminStorage, type StudentEnrollment } from '../../services/adminStorageService';
 import { coursesData } from '../../data/coursesData';
 
 interface AdminStudentsTabProps {
@@ -24,8 +24,8 @@ interface AdminStudentsTabProps {
   onDeleteStudent: (id: string) => void;
   onExportCSV: () => void;
   isOpenAddModal: boolean;
-  onCloseAddModal: () => void;
   onOpenAddModal: () => void;
+  onCloseAddModal: () => void;
 }
 
 export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
@@ -42,6 +42,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
   const [selectedCourseFilter, setSelectedCourseFilter] = useState('All');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'paid' | 'pending'>('all');
   const [copySuccess, setCopySuccess] = useState(false);
+  const batchTimings = AdminStorage.getBatchTimings();
 
   // Manual Add Student Form State
   const [newStudentForm, setNewStudentForm] = useState({
@@ -49,6 +50,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
     email: '',
     phone: '',
     courseId: coursesData[0]?.id || 'ugc-net-paper-1',
+    timing: batchTimings[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
     amount: 999,
     feeStatus: 'paid' as 'paid' | 'pending',
     paymentMode: 'upi_direct' as StudentEnrollment['paymentMode'],
@@ -74,6 +76,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
       phone: newStudentForm.phone.replace(/\D/g, ''),
       courseId: newStudentForm.courseId,
       courseTitle: courseObj ? courseObj.title : 'Course Batch',
+      timing: newStudentForm.timing,
       amount: isPaid ? (Number(newStudentForm.amount) || 999) : 0,
       feeDue: isPaid ? 0 : (Number(newStudentForm.amount) || 999),
       paymentStatus: isPaid ? 'paid' : 'pending',
@@ -88,6 +91,7 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
       email: '',
       phone: '',
       courseId: coursesData[0]?.id || 'ugc-net-paper-1',
+      timing: batchTimings[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
       amount: 999,
       feeStatus: 'paid',
       paymentMode: 'upi_direct',
@@ -239,6 +243,10 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                 </a>
               </div>
               <div className="text-xs text-slate-500 line-clamp-1">{s.courseTitle.split('(')[0]}</div>
+              <div className="text-[11px] text-amber-700 font-semibold flex items-center gap-1">
+                <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                <span>{s.timing || 'Evening Batch (7:00 PM - 8:30 PM)'}</span>
+              </div>
               <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
                 {!isPaid && (
                   <>
@@ -309,7 +317,13 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                         <Mail className="w-3 h-3 shrink-0" /><span className="truncate">{s.email || 'No email'}</span>
                       </div>
                     </td>
-                    <td className="py-4 px-4 max-w-xs"><div className="font-medium text-slate-800 line-clamp-2">{s.courseTitle}</div></td>
+                    <td className="py-4 px-4 max-w-xs">
+                      <div className="font-medium text-slate-800 line-clamp-2">{s.courseTitle}</div>
+                      <div className="text-[11px] text-amber-700 font-semibold mt-0.5 flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-amber-600 shrink-0" />
+                        <span>{s.timing || 'Evening Batch (7:00 PM - 8:30 PM)'}</span>
+                      </div>
+                    </td>
                     <td className="py-4 px-4">
                       {isPaid ? (<><div className="font-extrabold text-sm text-emerald-700">₹{s.amount} Paid</div><span className="text-[10px] font-bold px-1.5 rounded uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">{s.paymentMode.replace('_',' ')}</span></>) 
                       : (<><div className="font-extrabold text-sm text-rose-600">₹0 <span className="text-[11px] text-amber-700">(₹{dueAmount} Due)</span></div><span className="text-[10px] font-bold px-1.5 rounded uppercase bg-amber-50 text-amber-800 border border-amber-300">Pending</span></>)}
@@ -412,6 +426,19 @@ export const AdminStudentsTab: React.FC<AdminStudentsTabProps> = ({
                     <option key={c.id} value={c.id}>
                       {c.title}
                     </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Preferred Batch Timing *</label>
+                <select
+                  value={newStudentForm.timing}
+                  onChange={(e) => setNewStudentForm({ ...newStudentForm, timing: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs"
+                >
+                  {batchTimings.map((t, idx) => (
+                    <option key={idx} value={t}>{t}</option>
                   ))}
                 </select>
               </div>

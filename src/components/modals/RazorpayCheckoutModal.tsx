@@ -95,6 +95,7 @@ export const RazorpayCheckoutModal: React.FC<RazorpayCheckoutModalProps> = ({
           orderId: payload.razorpay_order_id,
           paymentMode: 'razorpay',
           status: 'active',
+          timing: AdminStorage.getBatchTimings()[0] || 'Evening Batch (7:00 PM - 8:30 PM)',
           notes: 'Enrolled via Online Razorpay Gateway'
         });
 
