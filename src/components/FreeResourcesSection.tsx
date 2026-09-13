@@ -177,23 +177,25 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
                     </p>
 
                     {/* Topics Covered Checklist */}
-                    <div className="bg-white/80 rounded-xl p-3 border border-slate-200/60 mb-5 space-y-1.5">
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                        Contents Snapshot:
-                      </div>
-                      {res.topicsCovered.map((topic, i) => (
-                        <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                          <span className="leading-tight truncate">{topic}</span>
+                    {res.topicsCovered && res.topicsCovered.length > 0 && (
+                      <div className="bg-white/80 rounded-xl p-3 border border-slate-200/60 mb-5 space-y-1.5">
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          Contents Snapshot:
                         </div>
-                      ))}
-                    </div>
+                        {res.topicsCovered.map((topic, i) => (
+                          <div key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                            <span className="leading-tight truncate">{topic}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}
                   <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between gap-3">
                     <span className="text-[11px] text-slate-500 font-medium">
-                      {res.downloadCount}
+                      {res.downloadCount || 'Free Study PDF'}
                     </span>
 
                     <button

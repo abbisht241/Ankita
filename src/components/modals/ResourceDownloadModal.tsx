@@ -95,39 +95,52 @@ export const ResourceDownloadModal: React.FC<ResourceDownloadModalProps> = ({
             {/* Header */}
             <div className="text-left mb-6 pr-6">
               <span className="bg-brand-100 text-brand-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
-                {resource.type} • {resource.fileSize}
+                {resource.type || 'PDF Notes'}{resource.fileSize ? ` • ${resource.fileSize}` : ''}
               </span>
               <h3 className="text-xl sm:text-2xl font-bold font-display text-slate-900 mt-2 leading-snug">
                 {resource.title}
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                {resource.pageCount} Pages of High-Yield Revision Content by Dr. Ankita Bisht
+                {resource.pageCount ? `${resource.pageCount} Pages • ` : ''}High-Yield Revision Content by Dr. Ankita Bisht
               </p>
             </div>
 
-            {/* Document Preview Snippet Box */}
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6 space-y-3">
-              <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-brand-600" />
-                <span>Document Excerpt Preview:</span>
-              </div>
-              <div className="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700 italic leading-relaxed font-serif">
-                "{resource.previewSnippet}"
-              </div>
+            {/* Document Preview / Description Box */}
+            {(resource.description || resource.previewSnippet || (resource.topicsCovered && resource.topicsCovered.length > 0)) && (
+              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6 space-y-3">
+                {resource.description && (
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {resource.description}
+                  </p>
+                )}
+                {resource.previewSnippet && (
+                  <>
+                    <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-brand-600" />
+                      <span>Document Excerpt Preview:</span>
+                    </div>
+                    <div className="bg-white p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700 italic leading-relaxed font-serif">
+                      "{resource.previewSnippet}"
+                    </div>
+                  </>
+                )}
 
-              {/* Topics list */}
-              <div className="pt-2 space-y-1">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                  Included in this PDF:
-                </div>
-                {resource.topicsCovered.map((topic, i) => (
-                  <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>{topic}</span>
+                {/* Topics list */}
+                {resource.topicsCovered && resource.topicsCovered.length > 0 && (
+                  <div className="pt-2 space-y-1">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      Included in this PDF:
+                    </div>
+                    {resource.topicsCovered.map((topic, i) => (
+                      <div key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>{topic}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
-            </div>
+            )}
 
             {/* Download Lead Form */}
             <form onSubmit={handleDownload} className="space-y-3.5">

@@ -53,18 +53,18 @@ export interface Testimonial {
 export interface Resource {
   id: string;
   title: string;
-  category: string;
-  type: string;
-  fileSize: string;
-  pageCount: number;
-  downloadCount: string;
   description: string;
-  topicsCovered: string[];
-  previewSnippet: string;
-  isPopular?: boolean;
   downloadUrl?: string;
-  downloadAction?: 'modal' | 'direct' | 'whatsapp' | 'telegram';
   downloadBtnText?: string;
+  downloadAction?: 'modal' | 'direct' | 'whatsapp' | 'telegram';
+  category?: string;
+  type?: string;
+  fileSize?: string;
+  pageCount?: number;
+  downloadCount?: string;
+  topicsCovered?: string[];
+  previewSnippet?: string;
+  isPopular?: boolean;
 }
 
 export interface QuizQuestion {
