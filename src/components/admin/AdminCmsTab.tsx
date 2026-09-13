@@ -1479,13 +1479,13 @@ export const AdminCmsTab: React.FC = () => {
                     />
                   </div>
 
-                  {/* 3. PDF Download Link & Options */}
+                  {/* 3. Direct PDF Download Link */}
                   <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-3">
                     <div>
                       <label className="block font-bold text-slate-800 text-xs mb-1.5 flex items-center justify-between">
                         <span className="flex items-center gap-1.5">
                           <LinkIcon className="w-3.5 h-3.5 text-brand-600" />
-                          <span>PDF Download Link (Google Drive / Telegram / Direct PDF URL)</span>
+                          <span>PDF Direct Download Link (Google Drive / Telegram / Direct URL)</span>
                           <span className="text-rose-500">*</span>
                         </span>
                       </label>
@@ -1496,71 +1496,30 @@ export const AdminCmsTab: React.FC = () => {
                           value={res.downloadUrl || ''}
                           onChange={(e) => {
                             const updated = [...formData.resources.resources];
-                            updated[idx] = { ...updated[idx], downloadUrl: e.target.value };
+                            updated[idx] = { ...updated[idx], downloadUrl: e.target.value, downloadAction: 'direct' };
                             setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
                           }}
                           placeholder="https://drive.google.com/file/d/... ya direct PDF link paste karein"
-                          className="flex-1 px-3.5 py-2 border border-slate-300 rounded-xl bg-white text-xs font-mono text-slate-800 focus:border-brand-500 outline-none"
+                          className="flex-1 px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white text-xs font-mono text-slate-800 focus:border-brand-500 outline-none"
                         />
 
-                        <div className="flex items-center gap-2 shrink-0">
-                          {/* Direct PDF Upload Option */}
-                          <label className="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shrink-0">
-                            <UploadCloud className="w-3.5 h-3.5" />
-                            <span>Upload PDF</span>
-                            <input
-                              type="file"
-                              accept=".pdf,application/pdf"
-                              className="hidden"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0];
-                                if (!file) return;
-                                if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-                                  alert('Kripya sirf valid PDF file (.pdf) upload karein.');
-                                  return;
-                                }
-                                try {
-                                  const uploadForm = new FormData();
-                                  uploadForm.append('courseId', `resource-${res.id}`);
-                                  uploadForm.append('file', file);
-                                  const uploadRes = await fetch('/api/syllabus-pdf', {
-                                    method: 'POST',
-                                    body: uploadForm
-                                  });
-                                  const data = await uploadRes.json().catch(() => ({}));
-                                  const linkUrl = (uploadRes.ok && data.success)
-                                    ? `/api/syllabus-pdf?id=resource-${encodeURIComponent(res.id)}&v=${Date.now()}`
-                                    : 'https://t.me/drankitaeducator';
-                                  const updated = [...formData.resources.resources];
-                                  updated[idx] = { ...updated[idx], downloadUrl: linkUrl, fileSize: data.fileSize || 'PDF Document' };
-                                  setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                                  alert(`✓ "${file.name}" successfully upload ho gayi hai!`);
-                                } catch (err: any) {
-                                  alert(`Upload error: ${err.message}`);
-                                }
-                                e.target.value = '';
-                              }}
-                            />
-                          </label>
-
-                          {res.downloadUrl && (
-                            <a
-                              href={res.downloadUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl flex items-center gap-1 font-bold text-xs shrink-0 transition-colors"
-                              title="Test link in new tab"
-                            >
-                              <ExternalLink className="w-3.5 h-3.5" />
-                              <span>Test Link</span>
-                            </a>
-                          )}
-                        </div>
+                        {res.downloadUrl && (
+                          <a
+                            href={res.downloadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 rounded-xl flex items-center gap-1 font-bold text-xs shrink-0 transition-colors"
+                            title="Test link in new tab"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Test Link</span>
+                          </a>
+                        )}
                       </div>
 
                       {/* Quick link presets */}
                       <div className="flex flex-wrap items-center gap-2 mt-2 text-[11px]">
-                        <span className="text-slate-400 font-medium">Quick link presets:</span>
+                        <span className="text-slate-400 font-medium">Quick preset:</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1572,42 +1531,6 @@ export const AdminCmsTab: React.FC = () => {
                         >
                           ⚡ Set Official Telegram
                         </button>
-                      </div>
-                    </div>
-
-                    {/* 4. Download Option & Button Label */}
-                    <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex-1">
-                        <label className="block font-bold text-slate-700 text-xs mb-1">
-                          Download Action (डाउनलोड बटन का काम)
-                        </label>
-                        <select
-                          value={res.downloadAction || 'direct'}
-                          onChange={(e) => {
-                            const updated = [...formData.resources.resources];
-                            updated[idx] = { ...updated[idx], downloadAction: e.target.value as any };
-                            setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                          }}
-                          className="w-full sm:w-auto px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-medium text-xs text-slate-800 outline-none cursor-pointer"
-                        >
-                          <option value="direct">🚀 Direct Download / Open Link (सीधे PDF खुलेगी)</option>
-                          <option value="modal">📋 Lead Form First (छात्र का नाम व नंबर लेकर PDF लिंक देना)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block font-bold text-slate-700 text-xs mb-1">Button Text</label>
-                        <input
-                          type="text"
-                          value={res.downloadBtnText || 'Download PDF'}
-                          onChange={(e) => {
-                            const updated = [...formData.resources.resources];
-                            updated[idx] = { ...updated[idx], downloadBtnText: e.target.value };
-                            setFormData({ ...formData, resources: { ...formData.resources, resources: updated } });
-                          }}
-                          placeholder="e.g. Download PDF"
-                          className="px-3 py-1.5 border border-slate-300 rounded-xl bg-white font-medium text-xs text-slate-800 outline-none w-36"
-                        />
                       </div>
                     </div>
                   </div>

@@ -40,26 +40,24 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
     : activeResources;
 
   const handleResourceClick = (res: Resource) => {
-    const action = res.downloadAction || 'modal';
-
-    if (action === 'direct' && res.downloadUrl) {
+    // If download link exists, directly open/download!
+    if (res.downloadUrl && res.downloadUrl !== '#') {
       window.open(res.downloadUrl, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    if (action === 'whatsapp') {
+    if (res.downloadAction === 'whatsapp') {
       const msg = encodeURIComponent(`Hello Dr. Ankita! I would like to receive the free PDF: "${res.title}". Please share the download link.`);
       window.open(`https://wa.me/917417268651?text=${msg}`, '_blank', 'noopener,noreferrer');
       return;
     }
 
-    if (action === 'telegram') {
-      const tgUrl = res.downloadUrl || 'https://t.me/drankitaeducator';
-      window.open(tgUrl, '_blank', 'noopener,noreferrer');
+    if (res.downloadAction === 'telegram') {
+      window.open('https://t.me/drankitaeducator', '_blank', 'noopener,noreferrer');
       return;
     }
 
-    // Default: Open modal with lead capture and instant download link
+    // Default fallback only if no URL is provided
     onOpenResourceModal(res);
   };
 
