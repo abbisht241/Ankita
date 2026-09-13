@@ -6,7 +6,6 @@ import {
   PhoneCall, 
   Sparkles, 
   BookOpen, 
-  FileText, 
   HelpCircle, 
   UserCheck, 
   ChevronDown,
@@ -175,15 +174,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
           </a>
 
           <a
-            href="#free-resources"
-            onClick={(e) => handleNavClick(e, '#free-resources')}
-            className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-semibold text-brand-700 hover:bg-brand-50 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <FileText className="w-3.5 h-3.5 shrink-0" />
-            <span>Free Study Material</span>
-          </a>
-
-          <a
             href="#faqs"
             onClick={(e) => handleNavClick(e, '#faqs')}
             className="px-2.5 xl:px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:text-brand-700 hover:bg-slate-50 transition-colors whitespace-nowrap"
@@ -317,15 +307,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenDemoModal, onSelectCourseM
             >
               <ShieldCheck className="w-4 h-4 text-brand-600" />
               <span>Why Choose Us</span>
-            </a>
-
-            <a
-              href="#free-resources"
-              onClick={(e) => handleNavClick(e, '#free-resources')}
-              className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-brand-700 bg-brand-50"
-            >
-              <FileText className="w-4 h-4 text-brand-600" />
-              <span>Free Study Material &amp; PYQs</span>
             </a>
 
             <a

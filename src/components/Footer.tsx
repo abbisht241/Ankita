@@ -115,9 +115,6 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegalModal, onOpenDemoModa
                 <a href="#features" onClick={(e) => handleNavClick(e, '#features')} className="hover:text-brand-400 transition-colors">Learning System</a>
               </li>
               <li>
-                <a href="#free-resources" onClick={(e) => handleNavClick(e, '#free-resources')} className="hover:text-brand-400 transition-colors">Free Resources</a>
-              </li>
-              <li>
                 <a href="#faqs" onClick={(e) => handleNavClick(e, '#faqs')} className="hover:text-brand-400 transition-colors">FAQs</a>
               </li>
             </ul>
