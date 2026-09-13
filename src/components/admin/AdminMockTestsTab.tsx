@@ -80,9 +80,10 @@ export const AdminMockTestsTab: React.FC = () => {
 
   const handleShareWhatsAppInvite = (test: MockTest) => {
     const qCount = test.questions?.length || 0;
-    const durStr = formatTestDuration(qCount);
+    const timeSecs = test.timePerQuestionSecs || 35;
+    const durStr = formatTestDuration(qCount, timeSecs);
     const url = `https://learnwithdrankita.com/test?id=${encodeURIComponent(test.id)}`;
-    const text = `🎯 *Online NTA CBT Mock Test - Dr. Ankita Bisht Academy*\n\n📝 *Test Name:* ${test.title}\n⏱️ *Duration:* ${durStr} (${qCount} Questions × 35s) | *Total Marks:* ${test.totalMarks}\n📊 *Subject:* ${test.category}\n\n👉 *Click to Attempt CBT Mock Test Now:* \n${url}\n\n_Instant Answer Evaluation with Step-by-Step Logic Breakdown by Dr. Ankita Bisht._`;
+    const text = `🎯 *Online NTA CBT Mock Test - Dr. Ankita Bisht Academy*\n\n📝 *Test Name:* ${test.title}\n⏱️ *Duration:* ${durStr} (${qCount} Questions × ${timeSecs}s) | *Total Marks:* ${test.totalMarks}\n📊 *Subject:* ${test.category}\n\n👉 *Click to Attempt CBT Mock Test Now:* \n${url}\n\n_Instant Answer Evaluation with Step-by-Step Logic Breakdown by Dr. Ankita Bisht._`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -127,8 +128,9 @@ export const AdminMockTestsTab: React.FC = () => {
     e.preventDefault();
     if (!editingTest) return;
 
-    const autoDuration = calculateTestDurationMinutes(editingTest.questions?.length || 0);
-    const updatedTest = { ...editingTest, durationMinutes: autoDuration };
+    const timePerQuestionSecs = Number(editingTest.timePerQuestionSecs) > 0 ? Number(editingTest.timePerQuestionSecs) : 35;
+    const autoDuration = calculateTestDurationMinutes(editingTest.questions?.length || 0, timePerQuestionSecs);
+    const updatedTest = { ...editingTest, timePerQuestionSecs, durationMinutes: autoDuration };
     await MockTestStorage.saveTest(updatedTest);
     setTests(MockTestStorage.getTests());
     setIsTestModalOpen(false);
@@ -203,7 +205,8 @@ export const AdminMockTestsTab: React.FC = () => {
                 title: 'New UGC NET Paper 1 Mock Test 2026',
                 category: 'UGC NET Paper 1',
                 description: 'Authentic 2026 NTA CBT speed test with bilingual explanations.',
-                durationMinutes: calculateTestDurationMinutes(1),
+                durationMinutes: calculateTestDurationMinutes(1, 35),
+                timePerQuestionSecs: 35,
                 totalMarks: 20,
                 positiveMarks: 2,
                 negativeMarks: 0,
@@ -416,8 +419,8 @@ export const AdminMockTestsTab: React.FC = () => {
                   </div>
                   <div className="h-6 w-px bg-slate-200" />
                   <div className="text-center px-2">
-                    <div className="font-bold text-brand-700 font-mono">{formatTestDuration(test.questions?.length || 0)}</div>
-                    <div className="text-[10px] text-slate-400 uppercase">Timer (35s/Q)</div>
+                    <div className="font-bold text-brand-700 font-mono">{formatTestDuration(test.questions?.length || 0, test.timePerQuestionSecs || 35)}</div>
+                    <div className="text-[10px] text-slate-400 uppercase">Timer ({test.timePerQuestionSecs || 35}s/Q)</div>
                   </div>
                   <div className="h-6 w-px bg-slate-200" />
                   <div className="text-center px-2">
@@ -683,7 +686,7 @@ export const AdminMockTestsTab: React.FC = () => {
                   Question Bank Editor
                 </span>
                 <h3 className="text-lg font-bold font-display text-slate-900 mt-1">
-                  {selectedTestForQuestions.title} ({selectedTestForQuestions.questions.length} Questions • {formatTestDuration(selectedTestForQuestions.questions.length)})
+                  {selectedTestForQuestions.title} ({selectedTestForQuestions.questions.length} Questions • {formatTestDuration(selectedTestForQuestions.questions.length, selectedTestForQuestions.timePerQuestionSecs || 35)})
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -927,41 +930,97 @@ export const AdminMockTestsTab: React.FC = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    Exam Timer <span className="text-[10px] text-emerald-600 font-semibold">(Auto: 35s/Q)</span>
-                  </label>
-                  <div className="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 font-bold text-slate-900 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono text-brand-700">
-                      <Clock className="w-3.5 h-3.5 text-brand-600" />
-                      <span>{formatTestDuration(editingTest.questions?.length || 0)}</span>
-                    </div>
-                    <span className="text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
-                      {editingTest.questions?.length || 0} Qs × 35s
+              {/* Exam Timer & Per Question Configuration */}
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <label className="block font-bold text-slate-800 text-sm">
+                      Per Question Timer (Seconds)
+                    </label>
+                    <p className="text-xs text-slate-500">
+                      CBT mode me har question ke liye live timer set karein
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-brand-700 bg-brand-50 border border-brand-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-brand-600" />
+                      <span>Total Time: {formatTestDuration(editingTest.questions?.length || 0, editingTest.timePerQuestionSecs || 35)}</span>
                     </span>
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="5"
+                      max="600"
+                      step="5"
+                      required
+                      value={editingTest.timePerQuestionSecs || 35}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 35;
+                        setEditingTest({ ...editingTest, timePerQuestionSecs: val });
+                      }}
+                      className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold text-slate-900 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none pr-24"
+                      placeholder="e.g. 35"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">
+                      Secs / Question
+                    </span>
+                  </div>
+
+                  {/* Preset Buttons */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    {[
+                      { label: '30s', val: 30 },
+                      { label: '35s (NTA)', val: 35 },
+                      { label: '45s', val: 45 },
+                      { label: '60s (1m)', val: 60 },
+                      { label: '90s (1.5m)', val: 90 },
+                      { label: '120s (2m)', val: 120 }
+                    ].map(preset => {
+                      const isSelected = (editingTest.timePerQuestionSecs || 35) === preset.val;
+                      return (
+                        <button
+                          key={preset.val}
+                          type="button"
+                          onClick={() => setEditingTest({ ...editingTest, timePerQuestionSecs: preset.val })}
+                          className={`text-xs px-2.5 py-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-brand-600 text-white border-brand-700 shadow-xs'
+                              : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Marks Configuration */}
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Marks / Correct (+)</label>
+                  <label className="block font-bold text-slate-700 mb-1 text-xs">Marks / Correct (+)</label>
                   <input
                     type="number"
                     required
                     value={editingTest.positiveMarks}
                     onChange={(e) => setEditingTest({ ...editingTest, positiveMarks: parseFloat(e.target.value) || 2 })}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold"
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Negative (-) Marks</label>
+                  <label className="block font-bold text-slate-700 mb-1 text-xs">Negative (-) Marks</label>
                   <input
                     type="number"
                     step="0.25"
                     value={editingTest.negativeMarks}
                     onChange={(e) => setEditingTest({ ...editingTest, negativeMarks: parseFloat(e.target.value) || 0 })}
-                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold"
+                    className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-white font-bold text-sm"
                   />
                 </div>
               </div>

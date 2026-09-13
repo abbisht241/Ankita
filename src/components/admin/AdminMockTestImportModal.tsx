@@ -67,6 +67,7 @@ export const AdminMockTestImportModal: React.FC<AdminMockTestImportModalProps> =
   const [newTestCategory, setNewTestCategory] = useState('UGC NET Paper 1');
   const [positiveMarks, setPositiveMarks] = useState(2);
   const [negativeMarks, setNegativeMarks] = useState(0);
+  const [timePerQuestionSecs, setTimePerQuestionSecs] = useState(35);
   const [newTestDescription, setNewTestDescription] = useState('Comprehensive mock test covering core examination concepts with step-by-step rationales by Dr. Ankita Bisht.');
 
   // Auto-parse when raw text changes
@@ -171,7 +172,8 @@ Topic: NEP 2020 Goals`;
         title: newTestTitle.trim() || 'UGC NET Paper 1 - CBT Mock Test 2026',
         category: newTestCategory,
         description: newTestDescription.trim(),
-        durationMinutes: calculateTestDurationMinutes(parseResult.questions.length),
+        timePerQuestionSecs: timePerQuestionSecs,
+        durationMinutes: calculateTestDurationMinutes(parseResult.questions.length, timePerQuestionSecs),
         totalMarks: parseResult.questions.length * positiveMarks,
         positiveMarks: positiveMarks,
         negativeMarks: negativeMarks,
@@ -195,10 +197,12 @@ Topic: NEP 2020 Goals`;
       }
 
       const mergedQuestions = [...existing.questions, ...parseResult.questions];
+      const timeSecs = existing.timePerQuestionSecs || 35;
       const updatedTest: MockTest = {
         ...existing,
         questions: mergedQuestions,
-        durationMinutes: calculateTestDurationMinutes(mergedQuestions.length),
+        timePerQuestionSecs: timeSecs,
+        durationMinutes: calculateTestDurationMinutes(mergedQuestions.length, timeSecs),
         totalMarks: mergedQuestions.length * (existing.positiveMarks || 2)
       };
 
@@ -579,6 +583,43 @@ Topic: NEP 2020 Goals`;
                   />
                 </div>
 
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-semibold text-slate-700 text-xs">Timer / Question</label>
+                    <span className="text-[10px] font-bold text-brand-700 font-mono">
+                      {formatTestDuration(parseResult.questions.length, timePerQuestionSecs)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      min="5"
+                      max="600"
+                      step="5"
+                      value={timePerQuestionSecs}
+                      onChange={(e) => setTimePerQuestionSecs(parseInt(e.target.value) || 35)}
+                      className="w-full px-2.5 py-2 border border-slate-300 rounded-xl text-xs bg-white font-bold"
+                      placeholder="Seconds"
+                    />
+                    <div className="flex items-center gap-1 shrink-0">
+                      {[30, 35, 60].map(sec => (
+                        <button
+                          key={sec}
+                          type="button"
+                          onClick={() => setTimePerQuestionSecs(sec)}
+                          className={`text-[10px] px-1.5 py-1.5 rounded-lg font-bold border transition-colors cursor-pointer ${
+                            timePerQuestionSecs === sec 
+                              ? 'bg-brand-600 text-white border-brand-700' 
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
+                          }`}
+                        >
+                          {sec}s
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="sm:col-span-3">
                   <label className="block font-semibold text-slate-700 text-xs mb-1">Test Description &amp; Instructions</label>
                   <textarea
@@ -627,7 +668,7 @@ Topic: NEP 2020 Goals`;
 
               {parseResult.questions.length > 0 && (
                 <div className="text-xs text-slate-500">
-                  Total Exam Marks: <b>{parseResult.questions.length * positiveMarks}</b> • Time: <b>{formatTestDuration(parseResult.questions.length)}</b>
+                  Total Exam Marks: <b>{parseResult.questions.length * positiveMarks}</b> • Time: <b>{formatTestDuration(parseResult.questions.length, timePerQuestionSecs)} ({timePerQuestionSecs}s/Q)</b>
                 </div>
               )}
             </div>

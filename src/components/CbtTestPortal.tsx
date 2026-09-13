@@ -66,8 +66,8 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   const [answers, setAnswers] = useState<{ [qId: string]: number }>({});
   const [markedForReview, setMarkedForReview] = useState<{ [qId: string]: boolean }>({});
   const [visitedQuestions, setVisitedQuestions] = useState<{ [qId: string]: boolean }>({});
-  const QUESTION_TIME_LIMIT = 35; // Strict 35 seconds per question
-  const [questionSecondsLeft, setQuestionSecondsLeft] = useState(QUESTION_TIME_LIMIT);
+  const questionTimeLimit = activeTest?.timePerQuestionSecs && activeTest.timePerQuestionSecs > 0 ? activeTest.timePerQuestionSecs : 35;
+  const [questionSecondsLeft, setQuestionSecondsLeft] = useState(questionTimeLimit);
   const [secondsRemaining, setSecondsRemaining] = useState(30 * 60);
   const [isSubmitConfirmOpen, setIsSubmitConfirmOpen] = useState(false);
 
@@ -109,16 +109,17 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
     MockTestStorage.fetchSubmissionsFromCloud().catch(() => {});
   }, []);
 
-  // Live 35-Second Per-Question Countdown Timer (Anti-Cheating Speed Mode)
+  // Live Per-Question Countdown Timer (Anti-Cheating Speed Mode)
   useEffect(() => {
     if (stage !== 'testing') return;
 
     const timer = setInterval(() => {
       setQuestionSecondsLeft(prev => {
         if (prev <= 1) {
-          // 35s expired for current question: Advance or submit!
+          // Per-question timer expired: Advance or submit!
           const curIdx = currentQIndexRef.current;
           const currentTest = activeTestRef.current;
+          const curLimit = currentTest?.timePerQuestionSecs && currentTest.timePerQuestionSecs > 0 ? currentTest.timePerQuestionSecs : 35;
           if (currentTest && curIdx < currentTest.questions.length - 1) {
             const nextIdx = curIdx + 1;
             setCurrentQIndex(nextIdx);
@@ -126,7 +127,7 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
             if (nextQ) {
               setVisitedQuestions(v => ({ ...v, [nextQ.id]: true }));
             }
-            return QUESTION_TIME_LIMIT;
+            return curLimit;
           } else {
             performFinalSubmission();
             return 0;
@@ -165,8 +166,9 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
       return;
     }
 
-    setSecondsRemaining(activeTest.questions.length * QUESTION_TIME_LIMIT);
-    setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
+    const limit = activeTest.timePerQuestionSecs && activeTest.timePerQuestionSecs > 0 ? activeTest.timePerQuestionSecs : 35;
+    setSecondsRemaining(activeTest.questions.length * limit);
+    setQuestionSecondsLeft(limit);
     setAnswers({});
     setMarkedForReview({});
     setVisitedQuestions({ [activeTest.questions[0].id]: true });
@@ -218,10 +220,11 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
   };
 
   const handleNextQuestion = () => {
+    const limit = activeTest?.timePerQuestionSecs && activeTest.timePerQuestionSecs > 0 ? activeTest.timePerQuestionSecs : 35;
     if (currentQIndex < activeTest.questions.length - 1) {
       const nextIdx = currentQIndex + 1;
       setCurrentQIndex(nextIdx);
-      setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
+      setQuestionSecondsLeft(limit);
       const nextQ = activeTest.questions[nextIdx];
       if (nextQ) {
         setVisitedQuestions(prev => ({ ...prev, [nextQ.id]: true }));
@@ -240,8 +243,9 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
       alert('🔒 Anti-Cheating Mode: Questions must be attempted in sequence.');
       return;
     }
+    const limit = activeTest?.timePerQuestionSecs && activeTest.timePerQuestionSecs > 0 ? activeTest.timePerQuestionSecs : 35;
     setCurrentQIndex(index);
-    setQuestionSecondsLeft(QUESTION_TIME_LIMIT);
+    setQuestionSecondsLeft(limit);
     const targetQ = activeTest.questions[index];
     if (targetQ) {
       setVisitedQuestions(prev => ({ ...prev, [targetQ.id]: true }));
@@ -284,7 +288,8 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
       ? Math.round((finalScore / totalPossibleMarks) * 100) 
       : 0;
     const isPassed = percentage >= currentTest.passingPercentage;
-    const totalAllocatedSecs = currentTest.questions.length * QUESTION_TIME_LIMIT;
+    const testLimit = currentTest.timePerQuestionSecs && currentTest.timePerQuestionSecs > 0 ? currentTest.timePerQuestionSecs : 35;
+    const totalAllocatedSecs = currentTest.questions.length * testLimit;
     const timeSpent = Math.max(10, totalAllocatedSecs - sRemaining);
 
     const submissionData = {
@@ -448,8 +453,8 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                       {t.title}
                     </div>
                     <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>{t.questions.length} Qs • {formatTestDuration(t.questions.length)}</span>
-                      <span className="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">⚡ 35s / Q</span>
+                      <span>{t.questions.length} Qs • {formatTestDuration(t.questions.length, t.timePerQuestionSecs || 35)}</span>
+                      <span className="font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">⚡ {t.timePerQuestionSecs || 35}s / Q</span>
                     </div>
                   </button>
                 ))}
@@ -469,10 +474,10 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                       {activeTest.questions.length} Questions
                     </span>
                     <span className="bg-blue-100 text-blue-900 px-2.5 py-1 rounded-lg">
-                      ⏱️ {formatTestDuration(activeTest.questions.length)}
+                      ⏱️ {formatTestDuration(activeTest.questions.length, questionTimeLimit)}
                     </span>
                     <span className="bg-amber-100 text-amber-900 px-2.5 py-1 rounded-lg">
-                      ⚡ 35s / Q
+                      ⚡ {questionTimeLimit}s / Q
                     </span>
                     <span className="bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-lg">
                       +{activeTest.positiveMarks} Marks
@@ -484,12 +489,12 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                 <div className="bg-amber-50 border border-amber-300 rounded-2xl p-4 space-y-2">
                   <div className="flex items-center gap-2 text-amber-950 font-extrabold text-xs uppercase tracking-wider">
                     <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
-                    <span>⚡ Anti-Cheating Speed Test Protocol (35 Seconds/Question)</span>
+                    <span>⚡ Anti-Cheating Speed Test Protocol ({questionTimeLimit} Seconds/Question)</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-amber-950 font-medium">
                     <div className="flex items-start gap-1.5">
                       <span className="text-amber-700 font-bold">•</span>
-                      <span><strong>35s / Question:</strong> Har question ke liye 35 seconds ka live timer hai (Kul Samay: {formatTestDuration(activeTest.questions.length)}). Time khatam hote hi agla question automatically load hoga.</span>
+                      <span><strong>{questionTimeLimit}s / Question:</strong> Har question ke liye {questionTimeLimit} seconds ka live timer hai (Kul Samay: {formatTestDuration(activeTest.questions.length, questionTimeLimit)}). Time khatam hote hi agla question automatically load hoga.</span>
                     </div>
                     <div className="flex items-start gap-1.5">
                       <span className="text-amber-700 font-bold">•</span>
@@ -619,47 +624,56 @@ export const CbtTestPortal: React.FC<CbtTestPortalProps> = ({
                 </div>
               </div>
 
-              {/* Question 35s Live Speed Countdown Bar */}
-              <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2.5 h-2.5 rounded-full ${
-                      questionSecondsLeft <= 10 ? 'bg-rose-500 animate-ping' : questionSecondsLeft <= 20 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'
-                    }`} />
-                    <span className="font-extrabold text-slate-800">
-                      35s Question Timer:
-                    </span>
-                    <span className={`font-mono text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg transition-colors ${
-                      questionSecondsLeft <= 10 
-                        ? 'bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50' 
-                        : questionSecondsLeft <= 20 
-                          ? 'bg-amber-400 text-slate-950 font-black' 
-                          : 'bg-emerald-100 text-emerald-800 font-black'
-                    }`}>
-                      {questionSecondsLeft}s remaining
-                    </span>
+              {/* Question Live Speed Countdown Bar */}
+              {(() => {
+                const warningThreshold = Math.max(10, Math.round(questionTimeLimit * 0.4));
+                const dangerThreshold = Math.max(5, Math.round(questionTimeLimit * 0.2));
+                const isDanger = questionSecondsLeft <= dangerThreshold;
+                const isWarning = questionSecondsLeft <= warningThreshold;
+
+                return (
+                  <div className="space-y-2 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2.5 h-2.5 rounded-full ${
+                          isDanger ? 'bg-rose-500 animate-ping' : isWarning ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'
+                        }`} />
+                        <span className="font-extrabold text-slate-800">
+                          {questionTimeLimit}s Question Timer:
+                        </span>
+                        <span className={`font-mono text-xs sm:text-sm font-black px-2.5 py-0.5 rounded-lg transition-colors ${
+                          isDanger 
+                            ? 'bg-rose-500 text-white animate-pulse shadow-sm shadow-rose-500/50' 
+                            : isWarning 
+                              ? 'bg-amber-400 text-slate-950 font-black' 
+                              : 'bg-emerald-100 text-emerald-800 font-black'
+                        }`}>
+                          {questionSecondsLeft}s remaining
+                        </span>
+                      </div>
+
+                      <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                        <Zap className="w-3.5 h-3.5 text-amber-500" />
+                        <span>Auto-advances at 0s</span>
+                      </span>
+                    </div>
+
+                    {/* Visual Animated Countdown Bar */}
+                    <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden border border-slate-300/60">
+                      <div 
+                        className={`h-full transition-all duration-1000 ease-linear rounded-full ${
+                          isDanger 
+                            ? 'bg-rose-500' 
+                            : isWarning 
+                              ? 'bg-amber-500' 
+                              : 'bg-emerald-500'
+                        }`}
+                        style={{ width: `${Math.min(100, Math.max(0, (questionSecondsLeft / questionTimeLimit) * 100))}%` }}
+                      />
+                    </div>
                   </div>
-
-                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
-                    <Zap className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Auto-advances at 0s</span>
-                  </span>
-                </div>
-
-                {/* Visual Animated Countdown Bar */}
-                <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden border border-slate-300/60">
-                  <div 
-                    className={`h-full transition-all duration-1000 ease-linear rounded-full ${
-                      questionSecondsLeft <= 10 
-                        ? 'bg-rose-500' 
-                        : questionSecondsLeft <= 20 
-                          ? 'bg-amber-500' 
-                          : 'bg-emerald-500'
-                    }`}
-                    style={{ width: `${(questionSecondsLeft / 35) * 100}%` }}
-                  />
-                </div>
-              </div>
+                );
+              })()}
 
               {/* Question Text */}
               <div className="text-sm sm:text-base font-bold text-slate-900 leading-relaxed font-display">

@@ -1078,10 +1078,15 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                         <span className="text-[10px] font-bold text-brand-700 bg-brand-50 border border-brand-200 px-2.5 py-0.5 rounded-md">
                           {test.category}
                         </span>
-                        <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span>{formatTestDuration(test.questions?.length || 0)}</span>
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{formatTestDuration(test.questions?.length || 0, test.timePerQuestionSecs || 35)}</span>
+                          </span>
+                          <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                            ⚡ {test.timePerQuestionSecs || 35}s/Q
+                          </span>
+                        </div>
                       </div>
 
                       <h4 className="font-bold text-sm sm:text-base text-slate-900">

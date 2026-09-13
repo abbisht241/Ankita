@@ -15,6 +15,7 @@ export interface MockTest {
   category: string; // e.g. "UGC NET Paper 1", "Research Methodology", "CDP & Pedagogy", "Teaching Aptitude"
   description: string;
   durationMinutes: number; // e.g. 30, 60
+  timePerQuestionSecs?: number; // Configurable per-question timer (seconds), default: 35
   totalMarks: number;
   positiveMarks: number; // e.g. 2
   negativeMarks: number; // e.g. 0
@@ -26,13 +27,15 @@ export interface MockTest {
 }
 
 /**
- * Format total test time based on 35s per question:
- * e.g. 12 questions -> 420s -> "7m"
- * e.g. 10 questions -> 350s -> "5m 50s"
- * e.g. 1 question -> 35s -> "35s"
+ * Format total test time based on configurable timePerQuestionSecs (default 35s):
+ * e.g. 12 questions * 35s -> 420s -> "7m"
+ * e.g. 10 questions * 60s -> 600s -> "10m"
+ * e.g. 10 questions * 35s -> 350s -> "5m 50s"
+ * e.g. 1 question * 45s -> 45s -> "45s"
  */
-export const formatTestDuration = (questionCount: number): string => {
-  const totalSecs = Math.max(0, (questionCount || 0) * 35);
+export const formatTestDuration = (questionCount: number, timePerQuestionSecs: number = 35): string => {
+  const secsPerQ = Number(timePerQuestionSecs) > 0 ? Number(timePerQuestionSecs) : 35;
+  const totalSecs = Math.max(0, (questionCount || 0) * secsPerQ);
   if (totalSecs === 0) return '0s';
   const mins = Math.floor(totalSecs / 60);
   const secs = totalSecs % 60;
@@ -41,8 +44,9 @@ export const formatTestDuration = (questionCount: number): string => {
   return `${mins}m ${secs}s`;
 };
 
-export const calculateTestDurationMinutes = (questionCount: number): number => {
-  return Math.max(1, Math.ceil(((questionCount || 0) * 35) / 60));
+export const calculateTestDurationMinutes = (questionCount: number, timePerQuestionSecs: number = 35): number => {
+  const secsPerQ = Number(timePerQuestionSecs) > 0 ? Number(timePerQuestionSecs) : 35;
+  return Math.max(1, Math.ceil(((questionCount || 0) * secsPerQ) / 60));
 };
 
 export interface TestSubmission {
@@ -77,6 +81,7 @@ export const INITIAL_MOCK_TESTS: MockTest[] = [
     category: 'UGC NET Paper 1',
     description: 'High-yield examination simulation covering Teaching Aptitude, Research Methodology, ICT, Higher Education, People & Environment, and Indian Logic.',
     durationMinutes: 7, // Auto: 12 Qs * 35s = 420s = 7m
+    timePerQuestionSecs: 35,
     totalMarks: 20,
     positiveMarks: 2,
     negativeMarks: 0,
@@ -277,14 +282,18 @@ export const MockTestStorage = {
       }
     }
 
-    // Filter out deleted test IDs from local cache & auto-sync duration based on 35s per question
+    // Filter out deleted test IDs from local cache & auto-sync duration based on timePerQuestionSecs
     const filtered = tests
       .filter(t => !MockTestStorage.DELETED_TEST_IDS.has(t.id))
       .map(cleanTestSpss)
-      .map(t => ({
-        ...t,
-        durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0)
-      }));
+      .map(t => {
+        const secs = Number(t.timePerQuestionSecs) > 0 ? Number(t.timePerQuestionSecs) : 35;
+        return {
+          ...t,
+          timePerQuestionSecs: secs,
+          durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0, secs)
+        };
+      });
 
     if (filtered.length !== tests.length && typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(filtered));
@@ -300,14 +309,18 @@ export const MockTestStorage = {
       if (res.ok) {
         const json = await res.json();
         if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          // Filter out deleted tests & auto-sync duration based on 35s per question
+          // Filter out deleted tests & auto-sync duration based on timePerQuestionSecs
           const cleanTests: MockTest[] = json.data
             .filter((t: MockTest) => !MockTestStorage.DELETED_TEST_IDS.has(t.id))
             .map(cleanTestSpss)
-            .map((t: MockTest) => ({
-              ...t,
-              durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0)
-            }));
+            .map((t: MockTest) => {
+              const secs = Number(t.timePerQuestionSecs) > 0 ? Number(t.timePerQuestionSecs) : 35;
+              return {
+                ...t,
+                timePerQuestionSecs: secs,
+                durationMinutes: calculateTestDurationMinutes(t.questions?.length || 0, secs)
+              };
+            });
           if (cleanTests.length > 0) {
             if (typeof window !== 'undefined') {
               localStorage.setItem(STORAGE_KEYS.TESTS, JSON.stringify(cleanTests));
@@ -328,10 +341,12 @@ export const MockTestStorage = {
   },
 
   async saveTest(test: MockTest): Promise<void> {
-    // Auto calculate duration based on 35s per question
+    const timePerQuestionSecs = Number(test.timePerQuestionSecs) > 0 ? Number(test.timePerQuestionSecs) : 35;
+    // Auto calculate duration based on timePerQuestionSecs
     const normalizedTest: MockTest = {
       ...test,
-      durationMinutes: calculateTestDurationMinutes(test.questions?.length || 0)
+      timePerQuestionSecs,
+      durationMinutes: calculateTestDurationMinutes(test.questions?.length || 0, timePerQuestionSecs)
     };
 
     const tests = this.getTests();
