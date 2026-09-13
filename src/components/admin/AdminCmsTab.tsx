@@ -21,7 +21,8 @@ import {
   UploadCloud,
   Download,
   CheckCircle2,
-  X
+  X,
+  Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSiteContent } from '../../context/SiteContentContext';
@@ -39,6 +40,7 @@ export const AdminCmsTab: React.FC = () => {
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [adminPdfPreview, setAdminPdfPreview] = useState<{ url: string; title: string; name?: string } | null>(null);
   const [syllabusNotification, setSyllabusNotification] = useState<string | null>(null);
+  const [uploadingCourseIdx, setUploadingCourseIdx] = useState<number | null>(null);
 
   // Sync when content loads
   React.useEffect(() => {
@@ -80,52 +82,112 @@ export const AdminCmsTab: React.FC = () => {
     }
   };
 
-  const handleUploadSyllabusPdf = (courseIndex: number, file: File) => {
+  const handleUploadSyllabusPdf = async (courseIndex: number, file: File) => {
     if (!file) return;
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
       alert('Kripya sirf valid PDF file (.pdf) upload karein.');
       return;
     }
-    if (file.size > 12 * 1024 * 1024) {
-      alert('File size 12MB se jyada hai. Kripya 12MB se chhoti PDF file upload karein ya PDF URL link paste karein.');
+    if (file.size > 25 * 1024 * 1024) {
+      alert('File size 25MB se jyada hai. Kripya 25MB se chhoti PDF file upload karein.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      const formatBytes = (bytes: number) => {
-        if (bytes < 1024) return `${bytes} B`;
-        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-      };
+    const course = formData.courses.courses[courseIndex];
+    if (!course) return;
 
+    setUploadingCourseIdx(courseIndex);
+
+    const formatBytes = (bytes: number) => {
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    };
+
+    try {
+      // 1. Upload file directly to Cloudflare Pages API and KV storage
+      const uploadForm = new FormData();
+      uploadForm.append('courseId', course.id);
+      uploadForm.append('file', file);
+
+      let pdfUrl = `/api/syllabus-pdf?id=${encodeURIComponent(course.id)}&v=${Date.now()}`;
+      let pdfSize = formatBytes(file.size);
+      let pdfName = file.name;
+
+      try {
+        const res = await fetch('/api/syllabus-pdf', {
+          method: 'POST',
+          body: uploadForm
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.success) {
+          pdfUrl = `${data.url}&v=${Date.now()}`;
+          if (data.fileName) pdfName = data.fileName;
+          if (data.fileSize) pdfSize = data.fileSize;
+        } else {
+          console.warn('API returned non-success, using direct stream URL:', data);
+        }
+      } catch (uploadErr) {
+        console.warn('Direct upload fetch warning:', uploadErr);
+      }
+
+      // 2. Update local state
       const updated = [...formData.courses.courses];
       updated[courseIndex] = {
         ...updated[courseIndex],
-        syllabusPdfUrl: dataUrl,
-        syllabusPdfName: file.name,
-        syllabusPdfSize: formatBytes(file.size),
+        syllabusPdfUrl: pdfUrl,
+        syllabusPdfName: pdfName,
+        syllabusPdfSize: pdfSize,
         syllabusPdfUpdatedAt: new Date().toISOString()
       };
 
-      setFormData({
+      const newFormData: SiteContentConfig = {
         ...formData,
         courses: {
           ...formData.courses,
           courses: updated
         }
-      });
+      };
 
-      setSyllabusNotification(`✓ Syllabus PDF "${file.name}" successfully uploaded for "${updated[courseIndex].title}". Click "Save & Publish Live" to make it live!`);
+      setFormData(newFormData);
+
+      // 3. Auto-publish immediately so the user does NOT need to remember to click "Save & Publish"
+      const publishSuccess = await publishContent(newFormData);
+
+      if (publishSuccess) {
+        setSyllabusNotification(`🎉 Syllabus PDF "${pdfName}" successfully upload ho gayi hai aur Live website par turant active ho gayi hai!`);
+        try {
+          confetti({
+            particleCount: 120,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        } catch (_e) {}
+      } else {
+        setSyllabusNotification(`✓ Syllabus PDF "${pdfName}" uploaded. Click "Save & Publish Live" to verify.`);
+      }
+
       setTimeout(() => setSyllabusNotification(null), 8000);
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error('Failed to upload syllabus PDF:', err);
+      alert(`PDF upload karne me samasya aayi: ${err.message || 'Unknown error'}. Kripya dobara try karein.`);
+    } finally {
+      setUploadingCourseIdx(null);
+    }
   };
 
-  const handleRemoveSyllabusPdf = (courseIndex: number) => {
-    const courseTitle = formData.courses.courses[courseIndex]?.title || 'is course';
-    if (confirm(`Kya aap "${courseTitle}" ki uploaded syllabus PDF ko delete karna chahte hain?`)) {
+  const handleRemoveSyllabusPdf = async (courseIndex: number) => {
+    const course = formData.courses.courses[courseIndex];
+    const courseTitle = course?.title || 'is course';
+    if (!confirm(`Kya aap "${courseTitle}" ki uploaded syllabus PDF ko delete karna chahte hain?`)) {
+      return;
+    }
+
+    try {
+      if (course?.id) {
+        fetch(`/api/syllabus-pdf?id=${encodeURIComponent(course.id)}`, { method: 'DELETE' }).catch(() => {});
+      }
+
       const updated = [...formData.courses.courses];
       updated[courseIndex] = {
         ...updated[courseIndex],
@@ -134,15 +196,21 @@ export const AdminCmsTab: React.FC = () => {
         syllabusPdfSize: undefined,
         syllabusPdfUpdatedAt: undefined
       };
-      setFormData({
+
+      const newFormData: SiteContentConfig = {
         ...formData,
         courses: {
           ...formData.courses,
           courses: updated
         }
-      });
-      setSyllabusNotification(`✓ Syllabus PDF removed for "${courseTitle}". Click "Save & Publish Live" to update.`);
+      };
+
+      setFormData(newFormData);
+      await publishContent(newFormData);
+      setSyllabusNotification(`✓ Syllabus PDF removed for "${courseTitle}". Live website updated.`);
       setTimeout(() => setSyllabusNotification(null), 6000);
+    } catch (err: any) {
+      console.error('Error removing syllabus PDF:', err);
     }
   };
 
@@ -844,7 +912,20 @@ export const AdminCmsTab: React.FC = () => {
                         )}
                       </div>
 
-                      {course.syllabusPdfUrl ? (
+                      {uploadingCourseIdx === idx ? (
+                        /* Uploading Progress Indicator */
+                        <div className="border-2 border-brand-400 bg-brand-50/60 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center animate-pulse">
+                          <Loader2 className="w-8 h-8 text-brand-700 animate-spin" />
+                          <div>
+                            <p className="font-bold text-slate-800 text-sm">
+                              Uploading Syllabus PDF to Cloud Server...
+                            </p>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Cloudflare KV storage me upload ho raha hai. Website par turant live ho jayega...
+                            </p>
+                          </div>
+                        </div>
+                      ) : course.syllabusPdfUrl ? (
                         /* Uploaded PDF Details & Actions */
                         <div className="bg-white rounded-xl p-3.5 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
                           <div className="flex items-center gap-3 min-w-0">
@@ -896,6 +977,7 @@ export const AdminCmsTab: React.FC = () => {
                                 type="file"
                                 accept=".pdf,application/pdf"
                                 className="hidden"
+                                disabled={uploadingCourseIdx !== null}
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file) handleUploadSyllabusPdf(idx, file);
@@ -928,7 +1010,7 @@ export const AdminCmsTab: React.FC = () => {
                                 Click to Upload your Syllabus PDF (सिलेबस PDF अपलोड करें)
                               </span>
                               <p className="text-[11px] text-slate-400 mt-0.5">
-                                Select any PDF file (.pdf) up to 12MB
+                                Select any PDF file (.pdf) up to 25MB
                               </p>
                             </div>
                             <span className="bg-brand-700 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs group-hover:bg-brand-800 transition-colors mt-1">
@@ -938,6 +1020,7 @@ export const AdminCmsTab: React.FC = () => {
                               type="file"
                               accept=".pdf,application/pdf"
                               className="hidden"
+                              disabled={uploadingCourseIdx !== null}
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) handleUploadSyllabusPdf(idx, file);

@@ -321,7 +321,7 @@ export const SiteContentService = {
       try {
         const trimmedCourses = (updated.courses?.courses || []).map((c: Course) => ({
           ...c,
-          syllabusPdfUrl: c.syllabusPdfUrl && c.syllabusPdfUrl.length > 100000 ? '' : c.syllabusPdfUrl
+          syllabusPdfUrl: c.syllabusPdfUrl && (c.syllabusPdfUrl.startsWith('/api/') || c.syllabusPdfUrl.startsWith('http') || c.syllabusPdfUrl.length < 2000) ? c.syllabusPdfUrl : ''
         }));
         const trimmed = {
           ...updated,
