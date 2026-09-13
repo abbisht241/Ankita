@@ -25,6 +25,10 @@ export interface Course {
     hours: string;
   }[];
   keyBenefits: string[];
+  syllabusPdfUrl?: string;
+  syllabusPdfName?: string;
+  syllabusPdfSize?: string;
+  syllabusPdfUpdatedAt?: string;
 }
 
 export interface Testimonial {

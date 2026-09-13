@@ -6,6 +6,7 @@ const KV_KEY = 'global_site_content_db';
 
 function removeSpssFromText(text: string): string {
   if (typeof text !== 'string') return text;
+  if (text.startsWith('data:') || text.length > 5000) return text;
   return text
     .replace(/Hands-with practical data analysis/gi, 'Hands-on Statistical')
     .replace(/Hands-on\s*SPSS/gi, 'Hands-on Statistical')
@@ -39,7 +40,7 @@ function deepCleanSpss(obj: any): any {
   if (typeof obj === 'object') {
     const cleaned: any = {};
     for (const [key, val] of Object.entries(obj)) {
-      if (key === 'id' && typeof val === 'string' && val.includes('spss')) {
+      if ((key === 'id' && typeof val === 'string' && val.includes('spss')) || key === 'syllabusPdfUrl' || key === 'syllabusPdfData') {
         cleaned[key] = val;
       } else {
         cleaned[key] = deepCleanSpss(val);

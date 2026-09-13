@@ -185,7 +185,16 @@ export function App() {
 
   const handleDownloadSyllabus = () => {
     if (selectedCourseForSyllabus) {
-      alert(`📥 Downloading full ${selectedCourseForSyllabus.title} syllabus PDF... Check your downloads folder.`);
+      if (selectedCourseForSyllabus.syllabusPdfUrl) {
+        const link = document.createElement('a');
+        link.href = selectedCourseForSyllabus.syllabusPdfUrl;
+        link.download = selectedCourseForSyllabus.syllabusPdfName || `${selectedCourseForSyllabus.slug}_syllabus.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert(`📥 ${selectedCourseForSyllabus.title} syllabus PDF is being finalized by Dr. Ankita Bisht. You can request it on WhatsApp directly.`);
+      }
     }
   };
 

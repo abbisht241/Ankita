@@ -217,6 +217,7 @@ const STORAGE_KEY = 'dr_ankita_site_content_config';
 
 function removeSpssFromText(text: string): string {
   if (typeof text !== 'string') return text;
+  if (text.startsWith('data:') || text.length > 5000) return text;
   return text
     .replace(/Hands-with practical data analysis/gi, 'Hands-on Statistical')
     .replace(/Hands-on\s*SPSS/gi, 'Hands-on Statistical')
@@ -250,7 +251,7 @@ export function deepCleanSpss(obj: any): any {
   if (typeof obj === 'object') {
     const cleaned: any = {};
     for (const [key, val] of Object.entries(obj)) {
-      if (key === 'id' && typeof val === 'string' && val.includes('spss')) {
+      if ((key === 'id' && typeof val === 'string' && val.includes('spss')) || key === 'syllabusPdfUrl' || key === 'syllabusPdfData') {
         cleaned[key] = val;
       } else {
         cleaned[key] = deepCleanSpss(val);
@@ -313,7 +314,27 @@ export const SiteContentService = {
       version: 4,
       lastUpdated: new Date().toISOString()
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('localStorage quota exceeded while caching full content, attempting trimmed cache', e);
+      try {
+        const trimmedCourses = (updated.courses?.courses || []).map((c: Course) => ({
+          ...c,
+          syllabusPdfUrl: c.syllabusPdfUrl && c.syllabusPdfUrl.length > 100000 ? '' : c.syllabusPdfUrl
+        }));
+        const trimmed = {
+          ...updated,
+          courses: {
+            ...updated.courses,
+            courses: trimmedCourses
+          }
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+      } catch (err) {
+        console.error('Failed to save to localStorage', err);
+      }
+    }
   },
 
   async fetchRemoteContent(): Promise<SiteContentConfig> {

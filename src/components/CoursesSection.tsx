@@ -229,8 +229,8 @@ export const CoursesSection: React.FC<CoursesSectionProps> = ({
                       onClick={() => onSelectSyllabus(course)}
                       className="w-full bg-white hover:bg-slate-100 text-slate-700 hover:text-brand-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-slate-200 shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <FileText className="w-3.5 h-3.5" />
-                      <span>Full Syllabus</span>
+                      <FileText className={`w-3.5 h-3.5 ${course.syllabusPdfUrl ? 'text-rose-600' : 'text-slate-500'}`} />
+                      <span>{course.syllabusPdfUrl ? 'Syllabus PDF' : 'Full Syllabus'}</span>
                     </button>
 
                     <button

@@ -17,14 +17,17 @@ import {
   Trash2, 
   Eye,
   Link as LinkIcon,
-  ExternalLink
+  ExternalLink,
+  UploadCloud,
+  Download,
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useSiteContent } from '../../context/SiteContentContext';
 import type { SiteContentConfig } from '../../services/siteContentService';
 import { AdminStorage } from '../../services/adminStorageService';
 import type { Course, FAQItem, Resource, Testimonial } from '../../types';
-import { CourseSyllabusEditorModal } from './CourseSyllabusEditorModal';
 
 export const AdminCmsTab: React.FC = () => {
   const { content, publishContent, resetToDefaults } = useSiteContent();
@@ -34,7 +37,7 @@ export const AdminCmsTab: React.FC = () => {
   >('announcement');
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
-  const [editingSyllabusCourseIndex, setEditingSyllabusCourseIndex] = useState<number | null>(null);
+  const [adminPdfPreview, setAdminPdfPreview] = useState<{ url: string; title: string; name?: string } | null>(null);
   const [syllabusNotification, setSyllabusNotification] = useState<string | null>(null);
 
   // Sync when content loads
@@ -75,6 +78,89 @@ export const AdminCmsTab: React.FC = () => {
       } catch (e) {}
       alert('✅ Dr. Ankita Bisht ki complete verified CV information successfully restore aur live website par publish ho chuki hai!');
     }
+  };
+
+  const handleUploadSyllabusPdf = (courseIndex: number, file: File) => {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Kripya sirf valid PDF file (.pdf) upload karein.');
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert('File size 12MB se jyada hai. Kripya 12MB se chhoti PDF file upload karein ya PDF URL link paste karein.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      const formatBytes = (bytes: number) => {
+        if (bytes < 1024) return `${bytes} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+      };
+
+      const updated = [...formData.courses.courses];
+      updated[courseIndex] = {
+        ...updated[courseIndex],
+        syllabusPdfUrl: dataUrl,
+        syllabusPdfName: file.name,
+        syllabusPdfSize: formatBytes(file.size),
+        syllabusPdfUpdatedAt: new Date().toISOString()
+      };
+
+      setFormData({
+        ...formData,
+        courses: {
+          ...formData.courses,
+          courses: updated
+        }
+      });
+
+      setSyllabusNotification(`✓ Syllabus PDF "${file.name}" successfully uploaded for "${updated[courseIndex].title}". Click "Save & Publish Live" to make it live!`);
+      setTimeout(() => setSyllabusNotification(null), 8000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveSyllabusPdf = (courseIndex: number) => {
+    const courseTitle = formData.courses.courses[courseIndex]?.title || 'is course';
+    if (confirm(`Kya aap "${courseTitle}" ki uploaded syllabus PDF ko delete karna chahte hain?`)) {
+      const updated = [...formData.courses.courses];
+      updated[courseIndex] = {
+        ...updated[courseIndex],
+        syllabusPdfUrl: undefined,
+        syllabusPdfName: undefined,
+        syllabusPdfSize: undefined,
+        syllabusPdfUpdatedAt: undefined
+      };
+      setFormData({
+        ...formData,
+        courses: {
+          ...formData.courses,
+          courses: updated
+        }
+      });
+      setSyllabusNotification(`✓ Syllabus PDF removed for "${courseTitle}". Click "Save & Publish Live" to update.`);
+      setTimeout(() => setSyllabusNotification(null), 6000);
+    }
+  };
+
+  const handleSetSyllabusPdfUrl = (courseIndex: number, url: string) => {
+    const updated = [...formData.courses.courses];
+    updated[courseIndex] = {
+      ...updated[courseIndex],
+      syllabusPdfUrl: url.trim() || undefined,
+      syllabusPdfName: url.trim() ? (updated[courseIndex].syllabusPdfName || 'Official_Syllabus.pdf') : undefined,
+      syllabusPdfUpdatedAt: url.trim() ? new Date().toISOString() : undefined
+    };
+    setFormData({
+      ...formData,
+      courses: {
+        ...formData.courses,
+        courses: updated
+      }
+    });
   };
 
   const subTabs = [
@@ -737,34 +823,142 @@ export const AdminCmsTab: React.FC = () => {
                       />
                     </div>
 
-                    {/* Full Syllabus & Curriculum Action Section */}
-                    <div className="pt-3 border-t border-slate-200/80 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gradient-to-r from-brand-50/70 via-slate-50 to-brand-50/70 p-3.5 rounded-xl border border-brand-200 shadow-xs">
-                      <div>
-                        <div className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
-                          <BookOpen className="w-4 h-4 text-brand-700" />
-                          <span>Detailed Syllabus &amp; Curriculum Breakdown</span>
+                    {/* Official Course Syllabus PDF Upload Section */}
+                    <div className="pt-3 border-t border-slate-200/80 bg-slate-50/80 rounded-2xl p-4 border border-slate-200 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <div className="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-brand-700" />
+                            <span>Detailed Syllabus PDF (पाठ्यक्रम PDF)</span>
+                          </div>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            Apne banaye huye syllabus ka PDF yahan upload karein. Website par students ko live preview aur download option dikhega.
+                          </p>
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-1 flex flex-wrap items-center gap-1.5">
-                          <span className="bg-white text-brand-800 font-semibold px-2 py-0.5 rounded border border-brand-200">
-                            {course.syllabusModules?.length || 0} Modules / Units
+
+                        {course.syllabusPdfUrl && (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg shrink-0">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>PDF Active</span>
                           </span>
-                          <span className="bg-white text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200">
-                            {course.targetExams?.length || 0} Target Exams
-                          </span>
-                          <span className="bg-white text-slate-700 font-medium px-2 py-0.5 rounded border border-slate-200">
-                            {course.keyBenefits?.length || 0} Outcomes
-                          </span>
-                        </div>
+                        )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setEditingSyllabusCourseIndex(idx)}
-                        className="px-4 py-2.5 bg-brand-700 hover:bg-brand-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-sm hover:shadow transition-all cursor-pointer shrink-0"
-                      >
-                        <BookOpen className="w-4 h-4" />
-                        <span>Edit Full Syllabus &amp; Curriculum</span>
-                      </button>
+                      {course.syllabusPdfUrl ? (
+                        /* Uploaded PDF Details & Actions */
+                        <div className="bg-white rounded-xl p-3.5 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center shrink-0">
+                              <FileText className="w-5 h-5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-slate-900 text-xs sm:text-sm truncate">
+                                {course.syllabusPdfName || `${course.title} Syllabus.pdf`}
+                              </div>
+                              <div className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                                {course.syllabusPdfSize && <span>{course.syllabusPdfSize}</span>}
+                                {course.syllabusPdfUpdatedAt && (
+                                  <>
+                                    <span>•</span>
+                                    <span>Uploaded {new Date(course.syllabusPdfUpdatedAt).toLocaleDateString()}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                            {/* Preview Button */}
+                            <button
+                              type="button"
+                              onClick={() => setAdminPdfPreview({ url: course.syllabusPdfUrl!, title: course.title, name: course.syllabusPdfName })}
+                              className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Preview PDF</span>
+                            </button>
+
+                            {/* Download Button */}
+                            <a
+                              href={course.syllabusPdfUrl}
+                              download={course.syllabusPdfName || `${course.slug}_syllabus.pdf`}
+                              className="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download</span>
+                            </a>
+
+                            {/* Replace Button */}
+                            <label className="bg-brand-50 hover:bg-brand-100 text-brand-700 border border-brand-200 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer">
+                              <UploadCloud className="w-3.5 h-3.5" />
+                              <span>Change PDF</span>
+                              <input
+                                type="file"
+                                accept=".pdf,application/pdf"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleUploadSyllabusPdf(idx, file);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+
+                            {/* Delete Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSyllabusPdf(idx)}
+                              className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Remove PDF"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Dropzone Upload Box */
+                        <div className="space-y-2">
+                          <label className="border-2 border-dashed border-slate-300 hover:border-brand-500 bg-white hover:bg-brand-50/40 rounded-2xl p-5 flex flex-col items-center justify-center gap-2 text-center cursor-pointer transition-all group">
+                            <div className="w-12 h-12 rounded-2xl bg-brand-50 group-hover:bg-brand-100 text-brand-700 flex items-center justify-center transition-colors">
+                              <UploadCloud className="w-6 h-6" />
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-800 text-xs sm:text-sm group-hover:text-brand-700">
+                                Click to Upload your Syllabus PDF (सिलेबस PDF अपलोड करें)
+                              </span>
+                              <p className="text-[11px] text-slate-400 mt-0.5">
+                                Select any PDF file (.pdf) up to 12MB
+                              </p>
+                            </div>
+                            <span className="bg-brand-700 text-white font-bold text-xs px-4 py-1.5 rounded-xl shadow-xs group-hover:bg-brand-800 transition-colors mt-1">
+                              Browse &amp; Upload PDF
+                            </span>
+                            <input
+                              type="file"
+                              accept=".pdf,application/pdf"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleUploadSyllabusPdf(idx, file);
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+
+                          {/* Or URL link */}
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="text-[11px] font-medium text-slate-400 shrink-0">Or paste PDF Link:</span>
+                            <input
+                              type="url"
+                              placeholder="https://drive.google.com/... or cloud PDF URL"
+                              value={course.syllabusPdfUrl || ''}
+                              onChange={(e) => handleSetSyllabusPdfUrl(idx, e.target.value)}
+                              className="flex-1 text-xs px-3 py-1.5 border border-slate-200 rounded-xl bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1736,26 +1930,64 @@ export const AdminCmsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Course Syllabus & Curriculum Editor Modal */}
-      {editingSyllabusCourseIndex !== null && formData.courses.courses[editingSyllabusCourseIndex] && (
-        <CourseSyllabusEditorModal
-          course={formData.courses.courses[editingSyllabusCourseIndex]}
-          onClose={() => setEditingSyllabusCourseIndex(null)}
-          onSave={(updatedCourse) => {
-            const updated = [...formData.courses.courses];
-            updated[editingSyllabusCourseIndex] = updatedCourse;
-            setFormData({
-              ...formData,
-              courses: {
-                ...formData.courses,
-                courses: updated
-              }
-            });
-            setEditingSyllabusCourseIndex(null);
-            setSyllabusNotification(`✓ Syllabus & curriculum updated for "${updatedCourse.title}". Click "Save & Publish All Changes" to publish live!`);
-            setTimeout(() => setSyllabusNotification(null), 8000);
-          }}
-        />
+      {/* Admin PDF Preview Modal */}
+      {adminPdfPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-xs animate-fadeIn">
+          <div 
+            className="bg-white rounded-3xl max-w-4xl w-full p-4 sm:p-6 shadow-2xl border border-slate-200 relative max-h-[92vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 mb-3 shrink-0">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-rose-600" />
+                <div>
+                  <h3 className="font-bold text-slate-900 text-sm sm:text-base">{adminPdfPreview.title} - Syllabus PDF Preview</h3>
+                  <p className="text-xs text-slate-500">{adminPdfPreview.name || 'Official Syllabus PDF'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <a
+                  href={adminPdfPreview.url}
+                  download={adminPdfPreview.name || 'Syllabus.pdf'}
+                  className="bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-brand-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </a>
+                <a
+                  href={adminPdfPreview.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl border border-slate-200 flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Fullscreen</span>
+                </a>
+                <button
+                  onClick={() => setAdminPdfPreview(null)}
+                  className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 p-2 rounded-full cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 w-full bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 min-h-[60vh]">
+              <object
+                data={adminPdfPreview.url}
+                type="application/pdf"
+                className="w-full h-full min-h-[60vh] rounded-2xl"
+              >
+                <iframe
+                  src={adminPdfPreview.url}
+                  title="PDF Preview"
+                  className="w-full h-full min-h-[60vh] rounded-2xl border-0"
+                />
+              </object>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>
