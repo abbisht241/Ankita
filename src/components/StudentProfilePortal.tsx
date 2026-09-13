@@ -1183,34 +1183,24 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
 
                 return (
                   <div key={res.id || idx} className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs hover:border-brand-300 transition-all">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold">
-                          <FileText className="w-5 h-5" />
-                        </div>
-                        <span className="text-[10px] font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full border border-brand-100">
-                          {res.type || 'PDF Notes'}
-                        </span>
+                    <div className="space-y-2.5">
+                      <div className="w-10 h-10 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center font-bold">
+                        <FileText className="w-5 h-5" />
                       </div>
-                      <h4 className="font-bold text-sm text-slate-900 line-clamp-2">{res.title}</h4>
-                      <p className="text-xs text-slate-500 line-clamp-2">
+                      <h4 className="font-bold text-sm text-slate-900 leading-snug">{res.title}</h4>
+                      <p className="text-xs text-slate-600 leading-relaxed line-clamp-3">
                         {res.description || res.previewSnippet || 'Official study material & revision notes.'}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400 font-medium">
-                        <span>📦 {res.fileSize || 'PDF Document'}</span>
-                        {res.pageCount && <span>• 📄 {res.pageCount} Pages</span>}
-                      </div>
                     </div>
 
                     <a
                       href={downloadLink}
                       target={isExternal ? '_blank' : undefined}
                       rel="noopener noreferrer"
-                      download={!isExternal}
-                      className="w-full bg-slate-100 hover:bg-brand-700 text-slate-800 hover:text-white text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
+                      className="w-full bg-brand-50 hover:bg-brand-600 text-brand-700 hover:text-white border border-brand-200 hover:border-brand-600 text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer group"
                     >
                       <Download className="w-3.5 h-3.5 text-brand-600 group-hover:text-white transition-colors" />
-                      <span>{res.downloadBtnText || 'Download PDF'}</span>
+                      <span>Download PDF</span>
                       {isExternal && <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />}
                     </a>
                   </div>

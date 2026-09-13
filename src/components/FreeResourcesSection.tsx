@@ -34,7 +34,7 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
   const [activeTab, setActiveTab] = useState<'all' | 'quiz' | 'notes' | 'pyqs'>('all');
 
   const filteredResources = activeTab === 'notes'
-    ? activeResources.filter(r => r.type === 'PDF Notes' || r.type === 'Mindmap' || r.type === 'Formula Sheet')
+    ? activeResources.filter(r => !r.type || r.type === 'PDF Notes' || r.type === 'Mindmap' || r.type === 'Formula Sheet')
     : activeTab === 'pyqs'
     ? activeResources.filter(r => r.type === 'PYQ Solved')
     : activeResources;
@@ -155,14 +155,20 @@ export const FreeResourcesSection: React.FC<FreeResourcesSectionProps> = ({
                 >
                   <div>
                     {/* Header Badges */}
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="bg-brand-100 text-brand-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
-                        {res.type}
-                      </span>
-                      <span className="text-xs text-slate-500 font-medium">
-                        {res.fileSize} • {res.pageCount} Pages
-                      </span>
-                    </div>
+                    {(res.type || res.fileSize) && (
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        {res.type && (
+                          <span className="bg-brand-100 text-brand-800 text-[11px] font-bold px-2.5 py-0.5 rounded-md">
+                            {res.type}
+                          </span>
+                        )}
+                        {(res.fileSize || res.pageCount) && (
+                          <span className="text-xs text-slate-500 font-medium ml-auto">
+                            {res.fileSize}{res.pageCount ? ` • ${res.pageCount} Pages` : ''}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Title */}
                     <h3 className="text-base sm:text-lg font-bold font-display text-slate-900 group-hover:text-brand-700 transition-colors mb-2 leading-snug">
