@@ -69,7 +69,43 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
   const [batches, setBatches] = useState<BatchConfig[]>([]);
   const [submissions, setSubmissions] = useState<TestSubmission[]>([]);
   const [availableTests, setAvailableTests] = useState<MockTest[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'mock_tests' | 'study_material' | 'fee_history'>('dashboard');
+  const VALID_STUDENT_TABS = ['dashboard', 'mock_tests', 'study_material', 'fee_history'] as const;
+  type StudentTab = typeof VALID_STUDENT_TABS[number];
+
+  const getInitialStudentTab = (): StudentTab => {
+    if (typeof window === 'undefined') return 'dashboard';
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab') as StudentTab | null;
+    if (tab && (VALID_STUDENT_TABS as readonly string[]).includes(tab)) return tab;
+    try {
+      const saved = localStorage.getItem('student_active_tab') as StudentTab | null;
+      if (saved && (VALID_STUDENT_TABS as readonly string[]).includes(saved)) return saved;
+    } catch {}
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState<StudentTab>(getInitialStudentTab);
+
+  const handleTabChange = (tab: StudentTab) => {
+    setActiveTab(tab);
+    try {
+      localStorage.setItem('student_active_tab', tab);
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', tab);
+      window.history.replaceState(null, '', url.toString());
+    } catch {}
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('student_active_tab', activeTab);
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('tab') !== activeTab) {
+        url.searchParams.set('tab', activeTab);
+        window.history.replaceState(null, '', url.toString());
+      }
+    } catch {}
+  }, [activeTab]);
 
   // Scorecard Review Modal
   const [selectedSubmissionForReview, setSelectedSubmissionForReview] = useState<TestSubmission | null>(null);
@@ -769,7 +805,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
         <div className="bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/90 shadow-2xs mb-6">
           <div className="grid grid-cols-3 gap-1 sm:gap-2">
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => handleTabChange('dashboard')}
               className={`py-2 px-1.5 sm:py-2.5 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer ${
                 activeTab === 'dashboard'
                   ? 'bg-brand-600 text-white shadow-sm'
@@ -782,7 +818,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </button>
 
             <button
-              onClick={() => setActiveTab('mock_tests')}
+              onClick={() => handleTabChange('mock_tests')}
               className={`py-2 px-1.5 sm:py-2.5 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer ${
                 activeTab === 'mock_tests'
                   ? 'bg-brand-600 text-white shadow-sm'
@@ -797,7 +833,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
             </button>
 
             <button
-              onClick={() => setActiveTab('study_material')}
+              onClick={() => handleTabChange('study_material')}
               className={`py-2 px-1.5 sm:py-2.5 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all cursor-pointer ${
                 activeTab === 'study_material'
                   ? 'bg-brand-600 text-white shadow-sm'
@@ -869,7 +905,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                   <p className="text-xs text-slate-500">Review your past test scores, answers, and faculty rationales</p>
                 </div>
                 <button
-                  onClick={() => setActiveTab('mock_tests')}
+                  onClick={() => handleTabChange('mock_tests')}
                   className="text-xs font-bold text-brand-600 hover:text-brand-800 underline underline-offset-2 cursor-pointer"
                 >
                   View All ({submissions.length}) →
@@ -881,7 +917,7 @@ export const StudentProfilePortal: React.FC<StudentProfilePortalProps> = ({
                   <Target className="w-10 h-10 text-slate-400 mx-auto" />
                   <p className="text-xs text-slate-500">You haven't attempted any CBT Mock Tests yet.</p>
                   <button
-                    onClick={() => setActiveTab('mock_tests')}
+                    onClick={() => handleTabChange('mock_tests')}
                     className="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-xs"
                   >
                     <span>Attempt Your First CBT Test</span>

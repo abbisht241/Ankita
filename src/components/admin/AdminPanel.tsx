@@ -32,16 +32,92 @@ import { AdminBatchesTab } from './AdminBatchesTab';
 import { AdminSettingsTab } from './AdminSettingsTab';
 import { AdminCmsTab } from './AdminCmsTab';
 
+type AdminTabId = 
+  | 'dashboard' 
+  | 'students' 
+  | 'payments' 
+  | 'invoices' 
+  | 'mock-tests' 
+  | 'cms' 
+  | 'share-link' 
+  | 'inquiries' 
+  | 'batches' 
+  | 'settings';
+
+const VALID_ADMIN_TABS: AdminTabId[] = [
+  'dashboard',
+  'students',
+  'payments',
+  'invoices',
+  'mock-tests',
+  'cms',
+  'share-link',
+  'inquiries',
+  'batches',
+  'settings'
+];
+
+const getInitialAdminTab = (): AdminTabId => {
+  if (typeof window === 'undefined') return 'dashboard';
+
+  // 1. Check URL query params: e.g. /panel?tab=cms
+  const params = new URLSearchParams(window.location.search);
+  const tabParam = params.get('tab') as AdminTabId | null;
+  if (tabParam && VALID_ADMIN_TABS.includes(tabParam)) {
+    return tabParam;
+  }
+
+  // 2. Check URL hash: e.g. #/panel?tab=cms or #panel?tab=cms or #cms
+  const hash = window.location.hash;
+  if (hash) {
+    if (hash.includes('?')) {
+      const hashQuery = hash.split('?')[1];
+      const hashParams = new URLSearchParams(hashQuery);
+      const hashTab = hashParams.get('tab') as AdminTabId | null;
+      if (hashTab && VALID_ADMIN_TABS.includes(hashTab)) {
+        return hashTab;
+      }
+    }
+    const cleanHash = hash.replace(/^#\/?(panel\/?)?/, '').toLowerCase();
+    if (VALID_ADMIN_TABS.includes(cleanHash as AdminTabId)) {
+      return cleanHash as AdminTabId;
+    }
+  }
+
+  // 3. Check localStorage for last active tab
+  try {
+    const saved = localStorage.getItem('admin_active_tab') as AdminTabId | null;
+    if (saved && VALID_ADMIN_TABS.includes(saved)) {
+      return saved;
+    }
+  } catch {}
+
+  return 'dashboard';
+};
+
 interface AdminPanelProps {
   onBackToWebsite: () => void;
 }
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => AdminStorage.isAuthenticated());
   const [passcodeAttempt, setPasscodeAttempt] = useState('');
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'payments' | 'invoices' | 'mock-tests' | 'cms' | 'share-link' | 'inquiries' | 'batches' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<AdminTabId>(getInitialAdminTab);
+
+  const handleTabChange = (newTab: AdminTabId) => {
+    setActiveTab(newTab);
+    try {
+      localStorage.setItem('admin_active_tab', newTab);
+      const url = new URL(window.location.href);
+      url.searchParams.set('tab', newTab);
+      if (newTab !== 'cms') {
+        url.searchParams.delete('subtab');
+      }
+      window.history.replaceState(null, '', url.toString());
+    } catch {}
+  };
 
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [isOpenAddModal, setIsOpenAddModal] = useState(false);
@@ -75,7 +151,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
   };
 
   useEffect(() => {
-    setIsAuthenticated(AdminStorage.isAuthenticated());
+    // Sync URL with activeTab on initial mount and tab change
+    try {
+      localStorage.setItem('admin_active_tab', activeTab);
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('tab') !== activeTab) {
+        url.searchParams.set('tab', activeTab);
+        window.history.replaceState(null, '', url.toString());
+      }
+    } catch {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getInitialAdminTab();
+      setActiveTab(tab);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
     refreshData();
 
     // Auto-sync live inquiries and students every 5 seconds
@@ -121,6 +217,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
     AdminStorage.logout();
     setIsAuthenticated(false);
     setPasscodeAttempt('');
+    try {
+      localStorage.removeItem('admin_active_tab');
+      localStorage.removeItem('admin_cms_subtab');
+      const url = new URL(window.location.href);
+      url.searchParams.delete('tab');
+      url.searchParams.delete('subtab');
+      window.history.replaceState(null, '', url.toString());
+    } catch (_e) {}
   };
 
   const handleAddStudent = async (studentData: Omit<StudentEnrollment, 'id' | 'enrolledAt'>) => {
@@ -474,7 +578,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => setActiveTab(item.id as any)}
+                        onClick={() => handleTabChange(item.id as any)}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer group ${
                           isActive
                             ? 'bg-brand-700 text-white shadow-xs font-bold'
@@ -565,7 +669,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
                           <button
                             key={item.id}
                             onClick={() => {
-                              setActiveTab(item.id as any);
+                              handleTabChange(item.id as any);
                               setMobileSidebarOpen(false);
                             }}
                             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
@@ -620,9 +724,9 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
             <AdminDashboardTab
               students={students}
               inquiries={inquiries}
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={(tab) => handleTabChange(tab)}
               onOpenAddStudentModal={() => {
-                setActiveTab('students');
+                handleTabChange('students');
                 setIsOpenAddModal(true);
               }}
               onExportCSV={handleExportCSV}
@@ -676,7 +780,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onBackToWebsite }) => {
               onUpdateStatus={handleUpdateInquiryStatus}
               onDeleteInquiry={handleDeleteInquiry}
               onEnrollLead={handleEnrollLead}
-              onNavigateTab={(tab) => setActiveTab(tab)}
+              onNavigateTab={(tab) => handleTabChange(tab)}
             />
           )}
 

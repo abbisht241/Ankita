@@ -30,17 +30,71 @@ import type { SiteContentConfig } from '../../services/siteContentService';
 import { AdminStorage } from '../../services/adminStorageService';
 import type { Course, FAQItem, Resource, Testimonial } from '../../types';
 
+type CmsSubTab = 
+  | 'announcement' 
+  | 'hero' 
+  | 'courses' 
+  | 'about' 
+  | 'features' 
+  | 'resources' 
+  | 'testimonials' 
+  | 'faq' 
+  | 'contact';
+
+const VALID_CMS_SUBTABS: CmsSubTab[] = [
+  'announcement',
+  'hero',
+  'courses',
+  'about',
+  'features',
+  'resources',
+  'testimonials',
+  'faq',
+  'contact'
+];
+
+const getInitialCmsSubTab = (): CmsSubTab => {
+  if (typeof window === 'undefined') return 'announcement';
+  const params = new URLSearchParams(window.location.search);
+  const sub = params.get('subtab') as CmsSubTab | null;
+  if (sub && VALID_CMS_SUBTABS.includes(sub)) return sub;
+  try {
+    const saved = localStorage.getItem('admin_cms_subtab') as CmsSubTab | null;
+    if (saved && VALID_CMS_SUBTABS.includes(saved)) return saved;
+  } catch {}
+  return 'announcement';
+};
+
 export const AdminCmsTab: React.FC = () => {
   const { content, publishContent, resetToDefaults } = useSiteContent();
   const [formData, setFormData] = useState<SiteContentConfig>(content);
-  const [activeSubTab, setActiveSubTab] = useState<
-    'announcement' | 'hero' | 'courses' | 'about' | 'features' | 'resources' | 'testimonials' | 'faq' | 'contact'
-  >('announcement');
+  const [activeSubTab, setActiveSubTab] = useState<CmsSubTab>(getInitialCmsSubTab);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [adminPdfPreview, setAdminPdfPreview] = useState<{ url: string; title: string; name?: string } | null>(null);
   const [syllabusNotification, setSyllabusNotification] = useState<string | null>(null);
   const [uploadingCourseIdx, setUploadingCourseIdx] = useState<number | null>(null);
+
+  const handleSubTabChange = (tabId: CmsSubTab) => {
+    setActiveSubTab(tabId);
+    try {
+      localStorage.setItem('admin_cms_subtab', tabId);
+      const url = new URL(window.location.href);
+      url.searchParams.set('subtab', tabId);
+      window.history.replaceState(null, '', url.toString());
+    } catch {}
+  };
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('admin_cms_subtab', activeSubTab);
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('subtab') !== activeSubTab) {
+        url.searchParams.set('subtab', activeSubTab);
+        window.history.replaceState(null, '', url.toString());
+      }
+    } catch {}
+  }, [activeSubTab]);
 
   // Sync when content loads
   React.useEffect(() => {
@@ -311,7 +365,7 @@ export const AdminCmsTab: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
+              onClick={() => handleSubTabChange(tab.id)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                 isActive
                   ? 'bg-brand-700 text-white shadow-xs'
